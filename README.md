@@ -7,6 +7,7 @@ Central hub for Claude Code optimization. Mirrors the official documentation, pr
 ```bash
 git clone https://github.com/JvKuechen/CC-Optimizer.git
 cd CC-Optimizer
+git clone https://github.com/JvKuechen/CC-Optimizer.wiki.git wiki
 
 # Set git to use LF line endings (Windows default is CRLF which breaks things)
 git config --global core.autocrlf false

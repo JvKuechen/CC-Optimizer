@@ -1,0 +1,39 @@
+# Claude Code local files (user-specific, not shared)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# User-specific configs (personal paths, project lists, infra details)
+# Copy the .example.json files and fill in your values
+configs/user-config.json
+configs/projects.json
+
+# Synced docs are fetched on demand via /sync-docs
+docs/en/
+
+# Wiki is a separate git repo (pushed separately)
+wiki/
+
+# Audit findings are temporary working files
+findings/
+
+# One-time personal migration artifacts
+fan-out/migration-plan.md
+migrate-projects.py
+project-finder.py
+usb-git-sync.py
+
+# Personal roadmap (public version is playbook/roadmap.md)
+playbook/my-roadmap.md
+
+# Session handoff files
+handoff.md
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp

@@ -1,0 +1,114 @@
+# Infrastructure Deploy Pipeline
+# Triggered on push to main. Validates configs, deploys Ring 1 to passive, verifies.
+# Ring 0 changes (opt/gitea/, act_runner) are validate-only (no deploy).
+#
+# Copy to: .gitea/workflows/infra.yml in your infrastructure repo
+# Customize: CI_SCRIPTS_REF, TARGET_HOST, VERIFY_URLS
+name: Infrastructure Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Only one deploy at a time per branch (queued pushes wait)
+concurrency:
+  group: infra-deploy-main
+  cancel-in-progress: false
+
+env:
+  CI_SCRIPTS_REF: v0.1.0
+
+jobs:
+  validate:
+    name: Validate Configs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need previous commit for diff
+
+      - name: Checkout ci-scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ExampleOrg/ci-scripts
+          ref: ${{ env.CI_SCRIPTS_REF }}
+          path: ci-scripts
+
+      - name: Validate configs
+        run: bash ci-scripts/infra/validate.sh
+
+      - name: Generate plan
+        id: plan
+        run: |
+          PLAN_JSON=$(bash ci-scripts/infra/plan.sh 2>/dev/null | tail -1)
+          echo "plan_json=$PLAN_JSON" >> "$GITHUB_OUTPUT"
+          # Check if deploy should proceed
+          SHOULD_DEPLOY=$(echo "$PLAN_JSON" | jq -r '.deploy // false')
+          echo "should_deploy=$SHOULD_DEPLOY" >> "$GITHUB_OUTPUT"
+          HAS_RING0=$(echo "$PLAN_JSON" | jq -r '.has_ring0 // false')
+          echo "has_ring0=$HAS_RING0" >> "$GITHUB_OUTPUT"
+
+    outputs:
+      should_deploy: ${{ steps.plan.outputs.should_deploy }}
+      has_ring0: ${{ steps.plan.outputs.has_ring0 }}
+      plan_json: ${{ steps.plan.outputs.plan_json }}
+
+  deploy-passive:
+    name: Deploy to Passive
+    needs: validate
+    if: needs.validate.outputs.should_deploy == 'true'
+    runs-on: [self-hosted, secondary-server]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Checkout ci-scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ExampleOrg/ci-scripts
+          ref: ${{ env.CI_SCRIPTS_REF }}
+          path: ci-scripts
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CI_DEPLOY_SSH_KEY }}" > ~/.ssh/ci_deploy
+          chmod 600 ~/.ssh/ci_deploy
+          printf '%s\n' "${{ secrets.CI_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Deploy to passive
+        run: bash ci-scripts/infra/deploy-passive.sh
+        env:
+          TARGET_HOST: <passive-server-ip>
+          SSH_KEY_PATH: ~/.ssh/ci_deploy
+          GITEA_TOKEN: ${{ secrets.CI_GITEA_STATUS_TOKEN }}
+
+      - name: Verify deployment
+        run: bash ci-scripts/infra/verify.sh
+        env:
+          TARGET_HOST: <passive-server-ip>
+          SSH_KEY_PATH: ~/.ssh/ci_deploy
+          GITEA_TOKEN: ${{ secrets.CI_GITEA_STATUS_TOKEN }}
+          # Customize these for your environment:
+          # VERIFY_URLS: "https://home.example.com https://gitea.example.com"
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/ci_deploy ~/.ssh/known_hosts
+
+  ring0-warning:
+    name: Ring 0 Warning
+    needs: validate
+    if: needs.validate.outputs.has_ring0 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ring 0 changes detected
+        run: |
+          echo "WARNING: Ring 0 files changed. These require manual deployment."
+          echo "Ring 0 changes are NOT auto-deployed for safety."
+          echo "Use the deploy-to-server skill or manual SSH to deploy Ring 0 changes."
+          echo ""
+          echo "Plan: ${{ needs.validate.outputs.plan_json }}"

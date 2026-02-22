@@ -1,0 +1,9 @@
+{
+  "worker_prompt_file": "workers/workspace-optimizer.md",
+  "model": "sonnet",
+  "max_concurrent": 5,
+  "timeout_seconds": 180,
+  "max_turns": 10,
+  "error_recovery": ["sonnet", "opus"],
+  "resume_file": "optimization-progress.json"
+}

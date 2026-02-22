@@ -1,0 +1,66 @@
+# Promote to Active Server
+# Manual workflow_dispatch - triggered only when you want to promote a verified
+# passive deployment to the active server.
+#
+# Copy to: .gitea/workflows/promote.yml in your infrastructure repo
+# Customize: TARGET_HOST
+name: Promote to Active
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: "Commit SHA to promote (must have passed deploy-passive)"
+        required: true
+      ci_scripts_ref:
+        description: "ci-scripts version"
+        required: true
+        default: "v0.1.0"
+
+# Only one promote at a time
+concurrency:
+  group: infra-promote
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Promote to Active
+    runs-on: [self-hosted, primary-server]
+    steps:
+      - name: Checkout repo at specified commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+          fetch-depth: 2
+
+      - name: Checkout ci-scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ExampleOrg/ci-scripts
+          ref: ${{ inputs.ci_scripts_ref }}
+          path: ci-scripts
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CI_DEPLOY_SSH_KEY }}" > ~/.ssh/ci_deploy
+          chmod 600 ~/.ssh/ci_deploy
+          printf '%s\n' "${{ secrets.CI_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Promote to active
+        run: bash ci-scripts/infra/promote.sh
+        env:
+          TARGET_HOST: <active-server-ip>
+          SSH_KEY_PATH: ~/.ssh/ci_deploy
+          GITEA_TOKEN: ${{ secrets.CI_GITEA_STATUS_TOKEN }}
+
+      - name: Verify active
+        run: bash ci-scripts/infra/verify.sh
+        env:
+          TARGET_HOST: <active-server-ip>
+          SSH_KEY_PATH: ~/.ssh/ci_deploy
+          GITEA_TOKEN: ${{ secrets.CI_GITEA_STATUS_TOKEN }}
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/ci_deploy ~/.ssh/known_hosts

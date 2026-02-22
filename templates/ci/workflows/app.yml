@@ -1,0 +1,69 @@
+# Application Build & Push Pipeline
+# Tested with Gitea Actions runner
+#
+# For repos that build Docker images and push to Gitea container registry.
+# Uses host-mode execution (linux_amd64 label) because act_runner 0.2.11
+# ignores container.* config and job containers can't reach DinD.
+#
+# Copy to: .gitea/workflows/build.yml in your application repo
+# Customize: image name (step "Set image tags"), secrets
+#
+# Host-mode constraints (Alpine runner, no Node.js):
+#   - wget, not curl
+#   - manual git clone, not actions/checkout@v4
+#   - DOCKER_HOST must point to shared DinD socket
+#
+# Required Gitea secrets (per-repo or org-level):
+#   REGISTRY_USER  - Gitea username for docker login
+#   REGISTRY_TOKEN - Gitea token with package:write scope
+name: Build & Push Image
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: linux_amd64
+    env:
+      DOCKER_HOST: unix:///var/run/dind/docker.sock
+    steps:
+      - name: Install Docker CLI
+        run: |
+          wget -qO- https://download.docker.com/linux/static/stable/x86_64/docker-27.5.1.tgz \
+            | tar xz --strip-components=1 -C /usr/local/bin docker/docker
+          docker version
+
+      - name: Checkout
+        run: |
+          git clone https://gitea.example.com/${{ github.repository }}.git workspace
+          cd workspace
+          git checkout ${{ github.sha }}
+
+      - name: Set image tags
+        id: tags
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          REPO_LC=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=gitea.example.com/$REPO_LC" >> "$GITHUB_OUTPUT"
+
+      - name: Login to Gitea registry
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | \
+            docker login gitea.example.com -u "${{ secrets.REGISTRY_USER }}" --password-stdin
+
+      - name: Build and push
+        run: |
+          IMAGE="${{ steps.tags.outputs.image }}"
+          SHA_TAG="${{ steps.tags.outputs.short_sha }}"
+          cd workspace
+          docker build -t "$IMAGE:$SHA_TAG" -t "$IMAGE:latest" .
+          docker push "$IMAGE:$SHA_TAG"
+          docker push "$IMAGE:latest"
+          echo "Pushed $IMAGE:$SHA_TAG and $IMAGE:latest"
+
+      - name: Cleanup
+        if: always()
+        run: docker logout gitea.example.com 2>/dev/null || true

@@ -1,0 +1,38 @@
+# act_runner config - deploy to runner-data volume at /data/config.yaml
+# Tested with Gitea Actions runner
+#
+# CRITICAL: docker-compose.yml must set CONFIG_FILE=/data/config.yaml
+# or this entire file is silently ignored by the runner startup script.
+#
+# Two-label architecture:
+#   self-hosted  -> docker://node:20-bookworm  (infra jobs: SSH, curl, git)
+#   linux_amd64  -> host                       (app jobs: docker build/push)
+log:
+  level: info
+
+runner:
+  file: .runner
+  capacity: 1
+  timeout: 3h
+  fetch_timeout: 5s
+  fetch_interval: 2s
+  labels:
+    - "self-hosted:docker://node:20-bookworm"
+    - "linux_amd64:host"
+
+cache:
+  enabled: false
+
+container:
+  # WARNING: ALL container.* settings are IGNORED by act_runner 0.2.11.
+  # Kept here for documentation and in case a future version honors them.
+  # See findings/cicd-runner-corrections.md for full analysis.
+  network: ""
+  privileged: false
+  force_pull: false
+  valid_volumes:
+    - '**'
+  docker_host: "unix:///var/run/dind/docker.sock"
+
+host:
+  workdir_parent:

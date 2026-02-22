@@ -1,0 +1,19 @@
+[project]
+name = "gitea-mcp"
+version = "0.1.0"
+description = "CLI tool for Gitea API operations, optimized for Claude Code integration"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1.0",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+keyring = ["keyring>=24.0.0"]
+
+[project.scripts]
+gitea-mcp = "gitea_mcp.cli:cli"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

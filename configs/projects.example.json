@@ -1,0 +1,12 @@
+{
+  "skip_projects": ["example-project-to-skip"],
+  "skip_paths": ["C:/Archive/example-path"],
+  "work_indicators": ["internal-tool", "company-project"],
+  "work_repos": ["infra-config-repo"],
+  "rename_map": {},
+  "add_projects": [],
+  "github_skip_repos": ["example.github.io"],
+  "github_work_repos": ["infra-config-repo"],
+  "portfolio_skip": ["CC-Optimizer", "Archive"],
+  "init_skip": ["CC-Optimizer"]
+}

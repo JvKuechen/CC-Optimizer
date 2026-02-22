@@ -1,0 +1,57 @@
+# act_runner with sidecar DinD
+# Tested with Gitea Actions runner
+#
+# Key differences from naive setup:
+#   - dind-socket volume shared between DinD and runner (Unix socket access)
+#   - DinD listens on both Unix socket AND TCP (socket preferred)
+#   - CONFIG_FILE env var required or config.yaml is silently ignored
+#   - DinD CA cert mounted for internal registry (docker login/push)
+#   - daemon.json must be a pre-created FILE (not directory)
+#
+# Pre-deploy: echo '{}' > daemon.json  (must exist before compose up)
+services:
+  dind:
+    image: docker:27.5-dind
+    privileged: true
+    network_mode: host
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    volumes:
+      - dind-data:/var/lib/docker
+      - dind-socket:/var/run/dind
+      - ./daemon.json:/etc/docker/daemon.json:ro
+      # Mount internal CA for registry trust (docker login/push)
+      # DinD checks /etc/docker/certs.d/<registry>/ca.crt per-request
+      - /usr/local/share/ca-certificates/custom-ca.crt:/etc/docker/certs.d/gitea.example.com/ca.crt:ro
+    command:
+      - dockerd
+      - -H
+      - unix:///var/run/dind/docker.sock
+      - -H
+      - tcp://127.0.0.1:2375
+    restart: unless-stopped
+
+  runner:
+    image: gitea/act_runner:0.2.11
+    network_mode: host
+    environment:
+      GITEA_INSTANCE_URL: ${GITEA_INSTANCE_URL}
+      GITEA_RUNNER_REGISTRATION_TOKEN: ${RUNNER_TOKEN}
+      DOCKER_HOST: unix:///var/run/dind/docker.sock
+      # CRITICAL: Without this, config.yaml is silently ignored
+      CONFIG_FILE: /data/config.yaml
+      # Labels here are only used during FIRST registration.
+      # After that, labels come from config.yaml runner.labels section.
+      # To change labels: edit config.yaml, delete /data/.runner, restart.
+      GITEA_RUNNER_LABELS: ${RUNNER_LABELS}
+    volumes:
+      - runner-data:/data
+      - dind-socket:/var/run/dind
+      - /usr/local/share/ca-certificates:/usr/local/share/ca-certificates:ro
+      - /etc/ssl/certs:/etc/ssl/certs:ro
+    restart: unless-stopped
+
+volumes:
+  dind-data:
+  dind-socket:
+  runner-data:

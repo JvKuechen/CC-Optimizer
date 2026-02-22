@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "gitea": {
+      "command": "python",
+      "args": ["-m", "mcp_server"],
+      "cwd": "<PATH_TO_GITEA_MCP>",
+      "env": {
+        "GITEA_URL": "https://gitea.example.com",
+        "GITEA_TOKEN": "<YOUR_GITEA_API_TOKEN>"
+      }
+    }
+  }
+}

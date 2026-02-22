@@ -1,0 +1,9 @@
+{
+  "worker_prompt_file": "workers/example-tester.md",
+  "model": "haiku",
+  "max_concurrent": 3,
+  "timeout_seconds": 180,
+  "max_turns": 8,
+  "resume_file": "test-examples-progress.json",
+  "error_recovery": ["sonnet"]
+}

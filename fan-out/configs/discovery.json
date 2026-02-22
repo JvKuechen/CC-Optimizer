@@ -1,0 +1,9 @@
+{
+  "worker_prompt_file": "workers/folder-scout.md",
+  "model": "haiku",
+  "max_concurrent": 5,
+  "timeout_seconds": 90,
+  "max_turns": 5,
+  "resume_file": "discovery-progress.json",
+  "error_recovery": ["sonnet", "opus"]
+}

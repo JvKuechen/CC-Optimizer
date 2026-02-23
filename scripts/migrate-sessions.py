@@ -13,6 +13,7 @@ Examples:
     python scripts/migrate-sessions.py "C:/Users/me/claudes/Work/MyProject" "C:/Users/me/claudes/Github/CC-Optimizer/workspaces/Gitea/MyProject"
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -20,13 +21,14 @@ from pathlib import Path
 def encode_path(workspace_path):
     """Encode a workspace path the way Claude Code does.
 
-    Replaces backslashes and colons with hyphens.
-    C:\\Users\\me\\project -> C--Users-me-project
+    All non-alphanumeric characters except hyphens become hyphens.
+    C:\\Users\\me\\my_project -> C--Users-me-my-project
+    Dots, underscores, spaces, colons, backslashes all become hyphens.
     """
     # Normalize to absolute path with backslashes (Windows canonical form)
     p = str(Path(workspace_path).resolve())
-    # Replace backslashes and colons with hyphens
-    encoded = p.replace("\\", "-").replace(":", "-")
+    # Replace any character that is not alphanumeric or hyphen
+    encoded = re.sub(r"[^a-zA-Z0-9-]", "-", p)
     return encoded
 
 

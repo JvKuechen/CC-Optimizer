@@ -120,6 +120,7 @@ All workspaces are organized under `~/claudes/`:
 - Moving a workspace folder orphans `/resume` session history. Fix by renaming the directory under `~/.claude/projects/` to match the new path encoding (replace `\` with `-`, colon with `-`).
 - `[console]::beep` has no volume parameter. Pitch and duration are the only controls.
 - Windows NTFS is case-insensitive but case-preserving. `mkdir work` then `ls` may show `Work` if the directory pre-existed with that casing.
+- GitHub wiki repos MUST use the `master` branch. The wiki tab only reads from `master` -- renaming to `main` makes the wiki appear empty.
 
 ## Scope
 

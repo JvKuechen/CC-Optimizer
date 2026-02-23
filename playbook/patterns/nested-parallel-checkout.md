@@ -6,7 +6,7 @@ A git repository inside another git repository, gitignored by the parent, with i
 
 ## When to Use
 
-- Gitea wiki repos (wiki tab requires a separate repo at `<repo>.wiki.git`)
+- GitHub/Gitea wiki repos (wiki tab requires a separate repo at `<repo>.wiki.git`)
 - Documentation that lives alongside code but has a different deploy/commit lifecycle
 - Content that multiple projects reference but only one project hosts
 - Separating "infrastructure as code" from "documentation" in the same workspace
@@ -35,6 +35,7 @@ parent-repo/
 - `git status` in parent will NOT show nested repo changes (it's gitignored)
 - `git add -A` in parent will NOT capture nested repo content
 - Claude Code may not realize the nested directory is a separate repo unless told in CLAUDE.md
+- **GitHub wikis require the `master` branch** -- do not rename to `main`. GitHub's wiki tab only reads from `master`. Gitea wikis also default to `master`. If your pre-push hook pushes the wiki, detect the branch dynamically rather than hardcoding `main`
 - On Windows, avoid symlinks -- just use a real nested directory
 - If using `--add-dir`, the nested repo gets its own context but shares permissions
 - Both repos need separate push/pull workflows (consider a pre-push hook on the parent to auto-sync the nested repo)

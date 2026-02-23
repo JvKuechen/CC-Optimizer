@@ -32,7 +32,7 @@ IMPORTANT: If the `wiki/` directory does not exist, run `python scripts/setup.py
 - `docs/plugin-marketplace-reference.md` — Internal reference on plugin system and demo marketplace
 - `playbook/` — Actionable optimization checklist distilled from docs
 - `playbook/patterns.md` — Toolbelt: 16 reusable patterns discovered across 22 workspace audits
-- `wiki/` — Nested parallel checkout of Gitea wiki (separate .git, gitignored). Run `python scripts/setup.py` if missing
+- `wiki/` — Nested parallel checkout of GitHub wiki (separate .git, gitignored). Run `python scripts/setup.py` if missing
 - `scripts/setup.py` — Post-clone setup: clones wiki, installs pre-push hook, adds remotes
 - `playbook/patterns/` — Individual pattern files (current-state-capsule, gate-pattern, etc.)
 - `findings/` — Per-workspace audit reports (gitignored, temporary)
@@ -48,14 +48,14 @@ Run `python templates/deploy-user-settings.py` to deploy to `~/.claude/`:
 - **Guardrail hook** (`hooks/guardrail.py`): PreToolUse hook that blocks destructive Bash commands before execution
 - **Notification hook**: Plays two tones when Claude needs input (permission prompt or idle 60s+)
 
-Then install recommended plugins (script prints these commands):
-```bash
-claude plugin marketplace add anthropics/claude-code
-claude plugin install frontend-design@claude-code-plugins
-claude plugin install feature-dev@claude-code-plugins
-claude plugin install security-guidance@claude-code-plugins
-claude plugin install commit-commands@claude-code-plugins
-claude plugin install code-review@claude-code-plugins
+Then install recommended plugins (interactive-mode slash commands -- run inside a Claude Code session):
+```
+/plugin marketplace add anthropics/claude-code
+/plugin install frontend-design@claude-code-plugins
+/plugin install feature-dev@claude-code-plugins
+/plugin install security-guidance@claude-code-plugins
+/plugin install commit-commands@claude-code-plugins
+/plugin install code-review@claude-code-plugins
 ```
 
 The **fix-line-endings hook** (PostToolUse on Write|Edit) converts CRLF to LF immediately after every file write. The Write tool produces CRLF on Windows regardless of CLAUDE.md instructions or git config -- this hook is the only reliable fix. Skips binary files and CRLF-required types (.bat, .cmd, .ps1, .psm1, .psd1).
@@ -112,7 +112,7 @@ When writing CLAUDE.md for other workspaces:
 All workspaces are organized under `~/claudes/`:
 - `Work/` — Work projects
 - `Personal/` — Personal projects
-- `ClaudeDocs/` — This optimizer workspace
+- `CC-Optimizer/` — This optimizer workspace
 
 ## Gotchas
 

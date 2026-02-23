@@ -19,16 +19,16 @@ python scripts/setup.py
 # Bootstrap your machine (deploys global permissions, guardrail hook, notifications)
 python templates/deploy-user-settings.py
 
-# Install plugins
-claude plugin marketplace add anthropics/claude-code
-claude plugin install frontend-design@claude-code-plugins
-claude plugin install feature-dev@claude-code-plugins
-claude plugin install security-guidance@claude-code-plugins
-claude plugin install commit-commands@claude-code-plugins
-claude plugin install code-review@claude-code-plugins
+# Install plugins (interactive-mode slash commands -- run inside a Claude Code session)
+# /plugin marketplace add anthropics/claude-code
+# /plugin install frontend-design@claude-code-plugins
+# /plugin install feature-dev@claude-code-plugins
+# /plugin install security-guidance@claude-code-plugins
+# /plugin install commit-commands@claude-code-plugins
+# /plugin install code-review@claude-code-plugins
 ```
 
-Then open Claude Code in this directory and run `/sync-docs` to fetch the latest documentation.
+Then open Claude Code in this directory. Install plugins with `/plugin` and run `/sync-docs` to fetch the latest documentation.
 
 ## What You Get
 
@@ -50,7 +50,7 @@ cp configs/user-config.example.json configs/user-config.json
 cp configs/projects.example.json configs/projects.json
 ```
 
-Edit them with your own values (Gitea URLs, project lists, etc.). See the example files for documentation on each field.
+Edit them with your own values (remote URLs, project lists, etc.). See the example files for documentation on each field.
 
 ## Using This Repo
 

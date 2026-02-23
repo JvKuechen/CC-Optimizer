@@ -36,7 +36,7 @@ These assets are deployed to `~/.claude/` and automatically available in ALL wor
 - `windows-shell.md` — Windows-specific shell rules (paths, null device, ASCII only)
 
 **Agents** (`~/.claude/agents/`):
-- `docs-reference` — Haiku agent for quick doc lookups (points to ClaudeDocs/docs/en/)
+- `docs-reference` — Haiku agent for quick doc lookups (points to CC-Optimizer/docs/en/)
 - `workspace-analyzer` — Sonnet agent for read-only workspace audits
 
 When you update these files in `~/.claude/`, all workspaces benefit immediately. No per-workspace copies needed.
@@ -124,13 +124,11 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 
 ### 1.5 Check git remote configuration
 - [ ] `git remote -v` -- what remotes exist?
-- [ ] Every project should have a Gitea remote as `origin`:
-  - Work projects: `gitea.example.com/ExampleOrg/<repo>`
-  - Personal projects: `git.example.com/<user>/<repo>`
-- [ ] Does the project also need a GitHub mirror? (sync/backup/portfolio)
-  - If yes: check GitHub repo privacy (`gh repo view --json isPrivate`). Sync only to private unless intentionally public.
-  - Apply **Dual Remote Push** pattern (see `patterns/dual-remote-push.md`): add GitHub as second push URL on `origin`
-- [ ] Verify `main` branch tracks `origin` (Gitea)
+- [ ] Every project should have a primary remote as `origin`
+- [ ] Does the project need additional remotes? (mirror, backup, portfolio)
+  - If yes: check repo privacy (`gh repo view --json isPrivate`). Sync only to private unless intentionally public.
+  - Apply **Dual Remote Push** pattern (see `patterns/dual-remote-push.md`): add second remote as additional push URL on `origin`
+- [ ] Verify `main` branch tracks `origin`
 
 ### 1.6 Per-project feature decisions
 - [ ] **MCP servers** -- Does the project use a database, API, or service Claude should connect to directly?
@@ -241,7 +239,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 ### 4.1 Verify user-scope rules are present
 - [ ] Confirm `~/.claude/rules/context-handoff.md` exists (deployed during machine setup)
 - [ ] Confirm `~/.claude/rules/windows-shell.md` exists (deployed during machine setup)
-- [ ] If missing, run machine setup again or copy from ClaudeDocs `.claude/rules/`
+- [ ] If missing, run machine setup again or copy from CC-Optimizer `.claude/rules/`
 
 ### 4.2 Create project-specific rules
 - [ ] Identify logical groupings (API, frontend, testing, database, etc.)
@@ -378,7 +376,7 @@ All events: PreToolUse, PostToolUse, PostToolUseFailure, PreCompact, PermissionR
 ### 8.1 Verify Windows shell rules are present
 - [ ] Confirm `~/.claude/rules/windows-shell.md` exists (deployed during machine setup)
 - [ ] Key rules enforced: forward slashes in Bash, `/dev/null` not `nul`, `python` not `python3`, ASCII only in code
-- [ ] If missing, run machine setup again or copy from ClaudeDocs `.claude/rules/`
+- [ ] If missing, run machine setup again or copy from CC-Optimizer `.claude/rules/`
 
 ### 8.2 Verify scripts are cross-platform
 - [ ] No `grep -P`, `mapfile`, `readarray`, `sed -i` in any scripts

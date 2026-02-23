@@ -1,4 +1,4 @@
-"""Post-clone setup for ClaudeDocs workspace.
+"""Post-clone setup for CC-Optimizer workspace.
 
 Clones the wiki nested repo and installs the pre-push hook.
 Safe to run multiple times -- skips steps that are already done.
@@ -16,44 +16,63 @@ HOOKS_DIR = REPO_ROOT / ".git" / "hooks"
 CONFIGS_DIR = REPO_ROOT / "configs"
 
 
+def _derive_wiki_url_from_origin():
+    """Derive the wiki clone URL from the main repo's origin.
+
+    GitHub wiki repos follow the pattern: <repo-url-without-.git>.wiki.git
+    For example:
+        https://github.com/User/Repo.git -> https://github.com/User/Repo.wiki.git
+        git@github.com:User/Repo.git     -> git@github.com:User/Repo.wiki.git
+    """
+    try:
+        result = subprocess.run(
+            "git remote get-url origin",
+            cwd=REPO_ROOT, capture_output=True, text=True, shell=True,
+        )
+        origin = result.stdout.strip()
+    except Exception:
+        origin = ""
+
+    if not origin:
+        return None
+
+    # Strip trailing .git if present, append .wiki.git
+    if origin.endswith(".git"):
+        return origin[:-4] + ".wiki.git"
+    return origin + ".wiki.git"
+
+
 def _load_wiki_remotes():
-    """Load wiki remotes from user config, falling back to example values."""
+    """Load wiki remotes from user config, or auto-derive from origin."""
     config_path = CONFIGS_DIR / "user-config.json"
     if config_path.exists():
         with open(config_path, "r", encoding="utf-8") as f:
             cfg = json.load(f)
-        gitea_url = cfg.get("gitea_url", "https://gitea.example.com")
-        gitea_org = cfg.get("gitea_org", "ExampleOrg")
-        github_user = cfg.get("github_username", "<github-user>")
-        wiki_repo = cfg.get("github_wiki_repo", "<repo-name>-wiki")
+        remotes = {}
+        # Add configured remotes (skip entries with placeholder values)
+        for key, default_name in [
+            ("wiki_remote_gitea", "gitea"),
+            ("wiki_remote_github", "github"),
+        ]:
+            url = cfg.get(key, "")
+            if url and "example.com" not in url and "your-" not in url:
+                remotes[default_name] = {"name": default_name, "url": url}
+        if remotes:
+            # Use the first configured remote as "origin"
+            first = next(iter(remotes.values()))
+            first["name"] = "origin"
+            return remotes
+
+    # No config or no valid remotes -- derive from main repo's origin
+    wiki_url = _derive_wiki_url_from_origin()
+    if wiki_url:
         return {
-            gitea_url.replace("https://", ""): {
-                "name": "origin",
-                "url": cfg.get(
-                    "wiki_remote_gitea",
-                    f"{gitea_url}/{gitea_org}/CC-Optimizer.wiki.git",
-                ),
-            },
-            "github.com": {
-                "name": "github",
-                "url": cfg.get(
-                    "wiki_remote_github",
-                    f"https://github.com/{github_user}/{wiki_repo}.git",
-                ),
-            },
+            "auto": {"name": "origin", "url": wiki_url},
         }
-    else:
-        # Fallback: example values (won't actually clone, but shows expected format)
-        return {
-            "gitea.example.com": {
-                "name": "origin",
-                "url": "https://gitea.example.com/ExampleOrg/ClaudeDocs.wiki.git",
-            },
-            "github.com": {
-                "name": "github",
-                "url": "https://github.com/your-user/your-repo-wiki.git",
-            },
-        }
+
+    print("[wiki] WARNING: Could not determine wiki URL.")
+    print("       Create configs/user-config.json (see configs/user-config.example.json)")
+    return {}
 
 
 WIKI_REMOTES = _load_wiki_remotes()
@@ -101,21 +120,12 @@ def run(cmd, cwd=None):
     return result.stdout.strip()
 
 
-def get_main_origin():
-    """Get the main repo's origin URL."""
-    try:
-        return run("git remote get-url origin", cwd=REPO_ROOT)
-    except RuntimeError:
-        return ""
-
-
-def detect_wiki_clone_url(origin):
-    """Pick the best wiki clone URL based on which remote the main repo uses."""
-    for pattern, remote in WIKI_REMOTES.items():
-        if pattern in origin:
-            return remote["url"]
-    # Default to GitHub
-    return WIKI_REMOTES["github.com"]["url"]
+def detect_wiki_clone_url():
+    """Pick the wiki clone URL from configured remotes."""
+    if not WIKI_REMOTES:
+        return None
+    # Use the first (or only) remote's URL
+    return next(iter(WIKI_REMOTES.values()))["url"]
 
 
 def setup_wiki():
@@ -123,8 +133,10 @@ def setup_wiki():
     if (WIKI_DIR / ".git").exists():
         print("[wiki] Already cloned.")
     else:
-        origin = get_main_origin()
-        clone_url = detect_wiki_clone_url(origin)
+        clone_url = detect_wiki_clone_url()
+        if not clone_url:
+            print("[wiki] ERROR: No wiki URL available. Skipping clone.")
+            return
         print(f"[wiki] Cloning from {clone_url}...")
         run(f'git clone "{clone_url}" "{WIKI_DIR}"')
         print("[wiki] Cloned.")
@@ -161,7 +173,7 @@ def setup_hooks():
 
 
 def main():
-    print(f"Setting up ClaudeDocs workspace at {REPO_ROOT}\n")
+    print(f"Setting up CC-Optimizer workspace at {REPO_ROOT}\n")
     setup_wiki()
     print()
     setup_hooks()

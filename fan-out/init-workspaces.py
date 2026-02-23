@@ -16,7 +16,7 @@ PERSONAL_DIR = CLAUDES_DIR / "Personal"
 OUTPUT_DIR = Path(__file__).parent / "results"
 
 _projects_cfg = load_projects_config()
-SKIP_PROJECTS = set(_projects_cfg.get("init_skip", ["ClaudeDocs"]))
+SKIP_PROJECTS = set(_projects_cfg.get("init_skip", ["CC-Optimizer"]))
 
 # Baseline permissions - universally safe, stack-agnostic
 BASELINE_SETTINGS = {

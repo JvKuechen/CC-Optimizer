@@ -1,4 +1,4 @@
-# ClaudeDocs Roadmap
+# CC-Optimizer Roadmap
 
 Last updated: 2026-02-22
 
@@ -122,4 +122,4 @@ Deployed to `~/.claude/hooks/` alongside guardrail.py.
 - Phases 5-7 are "nice to have" -- implement when specific need arises
 - Advanced features require per-project evaluation
 - Centralized sharing is complete -- updates to `~/.claude/` propagate to all workspaces
-- Skills remain per-project (optimizer-specific workflows stay in ClaudeDocs)
+- Skills remain per-project (optimizer-specific workflows stay in CC-Optimizer)

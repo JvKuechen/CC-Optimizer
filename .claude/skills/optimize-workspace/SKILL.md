@@ -55,7 +55,7 @@ Optimize the Claude Code workspace at `$ARGUMENTS`.
 
 18. **Report** — Summarize all changes and rationale. Note anything needing user customization.
 
-19. **Clean up optimizer workspace** — Check `ClaudeDocs/.claude/settings.local.json` for stale entries accumulated from "always allow" clicks during this optimization. Remove any that are already covered by project or global settings. Keep only `WebSearch`.
+19. **Clean up optimizer workspace** — Check `CC-Optimizer/.claude/settings.local.json` for stale entries accumulated from "always allow" clicks during this optimization. Remove any that are already covered by project or global settings. Keep only `WebSearch`.
 
 ## Key Principles
 - Follow the playbook, not raw docs

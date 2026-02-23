@@ -116,6 +116,7 @@ Active workspaces live as nested clones under `workspaces/` in this repo, organi
 ## Gotchas
 
 - **Nested workspace search**: `workspaces/` is gitignored, so `rg` (Grep) from root skips it. Use explicit paths: `Grep(pattern, path="workspaces/{Org}/{Project}")`. Glob DOES find files in gitignored dirs. Read/Edit/Write work on any path.
+- **Co-Authored-By trailer**: Claude's system prompt adds `Co-Authored-By: Claude <noreply@anthropic.com>` to commits. GitHub parses this into ghost author avatars with broken names. The commit-msg hook (`scripts/setup.py`) strips these lines automatically.
 - CLI auto-generates deprecated colon syntax `Bash(cmd:*)` in settings.local.json when user clicks "always allow." Functional but inconsistent with docs which show `Bash(cmd *)`. Accept as-is.
 - Moving a workspace folder orphans `/resume` session history. Fix by renaming the directory under `~/.claude/projects/` to match the new path encoding (replace `\` with `-`, colon with `-`).
 - `[console]::beep` has no volume parameter. Pitch and duration are the only controls.

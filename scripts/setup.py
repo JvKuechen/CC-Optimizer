@@ -306,11 +306,65 @@ def setup_long_paths():
         print("  reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f")
 
 
+def setup_git_identity():
+    """Check git user.email is set and linked to a hosting account.
+
+    GitHub noreply emails must include the username prefix to link commits
+    to the account. Bare noreply@users.noreply.github.com shows as a
+    ghost contributor.
+    """
+    result = subprocess.run(
+        "git config user.email",
+        cwd=REPO_ROOT, capture_output=True, text=True, shell=True,
+    )
+    email = result.stdout.strip()
+
+    if not email:
+        # Check global
+        result = subprocess.run(
+            "git config --global user.email",
+            capture_output=True, text=True, shell=True,
+        )
+        email = result.stdout.strip()
+
+    if not email:
+        print("[git-identity] WARNING: No git user.email configured.")
+        print("  Commits won't be linked to your account on GitHub/Gitea.")
+        print("  Run: git config --global user.email \"you@example.com\"")
+        return
+
+    # Detect bare noreply (missing username prefix)
+    if email == "noreply@users.noreply.github.com":
+        print(f"[git-identity] WARNING: Email is bare noreply without username prefix.")
+        print(f"  Current:  {email}")
+        print("  GitHub won't link these commits to your account.")
+        answer = input("  Enter your GitHub username (or press Enter to skip): ").strip()
+        if answer:
+            fixed = f"{answer}@users.noreply.github.com"
+            subprocess.run(
+                f'git config --global user.email "{fixed}"',
+                capture_output=True, text=True, shell=True,
+            )
+            # Also fix repo-level if set
+            subprocess.run(
+                f'git config user.email "{fixed}"',
+                cwd=REPO_ROOT, capture_output=True, text=True, shell=True,
+            )
+            print(f"[git-identity] Set email to {fixed}")
+        else:
+            print("[git-identity] Skipped. Fix manually later.")
+        return
+
+    print(f"[git-identity] Email: {email}")
+
+
 def main():
     import sys
     reconfigure = "--reconfigure" in sys.argv
 
     print(f"Setting up CC-Optimizer workspace at {REPO_ROOT}\n")
+    setup_git_identity()
+    print()
     setup_long_paths()
     print()
     setup_workspaces(reconfigure=reconfigure)

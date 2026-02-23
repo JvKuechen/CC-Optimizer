@@ -20,26 +20,28 @@ IMPORTANT: If the `wiki/` directory does not exist, run `python scripts/setup.py
 
 ## Workflow
 
-1. **`/sync-docs`** — Fetches updated docs from code.claude.com/docs via curl script. Run before optimization work.
-2. **Follow the playbook** at `playbook/optimization-checklist.md` — Distilled from the docs into an actionable checklist. This is the primary reference during optimization (not raw docs).
-3. **`/update-playbook`** — After a doc sync shows changes, reviews what changed and updates the playbook.
-4. **`/optimize-workspace [path]`** — Analyzes a target workspace and applies optimizations.
+1. **`/sync-docs`** -- Fetches updated docs from code.claude.com/docs via curl script. Run before optimization work.
+2. **Follow the playbook** at `playbook/optimization-checklist.md` -- Distilled from the docs into an actionable checklist. This is the primary reference during optimization (not raw docs).
+3. **`/update-playbook`** -- After a doc sync shows changes, reviews what changed and updates the playbook.
+4. **`/init-workspace [name or path]`** -- Bootstraps a new workspace. With a name only, creates under `workspaces/{Org}/`. With a path, initializes in place.
+5. **`/optimize-workspace [name or path]`** -- Analyzes and optimizes a workspace. Can target nested workspaces by name or external paths. Offers to clone external projects into `workspaces/` first.
 
 ## Key Directories
 
-- `docs/en/` — Local mirror of 56 English doc pages (raw markdown from code.claude.com)
-- `docs/manifest.json` — Tracks lastmod timestamps per page for incremental sync
-- `docs/plugin-marketplace-reference.md` — Internal reference on plugin system and demo marketplace
-- `playbook/` — Actionable optimization checklist distilled from docs
-- `playbook/patterns.md` — Toolbelt: 16 reusable patterns discovered across 22 workspace audits
-- `wiki/` — Nested parallel checkout of GitHub wiki (separate .git, gitignored). Run `python scripts/setup.py` if missing
-- `scripts/setup.py` — Post-clone setup: clones wiki, installs pre-push hook, adds remotes
-- `playbook/patterns/` — Individual pattern files (current-state-capsule, gate-pattern, etc.)
-- `findings/` — Per-workspace audit reports (gitignored, temporary)
-- `templates/` — Reusable config: `user-settings.json`, `hooks/guardrail.py`, `deploy-user-settings.py`
-- `.claude/rules/` — Path-scoped rules for this workspace
-- `.claude/skills/` — sync-docs, optimize-workspace, update-playbook
-- `.claude/agents/` — docs-reference (haiku, fast lookup), workspace-analyzer (sonnet, read-only audit)
+- `workspaces/` -- Nested workspace clones, organized by user-configured org folders. Gitignored. Each project has its own .git. Use explicit Grep paths since rg skips gitignored dirs.
+- `docs/en/` -- Local mirror of 56 English doc pages (raw markdown from code.claude.com)
+- `docs/manifest.json` -- Tracks lastmod timestamps per page for incremental sync
+- `docs/plugin-marketplace-reference.md` -- Internal reference on plugin system and demo marketplace
+- `playbook/` -- Actionable optimization checklist distilled from docs
+- `playbook/patterns.md` -- Toolbelt: 16 reusable patterns discovered across 22 workspace audits
+- `wiki/` -- Nested parallel checkout of GitHub wiki (separate .git, gitignored). Run `python scripts/setup.py` if missing
+- `scripts/setup.py` -- Post-clone setup: clones wiki, installs pre-push hook, adds remotes
+- `playbook/patterns/` -- Individual pattern files (current-state-capsule, gate-pattern, etc.)
+- `findings/` -- Per-workspace audit reports (gitignored, temporary)
+- `templates/` -- Reusable config: `user-settings.json`, `hooks/guardrail.py`, `deploy-user-settings.py`
+- `.claude/rules/` -- Path-scoped rules for this workspace
+- `.claude/skills/` -- sync-docs, optimize-workspace, init-workspace, update-playbook
+- `.claude/agents/` -- docs-reference (haiku, fast lookup), workspace-analyzer (sonnet, read-only audit)
 
 ## Machine Setup (once per computer)
 
@@ -109,13 +111,11 @@ When writing CLAUDE.md for other workspaces:
 
 ## Workspace Consolidation
 
-All workspaces are organized under `~/claudes/`:
-- `Work/` — Work projects
-- `Personal/` — Personal projects
-- `CC-Optimizer/` — This optimizer workspace
+Active workspaces live as nested clones under `workspaces/` in this repo, organized by user-configured org folders (set during `python scripts/setup.py` or in `configs/user-config.json` under `workspace_orgs`). Each nested workspace keeps its own `.git` and remotes. The `workspaces/` directory is gitignored -- nothing inside is committed to the optimizer repo. External paths still work for in-place optimization.
 
 ## Gotchas
 
+- **Nested workspace search**: `workspaces/` is gitignored, so `rg` (Grep) from root skips it. Use explicit paths: `Grep(pattern, path="workspaces/{Org}/{Project}")`. Glob DOES find files in gitignored dirs. Read/Edit/Write work on any path.
 - CLI auto-generates deprecated colon syntax `Bash(cmd:*)` in settings.local.json when user clicks "always allow." Functional but inconsistent with docs which show `Bash(cmd *)`. Accept as-is.
 - Moving a workspace folder orphans `/resume` session history. Fix by renaming the directory under `~/.claude/projects/` to match the new path encoding (replace `\` with `-`, colon with `-`).
 - `[console]::beep` has no volume parameter. Pitch and duration are the only controls.

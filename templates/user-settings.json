@@ -43,6 +43,8 @@
   },
   "permissions": {
     "allow": [
+      "Read",
+      "Edit",
       "Bash(curl *)",
       "Bash(ls *)",
       "Bash(dir *)",

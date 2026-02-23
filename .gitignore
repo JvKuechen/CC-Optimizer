@@ -7,6 +7,9 @@ CLAUDE.local.md
 configs/user-config.json
 configs/projects.json
 
+# Nested workspaces (own git repos, never committed to optimizer)
+workspaces/
+
 # Synced docs are fetched on demand via /sync-docs
 docs/en/
 
@@ -24,6 +27,9 @@ usb-git-sync.py
 
 # Personal roadmap (public version is playbook/roadmap.md)
 playbook/my-roadmap.md
+
+# Plan files (working material, not committed)
+playbook/plan-*.md
 
 # Session handoff files
 handoff.md

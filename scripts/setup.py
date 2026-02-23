@@ -1,7 +1,8 @@
 """Post-clone setup for CC-Optimizer workspace.
 
-Clones the wiki nested repo and installs the pre-push hook.
-Safe to run multiple times -- skips steps that are already done.
+Creates workspaces directory structure, clones the wiki nested repo,
+and installs the pre-push hook. Safe to run multiple times -- skips
+steps that are already done.
 
 Usage: python scripts/setup.py
 """
@@ -14,6 +15,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 WIKI_DIR = REPO_ROOT / "wiki"
 HOOKS_DIR = REPO_ROOT / ".git" / "hooks"
 CONFIGS_DIR = REPO_ROOT / "configs"
+WORKSPACES_DIR = REPO_ROOT / "workspaces"
+DEFAULT_ORGS = ["Work", "Personal", "Github"]
 
 
 def _derive_wiki_url_from_origin():
@@ -173,8 +176,129 @@ def setup_hooks():
     print("[hooks] Pre-push hook installed.")
 
 
+def _load_user_config():
+    """Load user config if it exists, return dict or empty dict."""
+    config_path = CONFIGS_DIR / "user-config.json"
+    if config_path.exists():
+        with open(config_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+def _save_user_config(cfg):
+    """Save user config, creating configs/ if needed."""
+    CONFIGS_DIR.mkdir(exist_ok=True)
+    config_path = CONFIGS_DIR / "user-config.json"
+    with open(config_path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(cfg, f, indent=2)
+        f.write("\n")
+
+
+def _get_workspace_orgs(reconfigure=False):
+    """Get org folders from config, or prompt the user interactively."""
+    cfg = _load_user_config()
+
+    if "workspace_orgs" in cfg and not reconfigure:
+        return cfg["workspace_orgs"]
+
+    existing = cfg.get("workspace_orgs", [])
+    if existing:
+        print(f"[workspaces] Current org folders: {', '.join(existing)}")
+        answer = input("  Enter new comma-separated list (or press Enter to keep): ").strip()
+    else:
+        print("[workspaces] No workspace_orgs configured.")
+        print(f"  Default org folders: {', '.join(DEFAULT_ORGS)}")
+        answer = input("  Press Enter to accept defaults, or type comma-separated names: ").strip()
+
+    if answer:
+        orgs = [o.strip() for o in answer.split(",") if o.strip()]
+    elif existing:
+        return existing
+    else:
+        orgs = list(DEFAULT_ORGS)
+
+    # Save to config so future runs are non-interactive
+    cfg["workspace_orgs"] = orgs
+    _save_user_config(cfg)
+    print("[workspaces] Saved workspace_orgs to configs/user-config.json")
+
+    return orgs
+
+
+def setup_workspaces(reconfigure=False):
+    """Create workspaces directory structure from user config."""
+    orgs = _get_workspace_orgs(reconfigure=reconfigure)
+
+    if not WORKSPACES_DIR.exists():
+        WORKSPACES_DIR.mkdir()
+        print("[workspaces] Created workspaces/")
+    else:
+        print("[workspaces] Directory already exists.")
+
+    for org in orgs:
+        org_dir = WORKSPACES_DIR / org
+        if not org_dir.exists():
+            org_dir.mkdir()
+            print(f"[workspaces] Created workspaces/{org}/")
+        else:
+            print(f"[workspaces] workspaces/{org}/ already exists.")
+
+
+def setup_long_paths():
+    """Ensure Windows long path support is enabled for git and the OS."""
+    import platform
+    if platform.system() != "Windows":
+        print("[longpaths] Not on Windows, skipping.")
+        return
+
+    # Git: core.longpaths
+    try:
+        result = subprocess.run(
+            "git config --global core.longpaths",
+            capture_output=True, text=True, shell=True,
+        )
+        if result.stdout.strip().lower() == "true":
+            print("[longpaths] git core.longpaths already enabled.")
+        else:
+            subprocess.run(
+                "git config --global core.longpaths true",
+                capture_output=True, text=True, shell=True,
+            )
+            print("[longpaths] Enabled git core.longpaths globally.")
+    except Exception as e:
+        print(f"[longpaths] WARNING: Could not set git core.longpaths: {e}")
+
+    # Windows registry: LongPathsEnabled
+    try:
+        import winreg
+        key = winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE,
+            r"SYSTEM\CurrentControlSet\Control\FileSystem",
+            0, winreg.KEY_READ,
+        )
+        value, _ = winreg.QueryValueEx(key, "LongPathsEnabled")
+        winreg.CloseKey(key)
+        if value == 1:
+            print("[longpaths] Windows LongPathsEnabled is ON.")
+        else:
+            print("[longpaths] WARNING: Windows LongPathsEnabled is OFF.")
+            print("  Nested workspaces may hit the 260-char path limit.")
+            print("  To fix, run as admin: reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f")
+    except Exception:
+        print("[longpaths] WARNING: Could not check Windows LongPathsEnabled registry key.")
+        print("  If you hit path length errors, run as admin:")
+        print("  reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f")
+
+
 def main():
+    import sys
+    reconfigure = "--reconfigure" in sys.argv
+
     print(f"Setting up CC-Optimizer workspace at {REPO_ROOT}\n")
+    setup_long_paths()
+    print()
+    setup_workspaces(reconfigure=reconfigure)
+    print()
     setup_wiki()
     print()
     setup_hooks()

@@ -1,6 +1,7 @@
 {
   "username": "your-username",
   "claudes_dir": "~/claudes",
+  "workspace_orgs": ["Work", "Personal", "Github"],
   "github_username": "your-github-user",
   "github_repo": "CC-Optimizer",
   "github_wiki_repo": "CC-Optimizer",

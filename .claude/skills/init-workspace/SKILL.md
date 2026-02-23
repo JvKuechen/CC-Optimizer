@@ -1,12 +1,12 @@
 ---
 name: init-workspace
-description: Bootstrap a new Claude Code workspace with standard infrastructure
+description: Bootstrap a new Claude Code workspace or import an existing one
 disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 argument-hint: "[project-name or path-to-workspace]"
 ---
 
-Bootstrap a new Claude Code workspace.
+Bootstrap a new Claude Code workspace, or import an existing project into the nested workspace structure.
 
 ## Resolve Target Path
 
@@ -16,7 +16,29 @@ Determine where the workspace will live based on `$ARGUMENTS`:
 - **Project name only** (no path separators): Read org folders from `configs/user-config.json` (key: `workspace_orgs`). Ask the user which org to use, then set target to `workspaces/{Org}/{project-name}/` inside the CC-Optimizer repo. If no config exists, ask the user to run `python scripts/setup.py` first.
 - **No arguments**: Ask for project name and org folder (from config), then set target as above.
 
-For nested workspaces (under `workspaces/`):
+## Importing an Existing Project
+
+When the user wants to move an existing project into `workspaces/`:
+
+1. **Copy local** (default) -- `cp -r <source> <target>`. This preserves gitignored files, local configs, build artifacts, `deps/`, `.claude/settings.local.json`, and untracked reference material. Preferred over cloning from remote.
+2. **Clone from remote** -- Only if the user explicitly requests a clean clone, or if no local copy exists.
+
+Before copying, check and report the source repo's state:
+```bash
+git -C "<source>" status --short
+```
+Inform the user of any dirty state (modified files, untracked files, uncommitted changes). This is informational -- proceed with the copy regardless, since preserving local state is the point.
+
+After copying into `workspaces/`, migrate session history so `/resume` works at the new path:
+```bash
+python scripts/migrate-sessions.py "<old-path>" "<new-path>"
+```
+
+If the script reports no existing sessions, that's fine -- skip silently.
+
+## New Workspace Setup
+
+For new workspaces (no existing project to import):
 1. If a git remote URL is provided, clone it: `git clone <url> <target-path>`
 2. If no remote, create the directory and `git init` inside it
 3. Add `deps/` to the project's `.gitignore` (for pinned external reference material)
@@ -27,7 +49,7 @@ For nested workspaces (under `workspaces/`):
    - **Empty directory**: New project. Ask the user what they're building.
    - **Existing project**: Scan for language files, package manifests, build configs to auto-detect the stack. Confirm findings with the user.
 
-2. **Git init** -- If not already a git repo (skip for cloned repos):
+2. **Git init** -- If not already a git repo (skip for copied/cloned repos):
    - Empty dir: `git init`
    - Existing project: `git init && git add -A && git commit -m "Initial commit"` (snapshot before changes)
 

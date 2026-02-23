@@ -21,7 +21,7 @@ If the target is NOT already under `workspaces/`, ask the user:
 > Optimize in place, or clone into CC-Optimizer workspaces first?
 
 - **In place**: Proceed at the target's current location (existing behavior).
-- **Copy into workspaces**: Read org folders from `configs/user-config.json` (key: `workspace_orgs`). Ask the user which org to use, copy the local project into `workspaces/{Org}/{project}/` (preserves gitignored files and local state), then migrate session history with `python scripts/migrate-sessions.py`, then optimize the copy.
+- **Copy into workspaces**: Read org folders from `configs/user-config.json` (key: `workspace_orgs`). Ask the user which org to use, copy the local project into `workspaces/{Org}/{project}/` (preserves gitignored files and local state), then re-hide `.git` (`attrib +H "<target>/.git"`), then migrate session history with `python scripts/migrate-sessions.py`, then optimize the copy.
 
 ## Grep Workaround for Nested Workspaces
 

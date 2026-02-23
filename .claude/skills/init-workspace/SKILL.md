@@ -36,7 +36,10 @@ If multiple remotes have different repo names, list all unique names as options.
 
 ### 2. Copy local
 
-**Copy local** (default) -- `cp -r <source> <target>`. This preserves gitignored files, local configs, build artifacts, `deps/`, `.claude/settings.local.json`, and untracked reference material. Preferred over cloning from remote.
+**Copy local** (default) -- `cp -r <source> <target>`. This preserves gitignored files, local configs, build artifacts, `deps/`, `.claude/settings.local.json`, and untracked reference material. Preferred over cloning from remote. After copying, re-hide the `.git` directory (`cp -r` strips the Windows hidden attribute):
+```bash
+attrib +H "<target>/.git"
+```
 
 **Clone from remote** -- Only if the user explicitly requests a clean clone, or if no local copy exists.
 

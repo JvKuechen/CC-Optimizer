@@ -2,6 +2,7 @@
 import argparse
 import json
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -73,6 +74,11 @@ def migrate_project(src, dest_dir, rename_map, dry_run=True):
 
     try:
         shutil.move(str(src_path), str(dest_path))
+        # shutil.move strips the Windows hidden attribute from .git on
+        # cross-filesystem moves (copy+delete fallback). Re-apply it.
+        git_dir = dest_path / ".git"
+        if git_dir.exists():
+            subprocess.run(["attrib", "+H", str(git_dir)], check=False)
         print(f"  MOVED: {src} -> {dest_path}")
         return True
     except Exception as e:

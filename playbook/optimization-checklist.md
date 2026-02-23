@@ -116,13 +116,19 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 - [ ] `.github/copilot-instructions.md`
 - [ ] Any custom AI instructions in README or docs
 
-### 1.4 Select applicable patterns
+### 1.4 Check auto memory
+- [ ] Does `~/.claude/projects/<project>/memory/` exist?
+- [ ] If so, review `MEMORY.md` for stale or misleading content from prior sessions
+- [ ] Check for misdirected writes (documentation content that belongs in actual docs, not memory)
+- [ ] Clean or delete stale entries -- they load into every session
+
+### 1.5 Select applicable patterns
 - [ ] Review `playbook/patterns.md` toolbelt
 - [ ] Check each pattern's "When" section against this workspace
 - [ ] Note which patterns to apply (record in findings file)
 - [ ] **Credential hygiene** is always applicable -- check for exposed secrets
 
-### 1.5 Check git remote configuration
+### 1.6 Check git remote configuration
 - [ ] `git remote -v` -- what remotes exist?
 - [ ] Every project should have a primary remote as `origin`
 - [ ] Does the project need additional remotes? (mirror, backup, portfolio)
@@ -130,7 +136,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
   - Apply **Dual Remote Push** pattern (see `patterns/dual-remote-push.md`): add second remote as additional push URL on `origin`
 - [ ] Verify `main` branch tracks `origin`
 
-### 1.6 Per-project feature decisions
+### 1.7 Per-project feature decisions
 - [ ] **MCP servers** -- Does the project use a database, API, or service Claude should connect to directly?
   - HTTP transport is now default, SSE is deprecated
   - MCP scopes: `local` (project-private, default), `user` (cross-project), `project` (shared `.mcp.json`)
@@ -339,6 +345,7 @@ paths:
 - [ ] Choose wisely: `command` for speed/determinism, `prompt` for simple judgment, `agent` for complex verification
 
 ### 7.2 Common hook patterns
+- [ ] **Gitignored search reminder** -- PostToolUse on Grep, reminds Claude to search gitignored dirs (wiki, docs, nested repos). See `patterns/gitignored-search-reminder.md`
 - [ ] **Auto-format on save** -- PostToolUse on Write/Edit, runs formatter
 - [ ] **Lint on save** -- PostToolUse on Write/Edit, runs linter
 - [ ] **Filter test output** -- PreToolUse on Bash for test commands, reduces tokens

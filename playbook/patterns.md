@@ -44,6 +44,12 @@ Referenced from Phase 1.5 of the optimization checklist.
 | Silent Task Scheduler | [silent-task-scheduler.md](patterns/silent-task-scheduler.md) | Windows scheduled Python automation |
 | Venv Batch Wrapper | [venv-batch-wrapper.md](patterns/venv-batch-wrapper.md) | Any Python project on Windows needing reliable venv activation |
 
+## Hooks
+
+| Pattern | File | When to Use |
+|---------|------|-------------|
+| Gitignored Search Reminder | [gitignored-search-reminder.md](patterns/gitignored-search-reminder.md) | Workspaces with gitignored dirs Claude needs to search (wiki, docs, nested repos) |
+
 ## Safety
 
 | Pattern | File | When to Use |

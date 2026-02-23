@@ -20,14 +20,33 @@ Determine where the workspace will live based on `$ARGUMENTS`:
 
 When the user wants to move an existing project into `workspaces/`:
 
-1. **Copy local** (default) -- `cp -r <source> <target>`. This preserves gitignored files, local configs, build artifacts, `deps/`, `.claude/settings.local.json`, and untracked reference material. Preferred over cloning from remote.
-2. **Clone from remote** -- Only if the user explicitly requests a clean clone, or if no local copy exists.
+### 1. Check for name mismatch
+
+Before copying, compare the local folder name against the repo name(s) on its remotes:
+```bash
+git -C "<source>" remote -v
+```
+Extract the repo name from each remote URL (strip `.git` suffix, take the last path component). If any remote name differs from the local folder name, present options:
+
+> Local folder is "Apps" but remote says "search.tcl.local". What should the workspace be named?
+> 1. search.tcl.local (from origin)
+> 2. Apps (keep current name)
+
+If multiple remotes have different repo names, list all unique names as options. Use the chosen name as the target directory name under `workspaces/{Org}/`.
+
+### 2. Copy local
+
+**Copy local** (default) -- `cp -r <source> <target>`. This preserves gitignored files, local configs, build artifacts, `deps/`, `.claude/settings.local.json`, and untracked reference material. Preferred over cloning from remote.
+
+**Clone from remote** -- Only if the user explicitly requests a clean clone, or if no local copy exists.
 
 Before copying, check and report the source repo's state:
 ```bash
 git -C "<source>" status --short
 ```
 Inform the user of any dirty state (modified files, untracked files, uncommitted changes). This is informational -- proceed with the copy regardless, since preserving local state is the point.
+
+### 3. Migrate session history
 
 After copying into `workspaces/`, migrate session history so `/resume` works at the new path:
 ```bash

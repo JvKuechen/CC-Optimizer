@@ -80,6 +80,15 @@ def _load_wiki_remotes():
 
 WIKI_REMOTES = _load_wiki_remotes()
 
+COMMIT_MSG_HOOK = r"""#!/bin/bash
+# commit-msg hook: strip Co-Authored-By lines added by Claude Code.
+# GitHub parses these into ghost author avatars with broken names.
+# The commit is still made by whoever is in git config user.name/email.
+
+sed -i '/^Co-Authored-By:/d' "$1"
+sed -i '/^[[:space:]]*$/N;/^\n$/d' "$1"
+"""
+
 PRE_PUSH_HOOK = r"""#!/bin/bash
 # Pre-push hook: also push the wiki repo when the main repo is pushed.
 # The wiki lives in wiki/ as a separate git repo (not a submodule).
@@ -158,22 +167,29 @@ def setup_wiki():
             print(f"[wiki] Remote {remote['name']} already exists.")
 
 
-def setup_hooks():
-    """Install the pre-push hook if missing or outdated."""
-    hook_path = HOOKS_DIR / "pre-push"
+def _install_hook(name, content, version_marker):
+    """Install or update a git hook."""
+    hook_path = HOOKS_DIR / name
 
     if hook_path.exists():
         current = hook_path.read_text(encoding="utf-8")
-        if "for REMOTE in" in current:
-            print("[hooks] Pre-push hook is up to date.")
+        if version_marker in current:
+            print(f"[hooks] {name} hook is up to date.")
             return
         else:
-            print("[hooks] Updating pre-push hook (old version)...")
+            print(f"[hooks] Updating {name} hook (old version)...")
     else:
-        print("[hooks] Installing pre-push hook...")
+        print(f"[hooks] Installing {name} hook...")
 
-    hook_path.write_text(PRE_PUSH_HOOK, encoding="utf-8", newline="\n")
-    print("[hooks] Pre-push hook installed.")
+    hook_path.write_text(content, encoding="utf-8", newline="\n")
+    print(f"[hooks] {name} hook installed.")
+
+
+def setup_hooks():
+    """Install git hooks if missing or outdated."""
+    HOOKS_DIR.mkdir(exist_ok=True)
+    _install_hook("pre-push", PRE_PUSH_HOOK, "for REMOTE in")
+    _install_hook("commit-msg", COMMIT_MSG_HOOK, "Co-Authored-By")
 
 
 def _load_user_config():

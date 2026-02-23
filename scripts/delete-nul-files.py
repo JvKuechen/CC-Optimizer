@@ -16,17 +16,40 @@ The script scans recursively and reports each file found and deleted.
 """
 
 import ctypes
+import os
 import sys
 from pathlib import Path
 
+# Windows reserved device names that pathlib/rglob silently skip.
+RESERVED_NAMES = {"nul", "con", "prn", "aux",
+                  "com1", "com2", "com3", "com4",
+                  "lpt1", "lpt2", "lpt3", "lpt4"}
 
-def delete_nul_file(path):
-    """Delete a reserved-name file using Win32 API."""
-    # The \\?\ prefix tells Windows to skip name parsing,
-    # allowing deletion of reserved names like 'nul', 'con', 'aux'.
-    win_path = "\\\\?\\" + str(Path(path).resolve())
+
+def delete_reserved_file(filepath):
+    """Delete a reserved-name file using Win32 API.
+
+    The \\\\?\\ prefix tells Windows to skip name parsing,
+    allowing deletion of reserved names like 'nul', 'con', 'aux'.
+    """
+    win_path = "\\\\?\\" + str(Path(filepath).resolve())
     result = ctypes.windll.kernel32.DeleteFileW(win_path)
     return result != 0
+
+
+def find_nul_files(root):
+    """Walk directory tree using os.scandir to find reserved-name files.
+
+    pathlib.rglob() silently skips Windows reserved names (nul, con, etc.)
+    because Python's path normalization treats them as device references.
+    os.scandir sees them as regular directory entries.
+    """
+    found = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        for name in filenames:
+            if name.lower() in RESERVED_NAMES:
+                found.append(os.path.join(dirpath, name))
+    return found
 
 
 def main():
@@ -36,22 +59,19 @@ def main():
         print(f"ERROR: {target} does not exist.")
         sys.exit(1)
 
-    found = []
-    for nul_file in target.rglob("nul"):
-        if nul_file.is_file() and nul_file.name == "nul":
-            found.append(nul_file)
+    found = find_nul_files(target)
 
     if not found:
-        print(f"No 'nul' files found under {target}")
+        print(f"No reserved-name files found under {target}")
         return
 
-    print(f"Found {len(found)} nul file(s):")
+    print(f"Found {len(found)} reserved-name file(s):")
     print()
 
     deleted = 0
     for f in found:
         print(f"  {f}", end="")
-        if delete_nul_file(f):
+        if delete_reserved_file(f):
             print(" -- deleted")
             deleted += 1
         else:

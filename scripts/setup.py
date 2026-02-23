@@ -90,7 +90,8 @@ if [ -d "$WIKI_DIR/.git" ]; then
 
     if git rev-parse --verify HEAD > /dev/null 2>&1; then
         for REMOTE in $(git remote); do
-            git push "$REMOTE" main 2>&1
+            BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "master")
+            git push "$REMOTE" "$BRANCH" 2>&1
             RESULT=$?
             if [ $RESULT -ne 0 ]; then
                 echo "WARNING: Wiki push to $REMOTE failed (exit $RESULT). Main repo push continues."

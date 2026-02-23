@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-USER_AGENT = "ClaudeDocs-Sync/1.0"
+USER_AGENT = "CC-Optimizer-Sync/1.0"
 
 
 def fetch_url(url):

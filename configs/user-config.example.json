@@ -7,7 +7,7 @@
   "gitea_url": "https://gitea.example.com",
   "gitea_org": "ExampleOrg",
   "home_gitea_url": "https://git.example.com",
-  "wiki_remote_gitea": "https://gitea.example.com/ExampleOrg/ClaudeDocs.wiki.git",
+  "wiki_remote_gitea": "https://gitea.example.com/ExampleOrg/CC-Optimizer.wiki.git",
   "wiki_remote_github": "https://github.com/your-github-user/CC-Optimizer.wiki.git",
   "active_server_ip": "10.0.0.1",
   "passive_server_ip": "10.0.0.2",

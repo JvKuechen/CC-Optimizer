@@ -760,13 +760,13 @@ CC-Optimizer (this workspace, GitHub-synced)
 2. **Runner isolation:** DinD on host network. Container-mode jobs get per-job bridge networks (can SSH out, can't reach Docker). Host-mode jobs run in runner container (full Docker + LAN access). `container.network: host` does NOT work in act_runner 0.2.11.
 3. **Runner labels:** Labeled by server (primary-server, secondary-server) with role (active-capable, passive-capable). Deploy jobs target specific runners.
 4. **Promote gate:** Manual workflow_dispatch (separate workflow). No auto-promote initially.
-5. **ci-scripts versioning:** Semver tags, immutable. ClaudeDocs generates, admin pushes tags. Current: v0.1.3.
+5. **ci-scripts versioning:** Semver tags, immutable. CC-Optimizer generates, admin pushes tags. Current: v0.1.3.
 6. **Deploy user:** ci-deploy user exists, SSH key auth works. ForceCommand dispatcher planned but not yet deployed.
 7. **SSH key handling:** Written to file per-job with printf (not echo), cleaned up in `if: always()` step. Never env var.
 8. **SSH key paths:** Use /root/.ssh/ absolute paths (~ not expanded in YAML env vars).
 9. **Dispatcher output:** JSON for all responses (ok/error envelope) -- planned.
-10. **CI scripts location:** Dedicated Gitea repo. ClaudeDocs is source, ci-scripts is consumption point.
-11. **Start point:** ClaudeDocs first (Phase A), infra-config is first customer (Phase C).
+10. **CI scripts location:** Dedicated Gitea repo. CC-Optimizer is source, ci-scripts is consumption point.
+11. **Start point:** CC-Optimizer first (Phase A), infra-config is first customer (Phase C).
 12. **act_runner version:** 0.2.11 confirmed working. Has critical bug: ALL `container.*` config settings are silently ignored. Job containers always get per-job bridge networks.
 13. **Job container image:** node:20-bookworm for container-mode jobs (has git, bash, jq, Node.js prerequisites). Alpine runner native for host-mode jobs (has git, wget only).
 14. **CA cert handling:** Two mechanisms. Infra pipelines (container mode): `INTERNAL_CA_PEM` Gitea secret installed via `update-ca-certificates`. App pipelines (host mode): Runner container mounts host CA certs directly, DinD gets per-registry CA cert via compose volume.

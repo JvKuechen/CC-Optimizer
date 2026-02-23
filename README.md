@@ -7,28 +7,19 @@ Central hub for Claude Code optimization. Mirrors the official documentation, pr
 ```bash
 git clone https://github.com/JvKuechen/CC-Optimizer.git
 cd CC-Optimizer
-git clone https://github.com/JvKuechen/CC-Optimizer.wiki.git wiki
 
-# Set git to use LF line endings (Windows default is CRLF which breaks things)
+# Set git to use LF line endings (recommended for Windows -- CRLF breaks hooks/scripts)
 git config --global core.autocrlf false
 git config --global core.eol lf
 
-# Clone wiki and install hooks
+# Clone wiki repo and install pre-push hook
 python scripts/setup.py
 
-# Bootstrap your machine (deploys global permissions, guardrail hook, notifications)
+# Deploy global permissions, guardrail hook, and notification sounds to ~/.claude/
 python templates/deploy-user-settings.py
-
-# Install plugins (interactive-mode slash commands -- run inside a Claude Code session)
-# /plugin marketplace add anthropics/claude-code
-# /plugin install frontend-design@claude-code-plugins
-# /plugin install feature-dev@claude-code-plugins
-# /plugin install security-guidance@claude-code-plugins
-# /plugin install commit-commands@claude-code-plugins
-# /plugin install code-review@claude-code-plugins
 ```
 
-Then open Claude Code in this directory. Install plugins with `/plugin` and run `/sync-docs` to fetch the latest documentation.
+Then open Claude Code in this directory and run `/sync-docs` to fetch the latest documentation. Optionally install plugins with `/plugin`.
 
 ## What You Get
 

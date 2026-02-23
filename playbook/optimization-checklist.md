@@ -401,9 +401,9 @@ All events: PreToolUse, PostToolUse, PostToolUseFailure, PreCompact, PermissionR
 - [ ] Run `git add --renormalize .` if converting an existing repo from CRLF to LF
 
 ### 8.4 Check for existing damage
-- [ ] Look for `nul` files in workspace root (created by bad `> nul` redirects)
+- [ ] Look for `nul` files in workspace root (created by bad `> nul` redirects in Git Bash)
 - [ ] Look for `tmp/claude-*-cwd` files (created by broken path quoting)
-- [ ] Clean up if found (nul files require `del \\?\C:\path\nul` in CMD)
+- [ ] Clean up nul files: `python scripts/delete-nul-files.py <workspace-path>` (uses Win32 DeleteFileW API -- CMD `del` and `rm` cannot delete reserved names from Git Bash)
 
 ---
 

@@ -120,6 +120,7 @@ Active workspaces live as nested clones under `workspaces/` in this repo, organi
 - CLI auto-generates deprecated colon syntax `Bash(cmd:*)` in settings.local.json when user clicks "always allow." Functional but inconsistent with docs which show `Bash(cmd *)`. Accept as-is.
 - Moving a workspace folder orphans `/resume` session history. Fix by renaming the directory under `~/.claude/projects/` to match the new path encoding (replace `\` with `-`, colon with `-`).
 - `[console]::beep` has no volume parameter. Pitch and duration are the only controls.
+- **nul file cleanup**: Bad `> nul` redirects in Git Bash create literal `nul` files that `rm`, `del`, and Explorer cannot delete. Use `python scripts/delete-nul-files.py <path>` (Win32 DeleteFileW API with `\\?\` prefix). Common in unoptimized workspaces.
 - Windows NTFS is case-insensitive but case-preserving. `mkdir work` then `ls` may show `Work` if the directory pre-existed with that casing.
 - GitHub wiki repos MUST use the `master` branch. The wiki tab only reads from `master` -- renaming to `main` makes the wiki appear empty.
 

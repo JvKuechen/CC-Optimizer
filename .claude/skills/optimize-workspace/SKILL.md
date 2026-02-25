@@ -70,7 +70,17 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
 
 13. **Add hooks** (Phase 7) -- Three types: `command` (deterministic, zero tokens), `prompt` (LLM evaluation), `agent` (multi-turn verification). Check for sandbox candidates (`/sandbox`).
 
-14. **Windows compat** (Phase 8) -- Check for nul files, tmpclaude files, Unix-only constructs.
+14. **Public repo lock** (Phase 7.5) -- Check if any remote is public:
+    ```bash
+    git -C "<target>" remote -v
+    ```
+    - `github.com`, `gitlab.com`, other public hosts = potentially public.
+    - Private IPs, `.local` domains, LAN-only Gitea = private. Skip.
+    - If public remote found and no `.public-repo` marker exists, ask the user if the repo is public.
+    - If yes: create `.public-repo` marker, install pre-commit hook (blocks `git commit` unless `PUBLIC_REPO_VERIFIED=1`), install commit-msg hook (strips Co-Authored-By). Add `scripts/verified-commit.sh` wrapper. Add `Bash(scripts/verified-commit.sh *)` to `.claude/settings.json` allow list. Document the workflow in CLAUDE.md.
+    - See CC-Optimizer's `scripts/setup.py` for the hook content (`PRE_COMMIT_HOOK`, `COMMIT_MSG_HOOK`).
+
+15. **Windows compat** (Phase 8) -- Check for nul files, tmpclaude files, Unix-only constructs.
 
 ## Post-Optimization
 

@@ -370,7 +370,15 @@ paths:
 ### 7.4 Hook events reference
 All events: PreToolUse, PostToolUse, PostToolUseFailure, PreCompact, PermissionRequest, UserPromptSubmit, Notification, Stop, SessionStart, SessionEnd, ConfigChange, WorktreeCreate, WorktreeRemove, SubagentStart, SubagentStop, TeammateIdle, TaskCompleted
 
-### 7.5 Agent team quality gate hooks
+### 7.5 Public repo commit lock
+- [ ] Check `git remote -v` for public hosting (github.com, gitlab.com, etc.)
+- [ ] LAN-only remotes (private IPs, `.local` domains, internal Gitea) are considered private -- skip
+- [ ] If public remote found: ask user if repo is public
+- [ ] If public: create `.public-repo` marker (tracked), install pre-commit hook (blocks `git commit` without `PUBLIC_REPO_VERIFIED=1`), add `scripts/verified-commit.sh` wrapper, document workflow in CLAUDE.md
+- [ ] Add `Bash(scripts/verified-commit.sh *)` to `.claude/settings.json` allow list
+- [ ] Hook content: see CC-Optimizer `scripts/setup.py` (`PRE_COMMIT_HOOK`, `COMMIT_MSG_HOOK`)
+
+### 7.6 Agent team quality gate hooks
 - [ ] `TeammateIdle` -- Runs when a teammate is about to go idle. Exit code 2 sends feedback and keeps teammate working. Command-only
 - [ ] `TaskCompleted` -- Runs when a task is being marked complete. Exit code 2 prevents completion and sends feedback. Supports command, prompt, and agent types
 - [ ] `TaskCompleted` fires for explicit TaskUpdate calls AND when teammates finish with in-progress tasks

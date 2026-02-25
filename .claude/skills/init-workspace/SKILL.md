@@ -103,7 +103,17 @@ For new workspaces (no existing project to import):
 
 8. **Commit** -- `git add -A && git commit -m "Claude Code workspace setup"`.
 
-9. **Report** -- Tell the user what was created and what they should customize.
+9. **Public repo lock** -- Check if any remote points to a public host:
+   ```bash
+   git -C "<target>" remote -v
+   ```
+   - Remotes on `github.com`, `gitlab.com`, or other public hosting = potentially public.
+   - Remotes on private IPs, `.local` domains, or LAN-only hosts (e.g., internal Gitea) = private.
+   - If any public remote found, ask the user: "Is this repo public? Should I add the public repo commit lock?"
+   - If yes: create `.public-repo` marker, install the pre-commit hook from CC-Optimizer's `scripts/setup.py` (the `PRE_COMMIT_HOOK` content), and install the commit-msg hook. Add `scripts/verified-commit.sh` if the project has a `scripts/` directory, otherwise note the `PUBLIC_REPO_VERIFIED=1` bypass in the report.
+   - If no: skip.
+
+10. **Report** -- Tell the user what was created and what they should customize.
 
 ## What This Does NOT Do
 

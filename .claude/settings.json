@@ -55,6 +55,7 @@
       "Bash(grep *)",
       "Bash(sed *)",
       "Bash(bash *)",
+      "Bash(scripts/verified-commit.sh *)",
       "Bash(echo *)",
       "Bash(pwd)",
       "Bash(tree *)",

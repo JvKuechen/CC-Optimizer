@@ -1,0 +1,13 @@
+# Public Repository Marker
+#
+# This file signals that one or more remotes point to a public hosting
+# service (e.g., GitHub public repo). When present, the pre-commit hook
+# blocks direct `git commit` and requires using `scripts/verified-commit.sh`
+# after reviewing the diff for sensitive or environment-specific content.
+#
+# LAN-only remotes (e.g., private Gitea) do not count as public.
+#
+# To disable: delete this file. This is an intentional action -- you are
+# accepting responsibility for ensuring no PII or infra details leak.
+#
+# Created by: python scripts/setup.py (or manually)

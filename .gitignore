@@ -16,6 +16,10 @@ docs/en/
 # Wiki is a separate git repo (pushed separately)
 wiki/
 
+# Environment-specific files (contain hostnames, credentials, infra details)
+# The generic/public versions are tracked; *-environments.md variants are not
+docs/design/*-environments.md
+
 # Audit findings are temporary working files
 findings/
 

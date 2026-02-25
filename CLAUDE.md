@@ -16,7 +16,7 @@ This is a **Claude Optimizer** workspace. It maintains a local mirror of the Cla
 
 ## Post-Clone Setup
 
-IMPORTANT: If the `wiki/` directory does not exist, run `python scripts/setup.py` before doing any other work. This clones the wiki nested repo and installs the pre-push hook. The script is idempotent.
+IMPORTANT: If the `wiki/` directory does not exist, run `python scripts/setup.py` before doing any other work. This clones the wiki nested repo and installs git hooks. The script is idempotent.
 
 ## Workflow
 
@@ -112,6 +112,16 @@ When writing CLAUDE.md for other workspaces:
 ## Workspace Consolidation
 
 Active workspaces live as nested clones under `workspaces/` in this repo, organized by user-configured org folders (set during `python scripts/setup.py` or in `configs/user-config.json` under `workspace_orgs`). Each nested workspace keeps its own `.git` and remotes. The `workspaces/` directory is gitignored -- nothing inside is committed to the optimizer repo. External paths still work for in-place optimization.
+
+## Public Repo Commit Workflow
+
+This repo has a `.public-repo` marker. The pre-commit hook blocks direct `git commit`. YOU MUST follow this workflow:
+
+1. Review staged diff: `git diff --cached`
+2. Verify no hostnames, credentials, usernames, IPs, or environment-specific details
+3. Commit using: `scripts/verified-commit.sh -m "message"`
+
+Environment-specific content goes in gitignored files (e.g., `*-environments.md`). The tracked versions contain only generalized patterns. When creating new design docs, split into generic (tracked) and specific (gitignored) from the start.
 
 ## Gotchas
 

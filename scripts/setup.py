@@ -80,6 +80,39 @@ def _load_wiki_remotes():
 
 WIKI_REMOTES = _load_wiki_remotes()
 
+PRE_COMMIT_HOOK = r"""#!/bin/bash
+# pre-commit hook: block commits on public repos unless verified.
+#
+# When .public-repo exists at the repo root, direct `git commit` is blocked.
+# Use scripts/verified-commit.sh or PUBLIC_REPO_VERIFIED=1 to bypass.
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+if [ -f "$REPO_ROOT/.public-repo" ] && [ "$PUBLIC_REPO_VERIFIED" != "1" ]; then
+    echo ""
+    echo "[Public Repo Lock] Commit blocked."
+    echo ""
+    echo "This repo has public remotes. Before committing, verify the staged"
+    echo "diff contains only generalized information (no hostnames, credentials,"
+    echo "usernames, IPs, or environment-specific details)."
+    echo ""
+    echo "Review the diff:"
+    echo "  git diff --cached"
+    echo ""
+    if [ -f "$REPO_ROOT/scripts/verified-commit.sh" ]; then
+        echo "Then commit using:"
+        echo "  scripts/verified-commit.sh -m \"your message\""
+    else
+        echo "Then commit using:"
+        echo "  PUBLIC_REPO_VERIFIED=1 git commit -m \"your message\""
+    fi
+    echo ""
+    exit 1
+fi
+
+exit 0
+"""
+
 COMMIT_MSG_HOOK = r"""#!/bin/bash
 # commit-msg hook: strip Co-Authored-By lines added by Claude Code.
 # GitHub parses these into ghost author avatars with broken names.
@@ -90,11 +123,39 @@ sed -i '/^[[:space:]]*$/N;/^\n$/d' "$1"
 """
 
 PRE_PUSH_HOOK = r"""#!/bin/bash
-# Pre-push hook: also push the wiki repo when the main repo is pushed.
-# The wiki lives in wiki/ as a separate git repo (not a submodule).
-# Pushes to ALL wiki remotes (origin, github, etc.) so they stay in sync.
+# Pre-push hook:
+# 1. If public repo, show a diff summary for human review before pushing.
+# 2. Push the wiki repo when the main repo is pushed.
 
-WIKI_DIR="$(git rev-parse --show-toplevel)/wiki"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# --- Public repo: show diff summary for human review ---
+if [ -f "$REPO_ROOT/.public-repo" ]; then
+    # Find what's being pushed vs what the remote already has
+    REMOTE="$1"
+    REMOTE_REF=$(git rev-parse "$REMOTE/$(git symbolic-ref --short HEAD)" 2>/dev/null)
+
+    if [ -n "$REMOTE_REF" ]; then
+        COMMIT_COUNT=$(git rev-list --count "$REMOTE_REF..HEAD" 2>/dev/null)
+        if [ "$COMMIT_COUNT" -gt 0 ]; then
+            echo ""
+            echo "=== Public Repo Push Summary ==="
+            echo "Pushing $COMMIT_COUNT commit(s) to $REMOTE:"
+            echo ""
+            git log --oneline "$REMOTE_REF..HEAD"
+            echo ""
+            echo "Files changed:"
+            git diff --stat "$REMOTE_REF..HEAD"
+            echo ""
+            echo "Review the full diff with: git diff $REMOTE_REF..HEAD"
+            echo "================================"
+            echo ""
+        fi
+    fi
+fi
+
+# --- Wiki push ---
+WIKI_DIR="$REPO_ROOT/wiki"
 
 if [ -d "$WIKI_DIR/.git" ]; then
     echo "Pre-push: pushing wiki repo..."
@@ -167,29 +228,48 @@ def setup_wiki():
             print(f"[wiki] Remote {remote['name']} already exists.")
 
 
-def _install_hook(name, content, version_marker):
+def _install_hook(name, content, version_marker, hooks_dir=None, label="hooks"):
     """Install or update a git hook."""
-    hook_path = HOOKS_DIR / name
+    target_dir = hooks_dir or HOOKS_DIR
+    hook_path = target_dir / name
 
     if hook_path.exists():
         current = hook_path.read_text(encoding="utf-8")
         if version_marker in current:
-            print(f"[hooks] {name} hook is up to date.")
+            print(f"[{label}] {name} hook is up to date.")
             return
         else:
-            print(f"[hooks] Updating {name} hook (old version)...")
+            print(f"[{label}] Updating {name} hook (old version)...")
     else:
-        print(f"[hooks] Installing {name} hook...")
+        print(f"[{label}] Installing {name} hook...")
 
     hook_path.write_text(content, encoding="utf-8", newline="\n")
-    print(f"[hooks] {name} hook installed.")
+    print(f"[{label}] {name} hook installed.")
 
 
 def setup_hooks():
     """Install git hooks if missing or outdated."""
     HOOKS_DIR.mkdir(exist_ok=True)
-    _install_hook("pre-push", PRE_PUSH_HOOK, "for REMOTE in")
+    _install_hook("pre-commit", PRE_COMMIT_HOOK, "PUBLIC_REPO_VERIFIED")
+    _install_hook("pre-push", PRE_PUSH_HOOK, "Public Repo Push Summary")
     _install_hook("commit-msg", COMMIT_MSG_HOOK, "Co-Authored-By")
+
+
+def setup_wiki_hooks():
+    """Install git hooks in the wiki repo."""
+    wiki_hooks_dir = WIKI_DIR / ".git" / "hooks"
+    if not (WIKI_DIR / ".git").exists():
+        print("[wiki-hooks] Wiki not cloned yet, skipping.")
+        return
+    wiki_hooks_dir.mkdir(exist_ok=True)
+    _install_hook(
+        "pre-commit", PRE_COMMIT_HOOK, "PUBLIC_REPO_VERIFIED",
+        hooks_dir=wiki_hooks_dir, label="wiki-hooks",
+    )
+    _install_hook(
+        "commit-msg", COMMIT_MSG_HOOK, "Co-Authored-By",
+        hooks_dir=wiki_hooks_dir, label="wiki-hooks",
+    )
 
 
 def _load_user_config():
@@ -239,6 +319,27 @@ def _get_workspace_orgs(reconfigure=False):
     print("[workspaces] Saved workspace_orgs to configs/user-config.json")
 
     return orgs
+
+
+def setup_wiki_public_repo_marker():
+    """Create .public-repo marker in the wiki if missing."""
+    if not (WIKI_DIR / ".git").exists():
+        print("[wiki-marker] Wiki not cloned yet, skipping.")
+        return
+    marker = WIKI_DIR / ".public-repo"
+    if marker.exists():
+        print("[wiki-marker] .public-repo marker already exists.")
+    else:
+        marker.write_text(
+            "# Public Repository Marker\n"
+            "#\n"
+            "# This wiki is published to GitHub. The pre-commit hook blocks\n"
+            "# direct git commit. Use PUBLIC_REPO_VERIFIED=1 git commit\n"
+            "# after reviewing the diff for sensitive content.\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        print("[wiki-marker] Created .public-repo marker in wiki/")
 
 
 def setup_workspaces(reconfigure=False):
@@ -372,6 +473,10 @@ def main():
     setup_wiki()
     print()
     setup_hooks()
+    print()
+    setup_wiki_hooks()
+    print()
+    setup_wiki_public_repo_marker()
     print("\nSetup complete.")
 
 

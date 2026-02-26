@@ -4,15 +4,25 @@
 
 Configure a git repo to push to two remotes (e.g., Gitea LAN + GitHub WAN) with a single `git push` command. Uses git's multiple push URL feature on one remote.
 
+## Remote Naming Convention
+
+The remote name signals visibility and function:
+
+| Scenario | Name | Rationale |
+|----------|------|-----------|
+| Any public remote in the push URLs | `public` | Warning label -- every `git push public` reminds you the world can see it |
+| Single private remote | Host name (`gitea`, `github`, etc.) | Obvious, no ambiguity |
+| Multiple private remotes (bridge pattern) | `mirrors` | Describes function (syncing between environments), makes no privacy claim, won't go stale if a remote later changes visibility |
+
 ## Remote Strategy
 
 Every project gets a local Gitea remote. Some also get GitHub.
 
-| Category | Gitea Remote | GitHub Remote | Dual Push? |
-|----------|-------------|---------------|------------|
-| Work | `gitea.example.com` (always) | No (internal only) | No |
-| Personal | `git.example.com` (always) | Private repo for sync/backup | Yes |
-| Personal (public) | `git.example.com` (always) | Public repo for portfolio | Yes |
+| Category | Gitea Remote | GitHub Remote | Dual Push? | Remote Name |
+|----------|-------------|---------------|------------|-------------|
+| Work only | Always | No | No | `gitea` |
+| Private bridge | Always | Private repo for sync | Yes | `mirrors` |
+| Public | Always | Public repo | Yes | `public` |
 
 **Gitea is always the primary remote** (LAN, fast, always available). GitHub is the optional WAN mirror for backup, sync, or public visibility.
 
@@ -28,66 +38,78 @@ Every project gets a local Gitea remote. Some also get GitHub.
 
 - **Push**: Git sends to ALL push URLs configured on a remote. One command, both updated.
 - **Fetch**: Git only fetches from the single fetch URL. One remote = one fetch source.
-- **Secondary remote**: Keep it around for direct fetch if you need to pull from the other source.
+- **Secondary remote**: Keep standalone named remotes around for direct fetch if you need to pull from the other source.
 
 ## Setup
 
-Gitea (`origin`) is always the primary remote. Add GitHub as a second push URL:
+### Public repo (any push URL is public)
 
 ```bash
-# Add both push URLs to the primary remote.
-# IMPORTANT: The first --add --push REPLACES the implicit "use fetch URL for push",
-# so you must explicitly add the original URL too.
-git remote set-url --add --push origin https://git.example.com/user/repo.git
-git remote set-url --add --push origin https://github.com/user/repo.git
+# Rename existing remote to 'public'
+git remote rename origin public
+# Or if starting fresh:
+git remote add public https://git.example.com/org/repo.git
 
-# Add github as standalone remote for direct fetch if needed
+# Add GitHub public as second push URL
+git remote set-url --add --push public https://git.example.com/org/repo.git
+git remote set-url --add --push public https://github.com/user/repo.git
+
+# Keep github as standalone for direct fetch
 git remote add github https://github.com/user/repo.git
+
+# Track the dual-push remote
+git branch --set-upstream-to=public/main main
 ```
 
 Result:
 ```
-origin  https://git.example.com/user/repo.git (fetch)
-origin  https://git.example.com/user/repo.git (push)
-origin  https://github.com/user/repo.git (push)
+public  https://git.example.com/org/repo.git (fetch)
+public  https://git.example.com/org/repo.git (push)
+public  https://github.com/user/repo.git (push)
 github  https://github.com/user/repo.git (fetch)
 github  https://github.com/user/repo.git (push)
 ```
 
-For Work projects (Gitea only, no dual push):
-```
-origin  https://gitea.example.com/ExampleOrg/repo.git (fetch)
-origin  https://gitea.example.com/ExampleOrg/repo.git (push)
+### Private bridge (multiple private remotes)
+
+```bash
+git remote add mirrors https://git.example.com/org/repo.git
+git remote set-url --add --push mirrors https://git.example.com/org/repo.git
+git remote set-url --add --push mirrors https://github.com/user/repo-private.git
+
+# Keep standalone remotes for direct fetch
+git remote add gitea https://git.example.com/org/repo.git
+git remote add github https://github.com/user/repo-private.git
+
+git branch --set-upstream-to=mirrors/main main
 ```
 
-## Gitea Instances
+### Work only (single Gitea, no dual push)
 
-| Instance | URL | Category | Org/User |
-|----------|-----|----------|----------|
-| Work | `gitea.example.com` | Work projects | `ExampleOrg` |
-| Personal | `git.example.com` | Personal projects | TBD |
+```
+gitea  https://gitea.example.com/org/repo.git (fetch)
+gitea  https://gitea.example.com/org/repo.git (push)
+```
 
 ## Gotchas
 
 - If one push URL fails (e.g., GitHub down), the push still succeeds for the other but git reports an error. The remotes will be out of sync until you push again when both are up.
 - Branch tracking only follows one remote. `git pull` fetches from the tracked remote only.
 - Pre-push hooks fire once per push URL, so hooks that push nested repos (like wiki/) will run twice. Make sure they're idempotent.
-- To remove a push URL: `git remote set-url --delete --push origin https://url-to-remove`
+- To remove a push URL: `git remote set-url --delete --push <remote> https://url-to-remove`
 - `git remote -v` shows the config. If you see only one push URL, the implicit default is still active.
 - **Privacy check before adding GitHub push URL**: Only sync to private repos unless the project is intentionally public. Use `gh repo view` to verify.
+- When renaming remotes, update branch tracking: `git branch --set-upstream-to=<new-name>/main main`
 
 ## During Optimization
 
 When setting up a workspace's git remotes:
 
 1. Check `git remote -v` -- what exists?
-2. Ensure Gitea remote exists (`gitea.example.com` for Work, `git.example.com` for Personal)
+2. Ensure Gitea remote exists
 3. If project needs GitHub mirror: verify/create GitHub repo, check privacy
-4. If dual remotes needed: add GitHub as second push URL on `origin`
-5. Keep `github` as standalone remote for direct fetch
-6. Document in CLAUDE.md if the dual-push setup exists, so Claude pushes to the right remote
-
-## Real-World Examples
-
-- **This repo** -- `github` remote pushes to both GitHub (<github-user>/<repo-name>) and Gitea (ExampleOrg/<repo-name>). Note: some repos have GitHub as primary for historical reasons; new projects should use Gitea as primary.
-- **Work projects** -- Single `origin` remote pointing to `gitea.example.com`. No GitHub mirror needed.
+4. Determine naming: `public` (any public push URL), `mirrors` (all private bridge), or host name (single remote)
+5. Add second push URL to the named remote
+6. Keep standalone remotes for direct fetch from either source
+7. Set branch tracking to the dual-push remote
+8. Document in CLAUDE.md if the dual-push setup exists, so Claude pushes to the right remote

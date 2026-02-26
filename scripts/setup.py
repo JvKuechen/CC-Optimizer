@@ -19,63 +19,88 @@ WORKSPACES_DIR = REPO_ROOT / "workspaces"
 DEFAULT_ORGS = ["Work", "Personal", "Github"]
 
 
-def _derive_wiki_url_from_origin():
-    """Derive the wiki clone URL from the main repo's origin.
+def _derive_wiki_urls():
+    """Derive wiki clone URLs from the main repo's remotes.
 
-    GitHub wiki repos follow the pattern: <repo-url-without-.git>.wiki.git
-    For example:
-        https://github.com/User/Repo.git -> https://github.com/User/Repo.wiki.git
-        git@github.com:User/Repo.git     -> git@github.com:User/Repo.wiki.git
+    Wiki repos follow the pattern: <repo-url-without-.git>.wiki.git
+    Checks all remotes on the main repo and converts each to a wiki URL.
     """
+    urls = []
     try:
         result = subprocess.run(
-            "git remote get-url origin",
-            cwd=REPO_ROOT, capture_output=True, text=True, shell=True,
+            "git remote", cwd=REPO_ROOT,
+            capture_output=True, text=True, shell=True,
         )
-        origin = result.stdout.strip()
+        for remote_name in result.stdout.strip().splitlines():
+            r = subprocess.run(
+                f"git remote get-url {remote_name}",
+                cwd=REPO_ROOT, capture_output=True, text=True, shell=True,
+            )
+            url = r.stdout.strip()
+            if url:
+                if url.endswith(".git"):
+                    urls.append(url[:-4] + ".wiki.git")
+                else:
+                    urls.append(url + ".wiki.git")
     except Exception:
-        origin = ""
-
-    if not origin:
-        return None
-
-    # Strip trailing .git if present, append .wiki.git
-    if origin.endswith(".git"):
-        return origin[:-4] + ".wiki.git"
-    return origin + ".wiki.git"
+        pass
+    return urls
 
 
 def _load_wiki_remotes():
-    """Load wiki remotes from user config, or auto-derive from origin."""
+    """Load wiki remote config: primary URL, push URLs, and remote name.
+
+    Naming convention (matches dual-remote-push pattern):
+      - public:  any push URL points to a public host
+      - mirrors: multiple private remotes (bridge pattern)
+      - <host>:  single private remote
+
+    Returns dict with keys: name, clone_url, push_urls
+    """
+    push_urls = []
+
+    # Try user config first
     config_path = CONFIGS_DIR / "user-config.json"
     if config_path.exists():
         with open(config_path, "r", encoding="utf-8") as f:
             cfg = json.load(f)
-        remotes = {}
-        # Add configured remotes (skip entries with placeholder values)
-        for key, default_name in [
-            ("wiki_remote_gitea", "gitea"),
-            ("wiki_remote_github", "github"),
-        ]:
+        for key in ["wiki_remote_gitea", "wiki_remote_github"]:
             url = cfg.get(key, "")
             if url and "example.com" not in url and "your-" not in url:
-                remotes[default_name] = {"name": default_name, "url": url}
-        if remotes:
-            # Use the first configured remote as "origin"
-            first = next(iter(remotes.values()))
-            first["name"] = "origin"
-            return remotes
+                push_urls.append(url)
 
-    # No config or no valid remotes -- derive from main repo's origin
-    wiki_url = _derive_wiki_url_from_origin()
-    if wiki_url:
-        return {
-            "auto": {"name": "origin", "url": wiki_url},
-        }
+    # Fallback: derive from main repo remotes
+    if not push_urls:
+        push_urls = _derive_wiki_urls()
 
-    print("[wiki] WARNING: Could not determine wiki URL.")
-    print("       Create configs/user-config.json (see configs/user-config.example.json)")
-    return {}
+    if not push_urls:
+        print("[wiki] WARNING: Could not determine wiki URL.")
+        print("       Create configs/user-config.json (see configs/user-config.example.json)")
+        return None
+
+    # Determine remote name based on visibility
+    is_public = (REPO_ROOT / ".public-repo").exists()
+    if is_public:
+        name = "public"
+    elif len(push_urls) > 1:
+        name = "mirrors"
+    else:
+        # Single remote: name after host
+        from urllib.parse import urlparse
+        host = urlparse(push_urls[0]).hostname or "origin"
+        # Use short name for known hosts
+        if "github" in host:
+            name = "github"
+        elif "gitea" in host or "git." in host:
+            name = "gitea"
+        else:
+            name = host.split(".")[0]
+
+    return {
+        "name": name,
+        "clone_url": push_urls[0],
+        "push_urls": push_urls,
+    }
 
 
 WIKI_REMOTES = _load_wiki_remotes()
@@ -194,38 +219,61 @@ def run(cmd, cwd=None):
     return result.stdout.strip()
 
 
-def detect_wiki_clone_url():
-    """Pick the wiki clone URL from configured remotes."""
-    if not WIKI_REMOTES:
-        return None
-    # Use the first (or only) remote's URL
-    return next(iter(WIKI_REMOTES.values()))["url"]
-
-
 def setup_wiki():
-    """Clone wiki if missing, add all remotes."""
+    """Clone wiki if missing, set up remote with dual push URLs."""
+    if not WIKI_REMOTES:
+        print("[wiki] ERROR: No wiki URL available. Skipping.")
+        return
+
+    remote_name = WIKI_REMOTES["name"]
+    clone_url = WIKI_REMOTES["clone_url"]
+    push_urls = WIKI_REMOTES["push_urls"]
+
     if (WIKI_DIR / ".git").exists():
         print("[wiki] Already cloned.")
     else:
-        clone_url = detect_wiki_clone_url()
-        if not clone_url:
-            print("[wiki] ERROR: No wiki URL available. Skipping clone.")
-            return
         print(f"[wiki] Cloning from {clone_url}...")
         run(f'git clone "{clone_url}" "{WIKI_DIR}"')
         print("[wiki] Cloned.")
 
-    # Ensure all remotes exist
+    # Set up the named remote with dual push URLs
     existing = run("git remote", cwd=WIKI_DIR).splitlines()
-    for remote in WIKI_REMOTES.values():
-        if remote["name"] not in existing:
-            print(f"[wiki] Adding remote: {remote['name']} -> {remote['url']}")
+
+    # Remove 'origin' if it was created by git clone and we want a different name
+    if "origin" in existing and remote_name != "origin":
+        run(f"git remote rename origin {remote_name}", cwd=WIKI_DIR)
+        print(f"[wiki] Renamed origin -> {remote_name}")
+        existing = [remote_name if r == "origin" else r for r in existing]
+
+    if remote_name not in existing:
+        run(
+            f'git remote add {remote_name} "{clone_url}"',
+            cwd=WIKI_DIR,
+        )
+        print(f"[wiki] Added remote: {remote_name}")
+
+    # Set up push URLs (first --add --push replaces implicit, so add all)
+    if len(push_urls) > 1:
+        for url in push_urls:
             run(
-                f"git remote add {remote['name']} \"{remote['url']}\"",
+                f'git remote set-url --add --push {remote_name} "{url}"',
                 cwd=WIKI_DIR,
             )
-        else:
-            print(f"[wiki] Remote {remote['name']} already exists.")
+        print(f"[wiki] Configured {len(push_urls)} push URLs on {remote_name}")
+
+    # Set branch tracking
+    branch = run(
+        "git symbolic-ref --short HEAD", cwd=WIKI_DIR,
+    ) or "master"
+    try:
+        run(f"git fetch {remote_name}", cwd=WIKI_DIR)
+        run(
+            f"git branch --set-upstream-to={remote_name}/{branch} {branch}",
+            cwd=WIKI_DIR,
+        )
+    except RuntimeError:
+        # Remote may not have this branch yet (fresh wiki)
+        pass
 
 
 def _install_hook(name, content, version_marker, hooks_dir=None, label="hooks"):

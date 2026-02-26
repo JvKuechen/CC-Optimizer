@@ -94,14 +94,18 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 
 ## Phase 1: Audit (Read-Only)
 
-### 1.1 Identify the stack
+### 1.1 Identify the workspace type
+- [ ] **Code repo** -- standard software project (build/test/deploy)
+- [ ] **Knowledge base repo** -- documents external software the team uses but doesn't develop (see `patterns/knowledge-base-repo.md`). If yes: skip build/test/lint below, follow the KB repo pattern instead (Import/ -> docs/ -> wiki/ pipeline, contradiction resolution, helpdesk integration)
+
+### 1.2 Identify the stack (code repos)
 - [ ] Language(s) and framework(s)
 - [ ] Build system (npm, cargo, go, gradle, make, etc.)
 - [ ] Test runner (jest, pytest, go test, cargo test, etc.)
 - [ ] Linter/formatter (eslint, prettier, black, rustfmt, etc.)
 - [ ] Deployment method (if applicable)
 
-### 1.2 Check existing Claude config
+### 1.3 Check existing Claude config
 - [ ] `CLAUDE.md` — exists? Line count? Quality?
 - [ ] `.claude/settings.json` — exists? What permissions are configured?
 - [ ] `.claude/settings.local.json` — exists?
@@ -111,24 +115,26 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 - [ ] `.mcp.json` — exists? What servers?
 - [ ] Hooks configured in settings?
 
-### 1.3 Check other AI tool configs (port useful content)
+### 1.4 Check other AI tool configs (port useful content)
 - [ ] `.cursorrules` or `.cursor/rules/`
 - [ ] `.github/copilot-instructions.md`
 - [ ] Any custom AI instructions in README or docs
 
-### 1.4 Check auto memory
+### 1.5 Check auto memory
 - [ ] Does `~/.claude/projects/<project>/memory/` exist?
 - [ ] If so, review `MEMORY.md` for stale or misleading content from prior sessions
 - [ ] Check for misdirected writes (documentation content that belongs in actual docs, not memory)
 - [ ] Clean or delete stale entries -- they load into every session
 
-### 1.5 Select applicable patterns
+### 1.6 Select applicable patterns
 - [ ] Review `playbook/patterns.md` toolbelt
 - [ ] Check each pattern's "When" section against this workspace
 - [ ] Note which patterns to apply (record in findings file)
 - [ ] **Credential hygiene** is always applicable -- check for exposed secrets
+- [ ] If identified as KB repo in 1.1: apply **Knowledge Base Repo** pattern (`patterns/knowledge-base-repo.md`)
+- [ ] Check if project has external documentation needs: **evolving docs** (online, changes regularly) = sync as-is (`patterns/vendor-docs-sync.md`); **static docs** (PDFs, installer manuals, pinned version) = ingest into agent-optimized markdown (`patterns/knowledge-base-repo.md`). If no official source found, ask the user
 
-### 1.6 Check git remote configuration
+### 1.7 Check git remote configuration
 - [ ] `git remote -v` -- what remotes exist?
 - [ ] Every project should have a primary remote as `origin`
 - [ ] Does the project need additional remotes? (mirror, backup, portfolio)
@@ -136,7 +142,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
   - Apply **Dual Remote Push** pattern (see `patterns/dual-remote-push.md`): add second remote as additional push URL on `origin`
 - [ ] Verify `main` branch tracks `origin`
 
-### 1.7 Per-project feature decisions
+### 1.8 Per-project feature decisions
 - [ ] **MCP servers** -- Does the project use a database, API, or service Claude should connect to directly?
   - HTTP transport is now default, SSE is deprecated
   - MCP scopes: `local` (project-private, default), `user` (cross-project), `project` (shared `.mcp.json`)
@@ -283,6 +289,11 @@ paths:
 - [ ] Code review checklist → `/review` skill
 - [ ] PR creation → `/create-pr` skill
 - [ ] Bug investigation → `/investigate` skill
+- [ ] **Docs sync or ingest** -- Determine which approach fits the project's external documentation:
+  - **Evolving docs** (online, machine-readable, changes regularly): create a `/sync-docs` skill with manifest-based delta sync. Mirror as-is -- don't parse what will change next week. See `patterns/vendor-docs-sync.md`
+  - **Static docs** (PDFs, .docx, ships with installer, pinned version): create an `/ingest-docs` skill that parses into agent-optimized markdown. Worth the effort because the content is stable and the raw format is hostile to agents. See `patterns/knowledge-base-repo.md`
+  - If no official online source is found, ask the user -- they may know of internal mirrors or have offline copies
+- [ ] **Knowledge base pipeline** (KB repos only) → `/ingest-docs`, `/update-wiki`, `/search-helpdesk` skills (see `patterns/knowledge-base-repo.md`)
 - [ ] Any workflow the team does repeatedly
 
 ### 5.2 Skill design guidelines

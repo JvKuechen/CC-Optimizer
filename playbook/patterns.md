@@ -1,8 +1,8 @@
 # Optimization Patterns Toolbelt
 
-Reusable patterns discovered across 22 workspace audits. During optimization, review this list and select applicable patterns for the target workspace.
+Reusable patterns discovered across 24 workspace audits. During optimization, review this list and select applicable patterns for the target workspace.
 
-Referenced from Phase 1.5 of the optimization checklist.
+Referenced from Phase 1.6 of the optimization checklist.
 
 ## CLAUDE.md Authoring
 
@@ -49,6 +49,13 @@ Referenced from Phase 1.5 of the optimization checklist.
 | Pattern | File | When to Use |
 |---------|------|-------------|
 | Gitignored Search Reminder | [gitignored-search-reminder.md](patterns/gitignored-search-reminder.md) | Workspaces with gitignored dirs Claude needs to search (wiki, docs, nested repos) |
+
+## Knowledge Management
+
+| Pattern | File | When to Use |
+|---------|------|-------------|
+| Knowledge Base Repo | [knowledge-base-repo.md](patterns/knowledge-base-repo.md) | Non-code repos for external software. **Ingest** static docs (PDFs, manuals) into agent-optimized markdown |
+| Vendor Docs Sync | [vendor-docs-sync.md](patterns/vendor-docs-sync.md) | **Sync** evolving online docs as-is. Don't parse what will change next week |
 
 ## Safety
 

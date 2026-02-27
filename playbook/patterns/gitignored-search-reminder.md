@@ -1,6 +1,6 @@
 # Gitignored Search Reminder
 
-**Source:** CC-Optimizer workspace -- wiki/ gitignored by parent repo, invisible to Grep
+**Source:** CC-Optimizer workspace -- originally for wiki/ (now tracked), still relevant for workspaces/ and other gitignored dirs
 
 ## When
 

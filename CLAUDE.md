@@ -16,7 +16,7 @@ This is a **Claude Optimizer** workspace. It maintains a local mirror of the Cla
 
 ## Post-Clone Setup
 
-IMPORTANT: If the `wiki/` directory does not exist, run `python scripts/setup.py` before doing any other work. This clones the wiki nested repo and installs git hooks. The script is idempotent.
+IMPORTANT: Run `python scripts/setup.py` after cloning. This initializes the wiki subrepo (connects `wiki/` to its remote for pushing), creates workspace directories, and installs git hooks. The script is idempotent.
 
 ## Workflow
 
@@ -34,8 +34,8 @@ IMPORTANT: If the `wiki/` directory does not exist, run `python scripts/setup.py
 - `docs/plugin-marketplace-reference.md` -- Internal reference on plugin system and demo marketplace
 - `playbook/` -- Actionable optimization checklist distilled from docs
 - `playbook/patterns.md` -- Toolbelt: 16 reusable patterns discovered across 22 workspace audits
-- `wiki/` -- Nested parallel checkout of GitHub wiki (separate .git, gitignored). Run `python scripts/setup.py` if missing
-- `scripts/setup.py` -- Post-clone setup: clones wiki, installs pre-push hook, adds remotes
+- `wiki/` -- GitHub/Gitea wiki content (tracked by main repo, synced to wiki subrepo via post-commit hook). Only `wiki/.git/` is gitignored. Run `python scripts/setup.py` to initialize the wiki subrepo after cloning
+- `scripts/setup.py` -- Post-clone setup: initializes wiki subrepo, installs git hooks, adds remotes
 - `playbook/patterns/` -- Individual pattern files (current-state-capsule, gate-pattern, etc.)
 - `findings/` -- Per-workspace audit reports (gitignored, temporary)
 - `templates/` -- Reusable config: `user-settings.json`, `hooks/guardrail.py`, `deploy-user-settings.py`
@@ -125,7 +125,7 @@ Environment-specific content goes in gitignored files (e.g., `*-environments.md`
 
 ## Gotchas
 
-- **Nested workspace search**: `workspaces/` is gitignored, so `rg` (Grep) from root skips it. Use explicit paths: `Grep(pattern, path="workspaces/{Org}/{Project}")`. Glob DOES find files in gitignored dirs. Read/Edit/Write work on any path. Same applies to `wiki/`. A PostToolUse hook on Grep reminds you to re-search gitignored dirs when searching from root.
+- **Nested workspace search**: `workspaces/` is gitignored, so `rg` (Grep) from root skips it. Use explicit paths: `Grep(pattern, path="workspaces/{Org}/{Project}")`. Glob DOES find files in gitignored dirs. Read/Edit/Write work on any path. Note: `wiki/` is tracked and IS included in Grep searches from root.
 - **Co-Authored-By trailer**: Claude's system prompt adds `Co-Authored-By: Claude <noreply@anthropic.com>` to commits. GitHub parses this into ghost author avatars with broken names. The commit-msg hook (`scripts/setup.py`) strips these lines automatically.
 - CLI auto-generates deprecated colon syntax `Bash(cmd:*)` in settings.local.json when user clicks "always allow." Functional but inconsistent with docs which show `Bash(cmd *)`. Accept as-is.
 - Moving a workspace folder orphans `/resume` session history. Fix by renaming the directory under `~/.claude/projects/` to match the new path encoding (replace `\` with `-`, colon with `-`).

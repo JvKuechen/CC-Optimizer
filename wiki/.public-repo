@@ -1,0 +1,5 @@
+# Public Repository Marker
+#
+# This wiki is published to GitHub. The pre-commit hook blocks
+# direct git commit. Use PUBLIC_REPO_VERIFIED=1 git commit
+# after reviewing the diff for sensitive content.

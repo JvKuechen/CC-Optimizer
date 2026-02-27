@@ -1,14 +1,16 @@
 """Post-clone setup for CC-Optimizer workspace.
 
-Creates workspaces directory structure, clones the wiki nested repo,
-and installs the pre-push hook. Safe to run multiple times -- skips
-steps that are already done.
+Creates workspaces directory structure, initializes the wiki subrepo
+for pushing, and installs git hooks. Safe to run multiple times --
+skips steps that are already done.
 
 Usage: python scripts/setup.py
 """
 
 import json
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -208,6 +210,44 @@ fi
 exit 0
 """
 
+POST_COMMIT_HOOK = r"""#!/bin/bash
+# post-commit hook: sync wiki/ changes to the wiki subrepo.
+#
+# After a main repo commit that touches wiki/ files, this hook
+# auto-commits those changes into the wiki's own git repo using
+# the main repo's commit subject as the wiki commit message.
+#
+# Requires wiki/.git to exist (run scripts/setup.py after clone).
+# The wiki pre-commit hook (.public-repo lock) is bypassed via
+# PUBLIC_REPO_VERIFIED=1 since the content was already reviewed
+# when committed to the main repo.
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+WIKI_DIR="$REPO_ROOT/wiki"
+
+# Skip if wiki subrepo not initialized
+if [ ! -d "$WIKI_DIR/.git" ]; then
+    exit 0
+fi
+
+# Check if this commit touched any wiki/ files
+CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD -- wiki/)
+if [ -z "$CHANGED" ]; then
+    exit 0
+fi
+
+cd "$WIKI_DIR"
+SUBJECT=$(git -C "$REPO_ROOT" log -1 --format="%s")
+git add -A
+
+if ! git diff --cached --quiet; then
+    export PUBLIC_REPO_VERIFIED=1
+    git commit -m "$SUBJECT" > /dev/null 2>&1
+fi
+
+exit 0
+"""
+
 
 def run(cmd, cwd=None):
     """Run a command and return stdout. Raises on failure."""
@@ -220,7 +260,16 @@ def run(cmd, cwd=None):
 
 
 def setup_wiki():
-    """Clone wiki if missing, set up remote with dual push URLs."""
+    """Initialize wiki subrepo .git if missing.
+
+    Wiki content is tracked by the main repo. This function sets up the
+    wiki/.git directory so the post-commit hook can commit changes and
+    the pre-push hook can push them to the wiki remote.
+
+    On a fresh clone, wiki/ has tracked markdown files but no .git.
+    We clone the wiki repo to a temp dir, move .git into wiki/, then
+    sync any differences.
+    """
     if not WIKI_REMOTES:
         print("[wiki] ERROR: No wiki URL available. Skipping.")
         return
@@ -230,11 +279,47 @@ def setup_wiki():
     push_urls = WIKI_REMOTES["push_urls"]
 
     if (WIKI_DIR / ".git").exists():
-        print("[wiki] Already cloned.")
+        print("[wiki] Already initialized.")
     else:
-        print(f"[wiki] Cloning from {clone_url}...")
-        run(f'git clone "{clone_url}" "{WIKI_DIR}"')
-        print("[wiki] Cloned.")
+        print(f"[wiki] Initializing subrepo from {clone_url}...")
+        # Clone to temp, move .git into wiki/ (preserves full history)
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_wiki = Path(tmp) / "wiki"
+            run(f'git clone "{clone_url}" "{tmp_wiki}"')
+            shutil.move(str(tmp_wiki / ".git"), str(WIKI_DIR / ".git"))
+
+        # Re-hide .git on Windows (cp/move strips the hidden attribute)
+        import platform
+        if platform.system() == "Windows":
+            subprocess.run(
+                f'attrib +H "{WIKI_DIR / ".git"}"',
+                shell=True, capture_output=True,
+            )
+
+        # Ensure wiki is on master branch (GitHub wiki requirement)
+        try:
+            current = run("git symbolic-ref --short HEAD", cwd=WIKI_DIR)
+            if current != "master":
+                run("git checkout master", cwd=WIKI_DIR)
+        except RuntimeError:
+            pass
+
+        # Stage everything and commit if main repo's files differ from wiki HEAD
+        run("git add -A", cwd=WIKI_DIR)
+        result = subprocess.run(
+            "git diff --cached --quiet",
+            cwd=WIKI_DIR, capture_output=True, text=True, shell=True,
+        )
+        if result.returncode != 0:
+            env = dict(subprocess.os.environ, PUBLIC_REPO_VERIFIED="1")
+            subprocess.run(
+                'git commit -m "Sync from main repo"',
+                cwd=WIKI_DIR, capture_output=True, text=True,
+                shell=True, env=env,
+            )
+            print("[wiki] Committed sync from main repo.")
+
+        print("[wiki] Initialized.")
 
     # Set up the named remote with dual push URLs
     existing = run("git remote", cwd=WIKI_DIR).splitlines()
@@ -301,6 +386,7 @@ def setup_hooks():
     _install_hook("pre-commit", PRE_COMMIT_HOOK, "PUBLIC_REPO_VERIFIED")
     _install_hook("pre-push", PRE_PUSH_HOOK, "Public Repo Push Summary")
     _install_hook("commit-msg", COMMIT_MSG_HOOK, "Co-Authored-By")
+    _install_hook("post-commit", POST_COMMIT_HOOK, "sync wiki/ changes")
 
 
 def setup_wiki_hooks():
@@ -367,27 +453,6 @@ def _get_workspace_orgs(reconfigure=False):
     print("[workspaces] Saved workspace_orgs to configs/user-config.json")
 
     return orgs
-
-
-def setup_wiki_public_repo_marker():
-    """Create .public-repo marker in the wiki if missing."""
-    if not (WIKI_DIR / ".git").exists():
-        print("[wiki-marker] Wiki not cloned yet, skipping.")
-        return
-    marker = WIKI_DIR / ".public-repo"
-    if marker.exists():
-        print("[wiki-marker] .public-repo marker already exists.")
-    else:
-        marker.write_text(
-            "# Public Repository Marker\n"
-            "#\n"
-            "# This wiki is published to GitHub. The pre-commit hook blocks\n"
-            "# direct git commit. Use PUBLIC_REPO_VERIFIED=1 git commit\n"
-            "# after reviewing the diff for sensitive content.\n",
-            encoding="utf-8",
-            newline="\n",
-        )
-        print("[wiki-marker] Created .public-repo marker in wiki/")
 
 
 def setup_workspaces(reconfigure=False):
@@ -523,8 +588,6 @@ def main():
     setup_hooks()
     print()
     setup_wiki_hooks()
-    print()
-    setup_wiki_public_repo_marker()
     print("\nSetup complete.")
 
 

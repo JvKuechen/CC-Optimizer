@@ -40,7 +40,21 @@ parent-repo/
 - If using `--add-dir`, the nested repo gets its own context but shares permissions
 - Both repos need separate push/pull workflows (consider a pre-push hook on the parent to auto-sync the nested repo)
 
+## Variant: Tracked Content with Gitignored .git
+
+An alternative where the parent repo tracks the nested content but gitignores only the `.git/` directory. A post-commit hook in the parent auto-commits to the nested repo when parent commits touch the nested directory. This provides:
+
+- Single source of truth (parent repo)
+- Normal search/grep includes nested content
+- Wiki remote kept in sync automatically
+- One-way flow: parent -> nested repo (no editing via wiki tab)
+
+Trade-off: wiki tab edits are disallowed (content flows from parent only).
+
+Used by CC-Optimizer itself for its GitHub wiki.
+
 ## Real-World Examples
 
+- **CC-Optimizer/wiki/** -- Tracked content variant. Wiki markdown is committed to the main repo; a post-commit hook silently syncs changes into the wiki subrepo. Pre-push hook pushes the wiki when the main repo pushes.
 - **project-alpha/wiki/** -- Gitea wiki for IT infrastructure docs. Parent is IaC (etc/, opt/, deploy/), wiki is user-facing documentation. Independent commit history, auto-synced via parent's pre-push hook.
 - **project-beta/wiki/** -- Gitea wiki for a knowledge base app. Same pattern: app code in parent, onboarding docs in nested wiki.

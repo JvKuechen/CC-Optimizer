@@ -13,12 +13,12 @@ workspaces/
 # Synced docs are fetched on demand via /sync-docs
 docs/en/
 
-# Wiki is a separate git repo (pushed separately)
-wiki/
+# Wiki content is tracked; only the wiki subrepo's .git is ignored
+wiki/.git/
 
 # Environment-specific files (contain hostnames, credentials, infra details)
 # The generic/public versions are tracked; *-environments.md variants are not
-docs/design/*-environments.md
+configs/*-environments.md
 
 # Audit findings are temporary working files
 findings/

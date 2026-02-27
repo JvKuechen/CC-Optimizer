@@ -29,7 +29,7 @@ The authoritative index is `playbook/patterns.md` -- this page summarizes the ca
 | **Config-Driven Generation** | Multi-variant outputs (reports, parsers, templates) |
 | **Handler Registry** | Multiple input formats routed to specific processors |
 | **Delta Polling** | Watchers, schedulers, any periodic data processing |
-| **Nested Parallel Checkout** | Gitea/GitHub wikis, documentation repos alongside code repos -- separate .git, gitignored by parent |
+| **Nested Parallel Checkout** | Gitea/GitHub wikis, documentation repos alongside code. Variant: track content, gitignore only .git/, post-commit hook syncs |
 
 ## Git Infrastructure
 
@@ -48,7 +48,8 @@ The authoritative index is `playbook/patterns.md` -- this page summarizes the ca
 
 | Pattern | When to Use |
 |---------|-------------|
-| **Gitignored Search Reminder** | Workspaces with gitignored dirs Claude needs to search (wiki, docs, nested repos). PostToolUse on Grep nudges Claude to re-search with explicit paths. |
+| **Gitignored Search Reminder** | Workspaces with gitignored dirs Claude needs to search (workspaces/, vendor dirs). PostToolUse on Grep nudges Claude to re-search with explicit paths. Note: wiki/ is now tracked and doesn't need this. |
+| **Push Review Gate** | Public repos where pushes need human review. PreToolUse hook on Bash blocks `git push`, generates consolidated diff review, user executes via `!` command. |
 
 ## Knowledge Management
 

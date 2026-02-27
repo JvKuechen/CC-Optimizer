@@ -30,12 +30,8 @@ def main():
     if not re.search(r"\bgit\s+push\b", command):
         return
 
-    # Find repo root
-    cwd = input_data.get("cwd", "")
-    if not cwd:
-        return
-
-    repo_root = Path(cwd).resolve()
+    # Derive repo root from script location (.claude/hooks/push-review.py)
+    repo_root = Path(__file__).resolve().parent.parent.parent
 
     # Only gate public repos
     if not (repo_root / ".public-repo").exists():

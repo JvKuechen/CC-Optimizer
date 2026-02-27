@@ -48,7 +48,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 
 | Pattern | File | When to Use |
 |---------|------|-------------|
-| Gitignored Search Reminder | [gitignored-search-reminder.md](patterns/gitignored-search-reminder.md) | Workspaces with gitignored dirs Claude needs to search (workspaces/, vendor dirs) |
+| Gitignored Search Reminder | [gitignored-search-reminder.md](patterns/gitignored-search-reminder.md) | Workspaces with gitignored dirs Claude needs to search (WS/, vendor dirs) |
 | Push Review Gate | [push-review-gate.md](patterns/push-review-gate.md) | Public repos where pushes need human review before reaching remote |
 
 ## Knowledge Management

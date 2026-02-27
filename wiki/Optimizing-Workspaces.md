@@ -5,7 +5,7 @@
 The primary workflow for optimizing a Claude Code workspace:
 
 1. Ensure docs are up to date: `/sync-docs`
-2. Import or target the workspace: `/init-workspace` to bring it into `workspaces/`, or use a path
+2. Import or target the workspace: `/init-workspace` to bring it into `WS/`, or use a path
 3. Optimize: `/optimize-workspace <name or path>`
 4. Follow the checklist in `playbook/optimization-checklist.md`
 
@@ -14,7 +14,7 @@ The primary workflow for optimizing a Claude Code workspace:
 From a Claude Code session in the CC-Optimizer directory:
 
 ```
-# By project name (looks under workspaces/)
+# By project name (looks under WS/)
 /optimize-workspace MyProject
 
 # By path (external project)
@@ -24,7 +24,7 @@ From a Claude Code session in the CC-Optimizer directory:
 /optimize-workspace
 ```
 
-When targeting an external project, the skill asks whether to optimize in place or copy into `workspaces/` first. Copying preserves gitignored files and local state, and migrates `/resume` session history.
+When targeting an external project, the skill asks whether to optimize in place or copy into `WS/` first. Copying preserves gitignored files and local state, and migrates `/resume` session history.
 
 This skill:
 1. Resolves the target workspace
@@ -63,4 +63,4 @@ See `playbook/patterns.md` for the index of reusable patterns discovered across 
 
 ### Gitignored Search Reminder (Hook Pattern)
 
-Claude Code's Grep uses ripgrep, which skips gitignored directories like `workspaces/`. For workspaces with gitignored content Claude needs to search, a PostToolUse hook on Grep can remind Claude to re-search with explicit paths. Note: `wiki/` is tracked by the main repo and included in searches automatically. See `playbook/patterns/gitignored-search-reminder.md`.
+Claude Code's Grep uses ripgrep, which skips gitignored directories like `WS/`. For workspaces with gitignored content Claude needs to search, a PostToolUse hook on Grep can remind Claude to re-search with explicit paths. Note: `wiki/` is tracked by the main repo and included in searches automatically. See `playbook/patterns/gitignored-search-reminder.md`.

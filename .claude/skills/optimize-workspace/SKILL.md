@@ -11,24 +11,24 @@ Optimize the Claude Code workspace at `$ARGUMENTS`.
 ## Resolve Target
 
 1. **If `$ARGUMENTS` is a path**: Use it directly.
-2. **If `$ARGUMENTS` is a project name** (no path separators): Look for it under `workspaces/` in the CC-Optimizer repo.
-3. **If no arguments**: List projects under `workspaces/` and ask the user to pick one, or provide a path.
+2. **If `$ARGUMENTS` is a project name** (no path separators): Look for it under `WS/` in the CC-Optimizer repo.
+3. **If no arguments**: List projects under `WS/` and ask the user to pick one, or provide a path.
 
 ## Nested vs External Decision
 
-If the target is NOT already under `workspaces/`, ask the user:
+If the target is NOT already under `WS/`, ask the user:
 
-> Optimize in place, or clone into CC-Optimizer workspaces first?
+> Optimize in place, or copy into WS/ first?
 
 - **In place**: Proceed at the target's current location (existing behavior).
-- **Copy into workspaces**: Read org folders from `configs/user-config.json` (key: `workspace_orgs`). Ask the user which org to use, copy the local project into `workspaces/{Org}/{project}/` (preserves gitignored files and local state), then re-hide `.git` (`attrib +H "<target>/.git"`), then migrate session history with `python scripts/migrate-sessions.py`, then optimize the copy.
+- **Copy into WS**: Copy the local project into `WS/{project}/` (preserves gitignored files and local state), then re-hide `.git` (`attrib +H "<target>/.git"`), then migrate session history with `python scripts/migrate-sessions.py`, then optimize the copy.
 
 ## Grep Workaround for Nested Workspaces
 
-When the target is under `workspaces/` (gitignored), `rg` from the CC-Optimizer root will NOT search into it. Always use an explicit path:
+When the target is under `WS/` (gitignored), `rg` from the CC-Optimizer root will NOT search into it. Always use an explicit path:
 
 ```
-Grep(pattern, path="workspaces/{Org}/{Project}")
+Grep(pattern, path="WS/{Project}")
 ```
 
 Glob DOES discover files in gitignored directories. Read/Edit/Write work on any path.

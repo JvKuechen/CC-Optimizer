@@ -23,12 +23,9 @@ python scripts/setup.py
 The setup script will:
 - Enable git long path support (`core.longpaths`)
 - Check the Windows LongPathsEnabled registry setting
-- Prompt you for workspace org folder names (e.g., Work, Personal, Github) and save them to `configs/user-config.json`
-- Create the `workspaces/` directory structure
+- Create the `WS/` directory for nested workspaces
 - Initialize the wiki subrepo (connects `wiki/` to its remote for pushing)
 - Install git hooks (pre-commit, commit-msg, pre-push, post-commit)
-
-Run `python scripts/setup.py --reconfigure` to change your org folders later.
 
 ## 2. Bootstrap Your Machine
 

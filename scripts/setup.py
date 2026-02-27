@@ -1,8 +1,8 @@
 """Post-clone setup for CC-Optimizer workspace.
 
-Creates workspaces directory structure, initializes the wiki subrepo
-for pushing, and installs git hooks. Safe to run multiple times --
-skips steps that are already done.
+Creates WS/ directory for nested workspaces, initializes the wiki
+subrepo for pushing, and installs git hooks. Safe to run multiple
+times -- skips steps that are already done.
 
 Usage: python scripts/setup.py
 """
@@ -17,8 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 WIKI_DIR = REPO_ROOT / "wiki"
 HOOKS_DIR = REPO_ROOT / ".git" / "hooks"
 CONFIGS_DIR = REPO_ROOT / "configs"
-WORKSPACES_DIR = REPO_ROOT / "workspaces"
-DEFAULT_ORGS = ["Work", "Personal", "Github"]
+WORKSPACES_DIR = REPO_ROOT / "WS"
 
 
 def _derive_wiki_urls():
@@ -424,54 +423,13 @@ def _save_user_config(cfg):
         f.write("\n")
 
 
-def _get_workspace_orgs(reconfigure=False):
-    """Get org folders from config, or prompt the user interactively."""
-    cfg = _load_user_config()
-
-    if "workspace_orgs" in cfg and not reconfigure:
-        return cfg["workspace_orgs"]
-
-    existing = cfg.get("workspace_orgs", [])
-    if existing:
-        print(f"[workspaces] Current org folders: {', '.join(existing)}")
-        answer = input("  Enter new comma-separated list (or press Enter to keep): ").strip()
-    else:
-        print("[workspaces] No workspace_orgs configured.")
-        print(f"  Default org folders: {', '.join(DEFAULT_ORGS)}")
-        answer = input("  Press Enter to accept defaults, or type comma-separated names: ").strip()
-
-    if answer:
-        orgs = [o.strip() for o in answer.split(",") if o.strip()]
-    elif existing:
-        return existing
-    else:
-        orgs = list(DEFAULT_ORGS)
-
-    # Save to config so future runs are non-interactive
-    cfg["workspace_orgs"] = orgs
-    _save_user_config(cfg)
-    print("[workspaces] Saved workspace_orgs to configs/user-config.json")
-
-    return orgs
-
-
-def setup_workspaces(reconfigure=False):
-    """Create workspaces directory structure from user config."""
-    orgs = _get_workspace_orgs(reconfigure=reconfigure)
-
+def setup_workspaces():
+    """Create WS/ directory for nested workspace clones."""
     if not WORKSPACES_DIR.exists():
         WORKSPACES_DIR.mkdir()
-        print("[workspaces] Created workspaces/")
+        print("[workspaces] Created WS/")
     else:
-        print("[workspaces] Directory already exists.")
-
-    for org in orgs:
-        org_dir = WORKSPACES_DIR / org
-        if not org_dir.exists():
-            org_dir.mkdir()
-            print(f"[workspaces] Created workspaces/{org}/")
-        else:
-            print(f"[workspaces] workspaces/{org}/ already exists.")
+        print("[workspaces] WS/ already exists.")
 
 
 def setup_long_paths():
@@ -574,14 +532,12 @@ def setup_git_identity():
 
 def main():
     import sys
-    reconfigure = "--reconfigure" in sys.argv
-
     print(f"Setting up CC-Optimizer workspace at {REPO_ROOT}\n")
     setup_git_identity()
     print()
     setup_long_paths()
     print()
-    setup_workspaces(reconfigure=reconfigure)
+    setup_workspaces()
     print()
     setup_wiki()
     print()

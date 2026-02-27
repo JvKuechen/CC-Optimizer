@@ -46,9 +46,8 @@ CC-Optimizer/
 │   ├── user-settings.json       # Global permissions template
 │   └── hooks/
 │       └── guardrail.py         # Destructive command blocker
-├── workspaces/                  # Nested workspace clones (gitignored)
-│   └── {Org}/                   # User-configured org folders
-│       └── {Project}/           # Each project has its own .git
+├── WS/                          # Nested workspace clones (gitignored)
+│   └── {Project}/               # Each project has its own .git
 ├── findings/                    # Per-workspace audit reports (gitignored)
 └── wiki/                        # Wiki content (tracked; wiki/.git/ gitignored)
 ```
@@ -57,7 +56,7 @@ CC-Optimizer/
 
 | Path | Tracked? | Why |
 |------|----------|-----|
-| `workspaces/` | No | Nested workspace clones with their own git repos |
+| `WS/` | No | Nested workspace clones with their own git repos |
 | `docs/en/` | No | Fetched on demand via `/sync-docs` - each user syncs their own |
 | `docs/manifest.json` | Yes | Tracks lastmod timestamps for incremental sync |
 | `configs/user-config.json` | No | User-specific settings (org folders, remotes, etc.) |
@@ -67,9 +66,9 @@ CC-Optimizer/
 
 ## Nested Workspaces
 
-Active projects live under `workspaces/` organized by user-configured org folders. Each project keeps its own `.git` and remotes. The org folders are set during `python scripts/setup.py` (first run prompts interactively) and stored in `configs/user-config.json`.
+Active projects live under `WS/` in a flat layout (no org subfolders). Each project keeps its own `.git` and remotes.
 
-**Search behavior**: `workspaces/` is gitignored, so `rg` (Grep) from the repo root skips it. Use explicit paths: `Grep(pattern, path="workspaces/{Org}/{Project}")`. Glob does find files in gitignored directories. Read/Edit/Write work on any path. `wiki/` is tracked and included in Grep searches normally.
+**Search behavior**: `WS/` is gitignored, so `rg` (Grep) from the repo root skips it. Use explicit paths: `Grep(pattern, path="WS/{Project}")`. Glob does find files in gitignored directories. Read/Edit/Write work on any path. `wiki/` is tracked and included in Grep searches normally.
 
 ## Feature Selection Guide
 

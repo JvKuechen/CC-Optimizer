@@ -48,7 +48,7 @@ The authoritative index is `playbook/patterns.md` -- this page summarizes the ca
 
 | Pattern | When to Use |
 |---------|-------------|
-| **Gitignored Search Reminder** | Workspaces with gitignored dirs Claude needs to search (workspaces/, vendor dirs). PostToolUse on Grep nudges Claude to re-search with explicit paths. Note: wiki/ is now tracked and doesn't need this. |
+| **Gitignored Search Reminder** | Workspaces with gitignored dirs Claude needs to search (WS/, vendor dirs). PostToolUse on Grep nudges Claude to re-search with explicit paths. Note: wiki/ is now tracked and doesn't need this. |
 | **Push Review Gate** | Public repos where pushes need human review. PreToolUse hook on Bash blocks `git push`, generates consolidated diff review, user executes via `!` command. |
 
 ## Knowledge Management

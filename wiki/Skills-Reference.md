@@ -27,8 +27,8 @@ Skills are on-demand workflows invoked with slash commands. They're only loaded 
 **When to use:** When you want to bring a project up to Claude Code best practices.
 
 **What it does:**
-1. Resolves the target -- by project name (looks under `workspaces/`), by path, or interactively
-2. For external projects, offers to copy into `workspaces/` first (preserves local state, migrates session history)
+1. Resolves the target -- by project name (looks under `WS/`), by path, or interactively
+2. For external projects, offers to copy into `WS/` first (preserves local state, migrates session history)
 3. Smoke tests the target project first
 4. Ensures git safety (clean working tree or snapshot)
 5. Follows `playbook/optimization-checklist.md` phases 1-8
@@ -47,7 +47,7 @@ Skills are on-demand workflows invoked with slash commands. They're only loaded 
 **When to use:** When starting a new project, adding Claude Code to a project for the first time, or moving a project into the nested workspace structure.
 
 **What it does:**
-- With a **project name only**: reads org folders from config, asks which org, creates under `workspaces/{Org}/{name}/`
+- With a **project name only**: creates under `WS/{name}/`
 - With a **path**: initializes in place at that path
 - **Importing**: copies local project (preserving gitignored files), migrates `/resume` session history via `scripts/migrate-sessions.py`
 - Detects the tech stack (or asks if empty directory)

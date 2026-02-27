@@ -280,6 +280,8 @@ def step_track_wiki(ws, wiki_dir, dry_run=False):
     git_dir.rename(git_bak)
     try:
         run("git add wiki/", cwd=ws)
+        # Unstage .git.bak files that got swept up by git add
+        run("git rm --cached -r --quiet wiki/.git.bak", cwd=ws)
     finally:
         git_bak.rename(git_dir)
 

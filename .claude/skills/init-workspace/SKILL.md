@@ -13,12 +13,12 @@ Bootstrap a new Claude Code workspace, or import an existing project into the ne
 Determine where the workspace will live based on `$ARGUMENTS`:
 
 - **Absolute or relative path provided** (contains `/` or `\`): Use that path directly (existing external-path behavior).
-- **Project name only** (no path separators): Read org folders from `configs/user-config.json` (key: `workspace_orgs`). Ask the user which org to use, then set target to `workspaces/{Org}/{project-name}/` inside the CC-Optimizer repo. If no config exists, ask the user to run `python scripts/setup.py` first.
+- **Project name only** (no path separators): Set target to `WS/{project-name}/` inside the CC-Optimizer repo.
 - **No arguments**: Ask for project name and org folder (from config), then set target as above.
 
 ## Importing an Existing Project
 
-When the user wants to move an existing project into `workspaces/`:
+When the user wants to move an existing project into `WS/`:
 
 ### 1. Check for name mismatch
 
@@ -32,7 +32,7 @@ Extract the repo name from each remote URL (strip `.git` suffix, take the last p
 > 1. search.tcl.local (from origin)
 > 2. Apps (keep current name)
 
-If multiple remotes have different repo names, list all unique names as options. Use the chosen name as the target directory name under `workspaces/{Org}/`.
+If multiple remotes have different repo names, list all unique names as options. Use the chosen name as the target directory name under `WS/`.
 
 ### 2. Copy local
 
@@ -51,7 +51,7 @@ Inform the user of any dirty state (modified files, untracked files, uncommitted
 
 ### 3. Migrate session history
 
-After copying into `workspaces/`, migrate session history so `/resume` works at the new path:
+After copying into `WS/`, migrate session history so `/resume` works at the new path:
 ```bash
 python scripts/migrate-sessions.py "<old-path>" "<new-path>"
 ```

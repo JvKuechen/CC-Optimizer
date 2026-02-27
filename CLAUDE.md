@@ -23,12 +23,12 @@ IMPORTANT: Run `python scripts/setup.py` after cloning. This initializes the wik
 1. **`/sync-docs`** -- Fetches updated docs from code.claude.com/docs via curl script. Run before optimization work.
 2. **Follow the playbook** at `playbook/optimization-checklist.md` -- Distilled from the docs into an actionable checklist. This is the primary reference during optimization (not raw docs).
 3. **`/update-playbook`** -- After a doc sync shows changes, reviews what changed and updates the playbook.
-4. **`/init-workspace [name or path]`** -- Bootstraps a new workspace. With a name only, creates under `workspaces/{Org}/`. With a path, initializes in place.
-5. **`/optimize-workspace [name or path]`** -- Analyzes and optimizes a workspace. Can target nested workspaces by name or external paths. Offers to clone external projects into `workspaces/` first.
+4. **`/init-workspace [name or path]`** -- Bootstraps a new workspace. With a name only, creates under `WS/`. With a path, initializes in place.
+5. **`/optimize-workspace [name or path]`** -- Analyzes and optimizes a workspace. Can target nested workspaces by name or external paths. Offers to clone external projects into `WS/` first.
 
 ## Key Directories
 
-- `workspaces/` -- Nested workspace clones, organized by user-configured org folders. Gitignored. Each project has its own .git. Use explicit Grep paths since rg skips gitignored dirs.
+- `WS/` -- Nested workspace clones (flat layout). Gitignored. Each project has its own .git. Use explicit Grep paths since rg skips gitignored dirs.
 - `docs/en/` -- Local mirror of 56 English doc pages (raw markdown from code.claude.com)
 - `docs/manifest.json` -- Tracks lastmod timestamps per page for incremental sync
 - `docs/plugin-marketplace-reference.md` -- Internal reference on plugin system and demo marketplace
@@ -111,7 +111,7 @@ When writing CLAUDE.md for other workspaces:
 
 ## Workspace Consolidation
 
-Active workspaces live as nested clones under `workspaces/` in this repo, organized by user-configured org folders (set during `python scripts/setup.py` or in `configs/user-config.json` under `workspace_orgs`). Each nested workspace keeps its own `.git` and remotes. The `workspaces/` directory is gitignored -- nothing inside is committed to the optimizer repo. External paths still work for in-place optimization.
+Active workspaces live as nested clones under `WS/` in this repo (flat layout, no org subfolders). Each nested workspace keeps its own `.git` and remotes. The `WS/` directory is gitignored -- nothing inside is committed to the optimizer repo. External paths still work for in-place optimization.
 
 ## Public Repo Commit Workflow
 
@@ -129,7 +129,7 @@ On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) inte
 
 ## Gotchas
 
-- **Nested workspace search**: `workspaces/` is gitignored, so `rg` (Grep) from root skips it. Use explicit paths: `Grep(pattern, path="workspaces/{Org}/{Project}")`. Glob DOES find files in gitignored dirs. Read/Edit/Write work on any path. Note: `wiki/` is tracked and IS included in Grep searches from root.
+- **Nested workspace search**: `WS/` is gitignored, so `rg` (Grep) from root skips it. Use explicit paths: `Grep(pattern, path="WS/{Project}")`. Glob DOES find files in gitignored dirs. Read/Edit/Write work on any path. Note: `wiki/` is tracked and IS included in Grep searches from root.
 - **Co-Authored-By trailer**: Claude's system prompt adds `Co-Authored-By: Claude <noreply@anthropic.com>` to commits. GitHub parses this into ghost author avatars with broken names. The commit-msg hook (`scripts/setup.py`) strips these lines automatically.
 - CLI auto-generates deprecated colon syntax `Bash(cmd:*)` in settings.local.json when user clicks "always allow." Functional but inconsistent with docs which show `Bash(cmd *)`. Accept as-is.
 - Moving a workspace folder orphans `/resume` session history. Fix by renaming the directory under `~/.claude/projects/` to match the new path encoding (replace `\` with `-`, colon with `-`).

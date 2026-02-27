@@ -8,7 +8,7 @@ configs/user-config.json
 configs/projects.json
 
 # Nested workspaces (own git repos, never committed to optimizer)
-workspaces/
+WS/
 
 # Synced docs are fetched on demand via /sync-docs
 docs/en/

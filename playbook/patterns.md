@@ -29,7 +29,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 | Config-Driven Generation | [config-driven-generation.md](patterns/config-driven-generation.md) | Multi-variant outputs (reports, parsers, templates) |
 | Handler Registry | [handler-registry.md](patterns/handler-registry.md) | Multiple input formats routed to specific processors |
 | Delta Polling | [delta-polling.md](patterns/delta-polling.md) | Watchers, schedulers, any periodic data processing |
-| Nested Parallel Checkout | [nested-parallel-checkout.md](patterns/nested-parallel-checkout.md) | Gitea wikis, documentation repos alongside code repos |
+| Nested Parallel Checkout | [nested-parallel-checkout.md](patterns/nested-parallel-checkout.md) | Gitea wikis, documentation repos alongside code. Variant: track content, gitignore only .git/ |
 
 ## Git Infrastructure
 
@@ -48,7 +48,8 @@ Referenced from Phase 1.6 of the optimization checklist.
 
 | Pattern | File | When to Use |
 |---------|------|-------------|
-| Gitignored Search Reminder | [gitignored-search-reminder.md](patterns/gitignored-search-reminder.md) | Workspaces with gitignored dirs Claude needs to search (wiki, docs, nested repos) |
+| Gitignored Search Reminder | [gitignored-search-reminder.md](patterns/gitignored-search-reminder.md) | Workspaces with gitignored dirs Claude needs to search (workspaces/, vendor dirs) |
+| Push Review Gate | [push-review-gate.md](patterns/push-review-gate.md) | Public repos where pushes need human review before reaching remote |
 
 ## Knowledge Management
 

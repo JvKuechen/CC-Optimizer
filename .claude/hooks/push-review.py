@@ -92,10 +92,12 @@ def main():
             },
             "additionalContext": (
                 "The git push was replaced with a diff review script. "
-                "Present the Bash output to the user as markdown so "
-                "they see the full review with syntax-colored diffs. "
-                "Do NOT run git push -- the user will execute "
-                "it via the ! command shown at the end of the review."
+                "IMPORTANT: The Bash output is truncated in the UI. "
+                "You MUST re-present the COMPLETE Bash output as "
+                "markdown -- every section, every line of the diff, "
+                "nothing omitted. Use ```diff fencing for syntax "
+                "coloring. Do NOT run git push -- the user will "
+                "execute it via the ! command at the end of the review."
             ),
         }
     }

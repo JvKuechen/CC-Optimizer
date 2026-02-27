@@ -125,7 +125,7 @@ Environment-specific content goes in gitignored files (e.g., `*-environments.md`
 
 ## Public Repo Push Workflow
 
-On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) intercepts `git push` commands. The hook swaps the push command with `scripts/push-review.py`, which outputs a consolidated diff review as Bash output (may be truncated). Present the Bash output to the user as markdown so they see the full review with syntax-colored diffs. Do NOT run git push again -- the user will execute the push via the `!` command shown at the end of the review.
+On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) intercepts `git push` commands. The hook swaps the push command with `scripts/push-review.py`, which outputs a consolidated diff review as Bash output. IMPORTANT: The Bash output is truncated in the UI. YOU MUST re-present the COMPLETE Bash output as markdown -- every section, every line of the diff, nothing omitted. Use ` ```diff ` fencing for syntax coloring. Do NOT run git push again -- the user will execute the push via the `!` command shown at the end of the review.
 
 ## Gotchas
 

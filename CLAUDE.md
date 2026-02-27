@@ -123,6 +123,16 @@ This repo has a `.public-repo` marker. The pre-commit hook blocks direct `git co
 
 Environment-specific content goes in gitignored files (e.g., `*-environments.md`). The tracked versions contain only generalized patterns. When creating new design docs, split into generic (tracked) and specific (gitignored) from the start.
 
+## Public Repo Push Workflow
+
+IMPORTANT: On repos with a `.public-repo` marker, do NOT push directly. Instead, show the user a push summary in chat and let them execute the push:
+
+1. Run `git log --oneline <remote>/<branch>..HEAD` and `git diff --stat <remote>/<branch>..HEAD`
+2. Present the summary in chat (commit subjects + files changed)
+3. Tell the user to push with: `! git push <remote> <branch>`
+
+The user pastes the `!` command to execute it in the terminal. This keeps the human in the loop for public pushes without needing interactive hooks that break in the chat format.
+
 ## Gotchas
 
 - **Nested workspace search**: `workspaces/` is gitignored, so `rg` (Grep) from root skips it. Use explicit paths: `Grep(pattern, path="workspaces/{Org}/{Project}")`. Glob DOES find files in gitignored dirs. Read/Edit/Write work on any path. Note: `wiki/` is tracked and IS included in Grep searches from root.

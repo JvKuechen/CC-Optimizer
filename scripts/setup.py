@@ -177,18 +177,6 @@ if [ -f "$REPO_ROOT/.public-repo" ]; then
             echo "Review the full diff with: git diff $REMOTE_REF..HEAD"
             echo "================================"
             echo ""
-            if [ "$PUBLIC_PUSH_CONFIRMED" = "1" ]; then
-                echo "PUBLIC_PUSH_CONFIRMED=1 -- proceeding."
-            elif [ -t 0 ] 2>/dev/null; then
-                read -r -p "Push to public remote? [y/N] " confirm < /dev/tty
-                if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-                    echo "Push aborted."
-                    exit 1
-                fi
-            else
-                echo "Non-interactive: set PUBLIC_PUSH_CONFIRMED=1 to confirm."
-                exit 1
-            fi
         fi
     fi
 fi

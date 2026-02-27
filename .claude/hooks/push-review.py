@@ -92,8 +92,9 @@ def main():
             },
             "additionalContext": (
                 "The git push was replaced with a diff review script. "
-                "The review output is shown to the user as the Bash "
-                "result. Do NOT run git push -- the user will execute "
+                "Present the Bash output to the user as markdown so "
+                "they see the full review with syntax-colored diffs. "
+                "Do NOT run git push -- the user will execute "
                 "it via the ! command shown at the end of the review."
             ),
         }

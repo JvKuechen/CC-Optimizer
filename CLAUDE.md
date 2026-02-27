@@ -125,13 +125,7 @@ Environment-specific content goes in gitignored files (e.g., `*-environments.md`
 
 ## Public Repo Push Workflow
 
-IMPORTANT: On repos with a `.public-repo` marker, do NOT push directly. Instead, show the user a push summary in chat and let them execute the push:
-
-1. Run `git log --oneline <remote>/<branch>..HEAD` and `git diff --stat <remote>/<branch>..HEAD`
-2. Present the summary in chat (commit subjects + files changed)
-3. Tell the user to push with: `! git push <remote> <branch>`
-
-The user pastes the `!` command to execute it in the terminal. This keeps the human in the loop for public pushes without needing interactive hooks that break in the chat format.
+On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) intercepts `git push` commands. The hook runs `scripts/push-review.py` to generate a consolidated diff review, then blocks the push. When the push is blocked, present the hook's review to the user EXACTLY as formatted (it contains markdown with ` ```diff ` blocks for syntax coloring). Do NOT re-run the push -- the user executes it via the `!` command shown at the end of the review.
 
 ## Gotchas
 

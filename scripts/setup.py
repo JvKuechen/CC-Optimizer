@@ -177,6 +177,11 @@ if [ -f "$REPO_ROOT/.public-repo" ]; then
             echo "Review the full diff with: git diff $REMOTE_REF..HEAD"
             echo "================================"
             echo ""
+            read -r -p "Push to public remote? [y/N] " confirm < /dev/tty
+            if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+                echo "Push aborted."
+                exit 1
+            fi
         fi
     fi
 fi

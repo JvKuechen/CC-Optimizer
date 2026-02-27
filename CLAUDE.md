@@ -125,7 +125,7 @@ Environment-specific content goes in gitignored files (e.g., `*-environments.md`
 
 ## Public Repo Push Workflow
 
-On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) intercepts `git push` commands. The hook runs `scripts/push-review.py` to generate a consolidated diff review, then blocks the push. When the push is blocked, present the hook's review to the user EXACTLY as formatted (it contains markdown with ` ```diff ` blocks for syntax coloring). Do NOT re-run the push -- the user executes it via the `!` command shown at the end of the review.
+On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) intercepts `git push` commands. The hook runs `scripts/push-review.py` to generate a consolidated diff review, then blocks the push. The diff review and `!` push command are already visible to the user in the hook output -- do NOT re-print, re-format, or summarize any of it. Just say "check the review above." Do NOT re-run the push.
 
 ## Gotchas
 

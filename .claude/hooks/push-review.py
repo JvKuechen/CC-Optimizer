@@ -70,10 +70,10 @@ def main():
     output = {
         "decision": "block",
         "reason": (
-            "Public repo push requires review. "
-            "Present the following to the user EXACTLY as formatted "
-            "(markdown with ```diff blocks). "
-            "Do NOT re-run the push.\n\n"
+            "PUSH BLOCKED for review. The diff review and the ! push "
+            "command are already visible to the user in this hook "
+            "output. Do NOT re-print, re-format, or summarize any of "
+            "it. Just say: check the review above.\n\n"
             + review
         ),
     }

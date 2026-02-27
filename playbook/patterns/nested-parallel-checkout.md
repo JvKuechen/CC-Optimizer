@@ -53,6 +53,24 @@ Trade-off: wiki tab edits are disallowed (content flows from parent only).
 
 Used by CC-Optimizer itself for its GitHub wiki.
 
+### Migration: Gitignored to Tracked
+
+To convert an existing gitignored nested checkout to tracked content:
+
+1. Commit any uncommitted changes in the nested repo first
+2. Change `.gitignore`: `wiki/` -> `wiki/.git/`
+3. **Gitlink workaround**: `git add wiki/` will detect `wiki/.git` and add a gitlink (submodule pointer) instead of actual files. Fix by temporarily hiding `.git`:
+   ```bash
+   mv wiki/.git wiki/.git_temp
+   git add wiki/
+   mv wiki/.git_temp wiki/.git
+   git rm --cached -r wiki/.git_temp/   # clean up any accidentally staged .git internals
+   ```
+   This only needs to happen once (the initial add). After wiki files are in the index as regular blobs, subsequent `git add wiki/file.md` works normally.
+4. Install the post-commit hook (see CC-Optimizer's `scripts/setup.py` for the template)
+5. Commit, verify the post-commit hook creates a wiki commit
+6. Delete the grep-wiki-reminder hook if you had one (no longer needed)
+
 ## Real-World Examples
 
 - **CC-Optimizer/wiki/** -- Tracked content variant. Wiki markdown is committed to the main repo; a post-commit hook silently syncs changes into the wiki subrepo. Pre-push hook pushes the wiki when the main repo pushes.

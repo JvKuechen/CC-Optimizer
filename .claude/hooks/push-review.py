@@ -1,11 +1,11 @@
 """PreToolUse hook: intercept git push on public repos.
 
 When Claude tries to push a repo with a .public-repo marker, this
-hook blocks the push and returns a formatted review via
-scripts/push-review.py. Claude presents it to the user, who then
-executes the push via the ! command.
+hook replaces the push command with scripts/push-review.py, which
+outputs a formatted diff review. The user then executes the actual
+push via the ! command shown at the end of the review.
 
-Non-public repos are not affected -- pushes proceed normally.
+Non-public repos and repos with nothing to push are not affected.
 """
 import json
 import re
@@ -48,34 +48,55 @@ def main():
                 remote_arg = arg
                 break
 
-    # Run push-review script
-    cmd = "python scripts/push-review.py"
-    if remote_arg:
-        cmd += " {}".format(remote_arg)
+    # Auto-detect remote if not specified
+    if not remote_arg:
+        remotes = subprocess.run(
+            "git remote", cwd=str(repo_root),
+            capture_output=True, text=True, shell=True,
+        ).stdout.strip().splitlines()
+        if "public" in remotes:
+            remote_arg = "public"
+        elif remotes:
+            remote_arg = remotes[0]
+        else:
+            return  # No remotes, allow push through
 
-    result = subprocess.run(
-        cmd, cwd=str(repo_root),
+    # Determine branch
+    branch = subprocess.run(
+        "git symbolic-ref --short HEAD", cwd=str(repo_root),
         capture_output=True, text=True, shell=True,
+    ).stdout.strip() or "main"
+
+    # Check if there are unpushed commits
+    count_result = subprocess.run(
+        "git rev-list --count {}/{}..HEAD".format(remote_arg, branch),
+        cwd=str(repo_root), capture_output=True, text=True, shell=True,
     )
+    if count_result.returncode != 0:
+        return  # Remote ref doesn't exist (first push?), allow through
+    if count_result.stdout.strip() in ("0", ""):
+        return  # Nothing to push, allow through
 
-    review = result.stdout.strip()
-
-    if not review:
-        return  # Script had no output, allow push
-    if "Nothing to push" in review or "No remote ref" in review:
-        return  # Nothing to review, allow push
-    if "No remotes" in review:
-        return  # Can't determine remote, allow push
+    # Replace push with review script (use forward slashes for Windows)
+    repo_path = str(repo_root).replace("\\", "/")
+    review_cmd = 'cd "{}" && python scripts/push-review.py'.format(repo_path)
+    if remote_arg:
+        review_cmd += " {}".format(remote_arg)
 
     output = {
-        "decision": "block",
-        "reason": (
-            "PUSH BLOCKED for review. The diff review and the ! push "
-            "command are already visible to the user in this hook "
-            "output. Do NOT re-print, re-format, or summarize any of "
-            "it. Just say: check the review above.\n\n"
-            + review
-        ),
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "allow",
+            "updatedInput": {
+                "command": review_cmd,
+            },
+            "additionalContext": (
+                "The git push was replaced with a diff review script. "
+                "The review output is shown to the user as the Bash "
+                "result. Do NOT run git push -- the user will execute "
+                "it via the ! command shown at the end of the review."
+            ),
+        }
     }
     print(json.dumps(output))
 

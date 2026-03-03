@@ -1,4 +1,4 @@
-# CC-Optimizer - Claude Code Optimizer
+# CC-Optimizer
 
 A workspace for maintaining Claude Code documentation and optimizing Claude Code workspaces across your projects.
 

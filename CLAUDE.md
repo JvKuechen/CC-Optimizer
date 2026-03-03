@@ -137,7 +137,7 @@ On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) inte
 - **nul file cleanup**: Bad `> nul` redirects in Git Bash create literal `nul` files that `rm`, `del`, and Explorer cannot delete. Use `python scripts/delete-nul-files.py <path>` (Win32 DeleteFileW API with `\\?\` prefix). Common in unoptimized workspaces.
 - **Hidden .git after copy/move**: `cp -r`, `shutil.move()`, and `shutil.copytree()` strip the Windows hidden attribute from `.git` directories. Always run `attrib +H "<dest>/.git"` after copying or moving a repo. The `fan-out/migrate.py` script handles this automatically.
 - Windows NTFS is case-insensitive but case-preserving. `mkdir work` then `ls` may show `Work` if the directory pre-existed with that casing.
-- **Wiki sync**: CI workflows (`.github/workflows/wiki-sync.yml`, `.gitea/workflows/wiki-sync.yml`) push `wiki/` content to both remotes on push to main. Requires `WIKI_TOKEN` secret on GitHub, `CI_TOKEN` + `INTERNAL_CA_PEM` secrets on Gitea.
+- **Wiki sync**: CI workflows (`.github/workflows/wiki-sync.yml`, `.gitea/workflows/wiki-sync.yml`) push `wiki/` content to both remotes on push to main. Requires `WIKI_TOKEN` secret on both platforms (org-level on Gitea), plus `INTERNAL_CA_PEM` on Gitea.
 
 ## Scope
 

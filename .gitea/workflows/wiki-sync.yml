@@ -24,13 +24,13 @@ jobs:
 
       - name: Sync wiki content
         env:
-          CI_TOKEN: ${{ secrets.CI_TOKEN }}
+          WIKI_TOKEN: ${{ secrets.WIKI_TOKEN }}
           SERVER_URL: ${{ github.server_url }}
         run: |
           REPO_PATH="${{ github.repository }}"
 
           git clone --depth 1 \
-            "https://ci:${CI_TOKEN}@${SERVER_URL#https://}/${REPO_PATH}.wiki.git" \
+            "https://wiki-sync:${WIKI_TOKEN}@${SERVER_URL#https://}/${REPO_PATH}.wiki.git" \
             /tmp/wiki
 
           # Clear existing files (except .git) and copy fresh content

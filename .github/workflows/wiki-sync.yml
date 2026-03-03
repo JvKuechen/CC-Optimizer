@@ -37,5 +37,5 @@ jobs:
           else
             MSG=$(git -C "$GITHUB_WORKSPACE" log -1 --format="%s")
             git commit -m "${MSG}"
-            git push origin master
+            git push origin HEAD
           fi

@@ -138,6 +138,7 @@ On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) inte
 - **Hidden .git after copy/move**: `cp -r`, `shutil.move()`, and `shutil.copytree()` strip the Windows hidden attribute from `.git` directories. Always run `attrib +H "<dest>/.git"` after copying or moving a repo. The `fan-out/migrate.py` script handles this automatically.
 - Windows NTFS is case-insensitive but case-preserving. `mkdir work` then `ls` may show `Work` if the directory pre-existed with that casing.
 - **Wiki sync**: CI workflows (`.github/workflows/wiki-sync.yml`, `.gitea/workflows/wiki-sync.yml`) push `wiki/` content to both remotes on push to main. Requires `WIKI_TOKEN` secret on both platforms (org-level on Gitea), plus `INTERNAL_CA_PEM` on Gitea.
+- **MCP Python servers on Windows**: `"command": "python"` in `.mcp.json` fails because Node.js `spawn()` cannot resolve the Windows Store Python alias. Wrap with cmd: `"command": "cmd", "args": ["/c", "python", "-m", "package_name"]`. Also check that the package has a `__main__.py` -- some (e.g., `mssql_mcp_server` 0.1.2) ship without one, requiring a manual shim in site-packages.
 
 ## Scope
 

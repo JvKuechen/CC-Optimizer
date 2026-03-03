@@ -149,6 +149,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
   - MCP connections can fail silently mid-session -- check with `/mcp`
   - `MAX_MCP_OUTPUT_TOKENS` (default 25000), warning threshold at 10000
   - Plugin-provided MCP servers auto-start when plugin is enabled
+  - **Windows: Python MCP servers need `cmd /c` wrapper.** Node.js `spawn()` cannot resolve the Windows Store Python alias directly. Use `"command": "cmd", "args": ["/c", "python", "-m", "package_name"]` instead of `"command": "python"`. Also verify the package has a `__main__.py` (some don't -- add a shim: `from package import main; main()`)
 - [ ] **MCP Tool Search** -- If project has many MCP tools, enable dynamic loading (`ENABLE_TOOL_SEARCH=auto`). Loads up to 10% of context, defers rest. Only Sonnet 4+/Opus 4+, not Haiku
 - [ ] **LSP plugin** -- What language(s)? Install the matching code intelligence plugin. Gives Claude type errors, go-to-definition, find-references via LSP tool
 - [ ] **Chrome integration** -- Does the project have a web UI Claude should test?

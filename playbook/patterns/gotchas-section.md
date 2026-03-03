@@ -17,6 +17,7 @@ Add a `## Gotchas` section to CLAUDE.md with terse entries. Each gotcha states t
 - Power Automate custom connectors silently drop query params with dots in names
 - `bool("False")` is `True` in Python but `false` in Lua -- UE4SS config files use Lua semantics
 - SAM format (`DOMAIN\user`) fails on LDAPS; use UPN format (`user@domain.com`) instead
+- Python MCP servers fail on Windows with `"command": "python"` -- Node.js spawn can't resolve Windows Store alias. Use `"command": "cmd", "args": ["/c", "python", "-m", "pkg"]`
 ```
 
 ## Rules

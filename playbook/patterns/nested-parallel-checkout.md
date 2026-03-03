@@ -40,25 +40,28 @@ parent-repo/
 - If using `--add-dir`, the nested repo gets its own context but shares permissions
 - Both repos need separate push/pull workflows (consider a pre-push hook on the parent to auto-sync the nested repo)
 
-## Variant: Tracked Content with Gitignored .git
+## Variant: Tracked Content with CI Sync
 
-An alternative where the parent repo tracks the nested content but gitignores only the `.git/` directory. A post-commit hook in the parent auto-commits to the nested repo when parent commits touch the nested directory. This provides:
+An alternative where the parent repo tracks the nested content and CI workflows push it to the wiki repo on push to main. No local subrepo or hooks needed -- just the content directory and a workflow file. This provides:
 
 - Single source of truth (parent repo)
 - Normal search/grep includes nested content
-- Wiki remote kept in sync automatically
-- One-way flow: parent -> nested repo (no editing via wiki tab)
+- Wiki remote kept in sync automatically via CI
+- One-way flow: parent -> wiki repo (no editing via wiki tab)
+- No per-machine setup (no subrepo clone, no hooks)
 
-Trade-off: wiki tab edits are disallowed (content flows from parent only).
+Trade-off: wiki tab edits are disallowed (content flows from parent only). Requires CI (GitHub Actions or Gitea Actions).
 
-Used by CC-Optimizer itself for its GitHub wiki.
+The workflow file is generic -- uses `github.server_url` and `github.repository` context variables, so one template works across all repos. Add a `concurrency` group with `cancel-in-progress: true` to prevent rapid pushes from queuing.
 
-### Migration: Gitignored to Tracked
+Used by CC-Optimizer and all WS/ workspaces with wikis.
 
-To convert an existing gitignored nested checkout to tracked content:
+### Migration: Gitignored to CI-Synced
+
+To convert an existing gitignored nested checkout to tracked content with CI sync:
 
 1. Commit any uncommitted changes in the nested repo first
-2. Change `.gitignore`: `wiki/` -> `wiki/.git/`
+2. Change `.gitignore`: `wiki/` -> `wiki/.git/` (or remove the entry entirely)
 3. **Gitlink workaround**: `git add wiki/` will detect `wiki/.git` and add a gitlink (submodule pointer) instead of actual files. Fix by temporarily hiding `.git`:
    ```bash
    mv wiki/.git wiki/.git_temp
@@ -67,12 +70,17 @@ To convert an existing gitignored nested checkout to tracked content:
    git rm --cached -r wiki/.git_temp/   # clean up any accidentally staged .git internals
    ```
    This only needs to happen once (the initial add). After wiki files are in the index as regular blobs, subsequent `git add wiki/file.md` works normally.
-4. Install the post-commit hook (see CC-Optimizer's `scripts/setup.py` for the template)
-5. Commit, verify the post-commit hook creates a wiki commit
-6. Delete the grep-wiki-reminder hook if you had one (no longer needed)
+4. Add `.gitea/workflows/wiki-sync.yml` (copy from CC-Optimizer -- works as-is for any repo)
+5. Ensure wiki repo exists on the platform (create first page via UI if needed)
+6. Ensure `WIKI_TOKEN` and `INTERNAL_CA_PEM` secrets are available (org-level on Gitea)
+7. Delete `wiki/.git/` locally (no longer needed)
+8. Remove any wiki-related hooks (post-commit, pre-push wiki section)
+9. Commit, push, verify CI workflow syncs to wiki repo
+
+See `scripts/rollout-wiki-sync.py` in CC-Optimizer for batch migration across workspaces.
 
 ## Real-World Examples
 
-- **CC-Optimizer/wiki/** -- Tracked content variant. Wiki markdown is committed to the main repo; a post-commit hook silently syncs changes into the wiki subrepo. Pre-push hook pushes the wiki when the main repo pushes.
-- **project-alpha/wiki/** -- Gitea wiki for IT infrastructure docs. Parent is IaC (etc/, opt/, deploy/), wiki is user-facing documentation. Independent commit history, auto-synced via parent's pre-push hook.
-- **project-beta/wiki/** -- Gitea wiki for a knowledge base app. Same pattern: app code in parent, onboarding docs in nested wiki.
+- **CC-Optimizer/wiki/** -- CI-synced variant. Wiki markdown is committed to the main repo; GitHub Actions and Gitea Actions workflows push content to wiki repos on push to main. No local subrepo.
+- **All WS/ workspaces with wikis** -- Same CI-synced pattern. Rolled out via `scripts/rollout-wiki-sync.py`. Generic workflow file, org-level secrets.
+- **project-alpha/wiki/** -- Gitea wiki for IT infrastructure docs. Parent is IaC (etc/, opt/, deploy/), wiki is user-facing documentation. CI-synced on push to main.

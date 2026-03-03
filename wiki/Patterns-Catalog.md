@@ -29,7 +29,7 @@ The authoritative index is `playbook/patterns.md` -- this page summarizes the ca
 | **Config-Driven Generation** | Multi-variant outputs (reports, parsers, templates) |
 | **Handler Registry** | Multiple input formats routed to specific processors |
 | **Delta Polling** | Watchers, schedulers, any periodic data processing |
-| **Nested Parallel Checkout** | Gitea/GitHub wikis, documentation repos alongside code. Variant: track content, gitignore only .git/, post-commit hook syncs |
+| **Nested Parallel Checkout** | Gitea/GitHub wikis, documentation repos alongside code. Variant: track content in main repo, CI syncs to wiki remote on push |
 
 ## Git Infrastructure
 

@@ -89,7 +89,7 @@ This repo has a `.public-repo` marker file because it is published to GitHub. Th
 3. Verify nothing environment-specific is staged (no hostnames, usernames, IPs, credentials)
 4. Commit using the verified wrapper: `scripts/verified-commit.sh -m "your message"`
 
-The pre-push hook also prints a summary of commits and changed files before pushing, giving the human a final chance to skim.
+A Claude Code PreToolUse hook intercepts `git push` and presents a full consolidated diff for review before the push proceeds, giving the human a final chance to catch anything.
 
 **Splitting generic vs specific content:** Design docs and configs that contain environment-specific details (hostnames, service names, SSH credentials) go in gitignored companion files. For example, the [Health Check Standard](Health-Check-Standard) lives in the wiki (generic spec), while `configs/health-check-environments.md` is gitignored (your specific setup). The `.gitignore` uses the pattern `configs/*-environments.md` to catch these.
 

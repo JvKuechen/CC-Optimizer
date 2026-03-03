@@ -25,6 +25,14 @@ IMPORTANT: Update `handoff.md` progressively as you work:
 
 Do NOT wait until 85% to write the first handoff. Write early, update often.
 
+## Task List
+
+IMPORTANT: Hydrate the task list (TaskCreate) alongside the handoff file for multi-step work. The task list survives auto-compaction and shows progress at a glance. The handoff captures context and decisions; the task list tracks how far you got.
+
+- Create tasks when starting non-trivial work (3+ steps)
+- Mark tasks in_progress/completed as you go
+- After compaction, read the handoff first (goals, decisions, approach), then check TaskList to see where you left off
+
 ## Handoff File Contents
 
 - **Date and session context** (what is being worked on)

@@ -114,4 +114,4 @@ python scripts/setup.py              # Normal setup
 python scripts/setup.py --reconfigure # Re-prompt for org folder names
 ```
 
-Sets up long path support, workspace org folders, wiki subrepo initialization, and git hooks (pre-commit, commit-msg, pre-push, post-commit). Idempotent -- safe to run multiple times.
+Sets up long path support, workspace directories, and git hooks (pre-commit, commit-msg, pre-push). Wiki sync is handled by CI workflows, not local hooks. Idempotent -- safe to run multiple times.

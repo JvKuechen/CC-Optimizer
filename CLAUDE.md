@@ -16,7 +16,7 @@ This is a **Claude Optimizer** workspace. It maintains a local mirror of the Cla
 
 ## Post-Clone Setup
 
-IMPORTANT: Run `python scripts/setup.py` after cloning. This initializes the wiki subrepo (connects `wiki/` to its remote for pushing), creates workspace directories, and installs git hooks. The script is idempotent.
+IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace directories and installs git hooks. Wiki sync to GitHub/Gitea wikis is handled by CI workflows (no local setup needed). The script is idempotent.
 
 ## Workflow
 
@@ -34,8 +34,8 @@ IMPORTANT: Run `python scripts/setup.py` after cloning. This initializes the wik
 - `docs/plugin-marketplace-reference.md` -- Internal reference on plugin system and demo marketplace
 - `playbook/` -- Actionable optimization checklist distilled from docs
 - `playbook/patterns.md` -- Toolbelt: 16 reusable patterns discovered across 22 workspace audits
-- `wiki/` -- GitHub/Gitea wiki content (tracked by main repo, synced to wiki subrepo via post-commit hook). Only `wiki/.git/` is gitignored. Run `python scripts/setup.py` to initialize the wiki subrepo after cloning
-- `scripts/setup.py` -- Post-clone setup: initializes wiki subrepo, installs git hooks, adds remotes
+- `wiki/` -- GitHub/Gitea wiki content (tracked by main repo, synced to wiki remotes via CI on push to main). Searchable with Grep.
+- `scripts/setup.py` -- Post-clone setup: creates workspace directories, installs git hooks
 - `playbook/patterns/` -- Individual pattern files (current-state-capsule, gate-pattern, etc.)
 - `findings/` -- Per-workspace audit reports (gitignored, temporary)
 - `templates/` -- Reusable config: `user-settings.json`, `hooks/guardrail.py`, `deploy-user-settings.py`
@@ -137,7 +137,7 @@ On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) inte
 - **nul file cleanup**: Bad `> nul` redirects in Git Bash create literal `nul` files that `rm`, `del`, and Explorer cannot delete. Use `python scripts/delete-nul-files.py <path>` (Win32 DeleteFileW API with `\\?\` prefix). Common in unoptimized workspaces.
 - **Hidden .git after copy/move**: `cp -r`, `shutil.move()`, and `shutil.copytree()` strip the Windows hidden attribute from `.git` directories. Always run `attrib +H "<dest>/.git"` after copying or moving a repo. The `fan-out/migrate.py` script handles this automatically.
 - Windows NTFS is case-insensitive but case-preserving. `mkdir work` then `ls` may show `Work` if the directory pre-existed with that casing.
-- GitHub wiki repos MUST use the `master` branch. The wiki tab only reads from `master` -- renaming to `main` makes the wiki appear empty.
+- **Wiki sync**: CI workflows (`.github/workflows/wiki-sync.yml`, `.gitea/workflows/wiki-sync.yml`) push `wiki/` content to both remotes on push to main. Requires `WIKI_TOKEN` secret on GitHub, `CI_TOKEN` + `INTERNAL_CA_PEM` secrets on Gitea.
 
 ## Scope
 

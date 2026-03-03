@@ -1,0 +1,41 @@
+name: Sync wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wiki/**'
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync wiki content
+        env:
+          WIKI_TOKEN: ${{ secrets.WIKI_TOKEN }}
+        run: |
+          git clone --depth 1 \
+            "https://x-access-token:${WIKI_TOKEN}@github.com/${{ github.repository }}.wiki.git" \
+            /tmp/wiki
+
+          # Clear existing files (except .git) and copy fresh content
+          find /tmp/wiki -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r wiki/. /tmp/wiki/
+
+          cd /tmp/wiki
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No wiki changes to push."
+          else
+            MSG=$(git -C "$GITHUB_WORKSPACE" log -1 --format="%s")
+            git commit -m "${MSG}"
+            git push origin master
+          fi

@@ -37,7 +37,7 @@ CC-Optimizer/
 │   ├── patterns/                # Individual pattern files
 │   └── roadmap.md               # Optimization progress tracker
 ├── scripts/
-│   ├── setup.py                 # Post-clone setup (workspaces, wiki, hooks)
+│   ├── setup.py                 # Post-clone setup (workspaces, hooks)
 │   ├── verified-commit.sh       # Commit wrapper for public repo (bypasses pre-commit lock)
 │   ├── migrate-sessions.py      # Move /resume history when workspace path changes
 │   └── delete-nul-files.py      # Remove undeletable 'nul' files (Win32 API)
@@ -49,7 +49,7 @@ CC-Optimizer/
 ├── WS/                          # Nested workspace clones (gitignored)
 │   └── {Project}/               # Each project has its own .git
 ├── findings/                    # Per-workspace audit reports (gitignored)
-└── wiki/                        # Wiki content (tracked; wiki/.git/ gitignored)
+└── wiki/                        # Wiki content (tracked; synced to wikis via CI)
 ```
 
 ## What's Tracked vs Gitignored
@@ -61,7 +61,7 @@ CC-Optimizer/
 | `docs/manifest.json` | Yes | Tracks lastmod timestamps for incremental sync |
 | `configs/user-config.json` | No | User-specific settings (org folders, remotes, etc.) |
 | `findings/` | No | Temporary audit reports, per-user |
-| `wiki/` | Yes | Content tracked by main repo; `wiki/.git/` gitignored |
+| `wiki/` | Yes | Content tracked by main repo; synced to GitHub/Gitea wikis via CI on push |
 | `.claude/settings.local.json` | No | User-specific permission overrides |
 
 ## Nested Workspaces

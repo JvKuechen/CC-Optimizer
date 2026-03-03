@@ -16,7 +16,7 @@ cd CC-Optimizer
 git config --global core.autocrlf false
 git config --global core.eol lf
 
-# Set up workspaces, initialize wiki subrepo, install git hooks
+# Set up workspaces and install git hooks
 python scripts/setup.py
 ```
 
@@ -24,8 +24,9 @@ The setup script will:
 - Enable git long path support (`core.longpaths`)
 - Check the Windows LongPathsEnabled registry setting
 - Create the `WS/` directory for nested workspaces
-- Initialize the wiki subrepo (connects `wiki/` to its remote for pushing)
-- Install git hooks (pre-commit, commit-msg, pre-push, post-commit)
+- Install git hooks (pre-commit, commit-msg, pre-push)
+
+Wiki content in `wiki/` is tracked by the main repo and synced to GitHub/Gitea wikis automatically via CI workflows on push to main. No local wiki setup is needed.
 
 ## 2. Bootstrap Your Machine
 

@@ -1,110 +1,21 @@
 """Post-clone setup for CC-Optimizer workspace.
 
-Creates WS/ directory for nested workspaces, initializes the wiki
-subrepo for pushing, and installs git hooks. Safe to run multiple
-times -- skips steps that are already done.
+Creates WS/ directory for nested workspaces and installs git hooks.
+Wiki sync is handled by CI workflows (.github/workflows/wiki-sync.yml
+and .gitea/workflows/wiki-sync.yml). Safe to run multiple times --
+skips steps that are already done.
 
 Usage: python scripts/setup.py
 """
 
 import json
-import shutil
 import subprocess
-import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-WIKI_DIR = REPO_ROOT / "wiki"
 HOOKS_DIR = REPO_ROOT / ".git" / "hooks"
 CONFIGS_DIR = REPO_ROOT / "configs"
 WORKSPACES_DIR = REPO_ROOT / "WS"
-
-
-def _derive_wiki_urls():
-    """Derive wiki clone URLs from the main repo's remotes.
-
-    Wiki repos follow the pattern: <repo-url-without-.git>.wiki.git
-    Checks all remotes on the main repo and converts each to a wiki URL.
-    """
-    urls = []
-    try:
-        result = subprocess.run(
-            "git remote", cwd=REPO_ROOT,
-            capture_output=True, text=True, shell=True,
-        )
-        for remote_name in result.stdout.strip().splitlines():
-            r = subprocess.run(
-                f"git remote get-url {remote_name}",
-                cwd=REPO_ROOT, capture_output=True, text=True, shell=True,
-            )
-            url = r.stdout.strip()
-            if url:
-                if url.endswith(".git"):
-                    urls.append(url[:-4] + ".wiki.git")
-                else:
-                    urls.append(url + ".wiki.git")
-    except Exception:
-        pass
-    return urls
-
-
-def _load_wiki_remotes():
-    """Load wiki remote config: primary URL, push URLs, and remote name.
-
-    Naming convention (matches dual-remote-push pattern):
-      - public:  any push URL points to a public host
-      - mirrors: multiple private remotes (bridge pattern)
-      - <host>:  single private remote
-
-    Returns dict with keys: name, clone_url, push_urls
-    """
-    push_urls = []
-
-    # Try user config first
-    config_path = CONFIGS_DIR / "user-config.json"
-    if config_path.exists():
-        with open(config_path, "r", encoding="utf-8") as f:
-            cfg = json.load(f)
-        for key in ["wiki_remote_gitea", "wiki_remote_github"]:
-            url = cfg.get(key, "")
-            if url and "example.com" not in url and "your-" not in url:
-                push_urls.append(url)
-
-    # Fallback: derive from main repo remotes
-    if not push_urls:
-        push_urls = _derive_wiki_urls()
-
-    if not push_urls:
-        print("[wiki] WARNING: Could not determine wiki URL.")
-        print("       Create configs/user-config.json (see configs/user-config.example.json)")
-        return None
-
-    # Determine remote name based on visibility
-    is_public = (REPO_ROOT / ".public-repo").exists()
-    if is_public:
-        name = "public"
-    elif len(push_urls) > 1:
-        name = "mirrors"
-    else:
-        # Single remote: name after host
-        from urllib.parse import urlparse
-        host = urlparse(push_urls[0]).hostname or "origin"
-        # Use short name for known hosts
-        if "github" in host:
-            name = "github"
-        elif "gitea" in host or "git." in host:
-            name = "gitea"
-        else:
-            name = host.split(".")[0]
-
-    return {
-        "name": name,
-        "clone_url": push_urls[0],
-        "push_urls": push_urls,
-    }
-
-
-WIKI_REMOTES = _load_wiki_remotes()
 
 PRE_COMMIT_HOOK = r"""#!/bin/bash
 # pre-commit hook: block commits on public repos unless verified.
@@ -149,15 +60,12 @@ sed -i '/^[[:space:]]*$/N;/^\n$/d' "$1"
 """
 
 PRE_PUSH_HOOK = r"""#!/bin/bash
-# Pre-push hook:
-# 1. If public repo, show a diff summary for human review before pushing.
-# 2. Push the wiki repo when the main repo is pushed.
+# Pre-push hook: on public repos, show a diff summary for human review.
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-# --- Public repo: show diff summary for human review ---
+# --- Public Repo Push Summary ---
 if [ -f "$REPO_ROOT/.public-repo" ]; then
-    # Find what's being pushed vs what the remote already has
     REMOTE="$1"
     REMOTE_REF=$(git rev-parse "$REMOTE/$(git symbolic-ref --short HEAD)" 2>/dev/null)
 
@@ -180,70 +88,6 @@ if [ -f "$REPO_ROOT/.public-repo" ]; then
     fi
 fi
 
-# --- Wiki push ---
-WIKI_DIR="$REPO_ROOT/wiki"
-
-if [ -d "$WIKI_DIR/.git" ]; then
-    echo "Pre-push: pushing wiki repo..."
-    cd "$WIKI_DIR"
-
-    if git rev-parse --verify HEAD > /dev/null 2>&1; then
-        for REMOTE in $(git remote); do
-            BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "master")
-            git push "$REMOTE" "$BRANCH" 2>&1
-            RESULT=$?
-            if [ $RESULT -ne 0 ]; then
-                echo "WARNING: Wiki push to $REMOTE failed (exit $RESULT). Main repo push continues."
-            else
-                echo "Pre-push: wiki pushed to $REMOTE."
-            fi
-        done
-    else
-        echo "Pre-push: wiki has no commits, skipping."
-    fi
-else
-    echo "Pre-push: no wiki directory found, skipping."
-fi
-
-# Always allow the main push to proceed
-exit 0
-"""
-
-POST_COMMIT_HOOK = r"""#!/bin/bash
-# post-commit hook: sync wiki/ changes to the wiki subrepo.
-#
-# After a main repo commit that touches wiki/ files, this hook
-# auto-commits those changes into the wiki's own git repo using
-# the main repo's commit subject as the wiki commit message.
-#
-# Requires wiki/.git to exist (run scripts/setup.py after clone).
-# The wiki pre-commit hook (.public-repo lock) is bypassed via
-# PUBLIC_REPO_VERIFIED=1 since the content was already reviewed
-# when committed to the main repo.
-
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-WIKI_DIR="$REPO_ROOT/wiki"
-
-# Skip if wiki subrepo not initialized
-if [ ! -d "$WIKI_DIR/.git" ]; then
-    exit 0
-fi
-
-# Check if this commit touched any wiki/ files
-CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD -- wiki/)
-if [ -z "$CHANGED" ]; then
-    exit 0
-fi
-
-cd "$WIKI_DIR"
-SUBJECT=$(git -C "$REPO_ROOT" log -1 --format="%s")
-git add -A
-
-if ! git diff --cached --quiet; then
-    export PUBLIC_REPO_VERIFIED=1
-    git commit -m "$SUBJECT" > /dev/null 2>&1
-fi
-
 exit 0
 """
 
@@ -256,108 +100,6 @@ def run(cmd, cwd=None):
     if result.returncode != 0:
         raise RuntimeError(f"Command failed: {cmd}\n{result.stderr}")
     return result.stdout.strip()
-
-
-def setup_wiki():
-    """Initialize wiki subrepo .git if missing.
-
-    Wiki content is tracked by the main repo. This function sets up the
-    wiki/.git directory so the post-commit hook can commit changes and
-    the pre-push hook can push them to the wiki remote.
-
-    On a fresh clone, wiki/ has tracked markdown files but no .git.
-    We clone the wiki repo to a temp dir, move .git into wiki/, then
-    sync any differences.
-    """
-    if not WIKI_REMOTES:
-        print("[wiki] ERROR: No wiki URL available. Skipping.")
-        return
-
-    remote_name = WIKI_REMOTES["name"]
-    clone_url = WIKI_REMOTES["clone_url"]
-    push_urls = WIKI_REMOTES["push_urls"]
-
-    if (WIKI_DIR / ".git").exists():
-        print("[wiki] Already initialized.")
-    else:
-        print(f"[wiki] Initializing subrepo from {clone_url}...")
-        # Clone to temp, move .git into wiki/ (preserves full history)
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_wiki = Path(tmp) / "wiki"
-            run(f'git clone "{clone_url}" "{tmp_wiki}"')
-            shutil.move(str(tmp_wiki / ".git"), str(WIKI_DIR / ".git"))
-
-        # Re-hide .git on Windows (cp/move strips the hidden attribute)
-        import platform
-        if platform.system() == "Windows":
-            subprocess.run(
-                f'attrib +H "{WIKI_DIR / ".git"}"',
-                shell=True, capture_output=True,
-            )
-
-        # Ensure wiki is on master branch (GitHub wiki requirement)
-        try:
-            current = run("git symbolic-ref --short HEAD", cwd=WIKI_DIR)
-            if current != "master":
-                run("git checkout master", cwd=WIKI_DIR)
-        except RuntimeError:
-            pass
-
-        # Stage everything and commit if main repo's files differ from wiki HEAD
-        run("git add -A", cwd=WIKI_DIR)
-        result = subprocess.run(
-            "git diff --cached --quiet",
-            cwd=WIKI_DIR, capture_output=True, text=True, shell=True,
-        )
-        if result.returncode != 0:
-            env = dict(subprocess.os.environ, PUBLIC_REPO_VERIFIED="1")
-            subprocess.run(
-                'git commit -m "Sync from main repo"',
-                cwd=WIKI_DIR, capture_output=True, text=True,
-                shell=True, env=env,
-            )
-            print("[wiki] Committed sync from main repo.")
-
-        print("[wiki] Initialized.")
-
-    # Set up the named remote with dual push URLs
-    existing = run("git remote", cwd=WIKI_DIR).splitlines()
-
-    # Remove 'origin' if it was created by git clone and we want a different name
-    if "origin" in existing and remote_name != "origin":
-        run(f"git remote rename origin {remote_name}", cwd=WIKI_DIR)
-        print(f"[wiki] Renamed origin -> {remote_name}")
-        existing = [remote_name if r == "origin" else r for r in existing]
-
-    if remote_name not in existing:
-        run(
-            f'git remote add {remote_name} "{clone_url}"',
-            cwd=WIKI_DIR,
-        )
-        print(f"[wiki] Added remote: {remote_name}")
-
-    # Set up push URLs (first --add --push replaces implicit, so add all)
-    if len(push_urls) > 1:
-        for url in push_urls:
-            run(
-                f'git remote set-url --add --push {remote_name} "{url}"',
-                cwd=WIKI_DIR,
-            )
-        print(f"[wiki] Configured {len(push_urls)} push URLs on {remote_name}")
-
-    # Set branch tracking
-    branch = run(
-        "git symbolic-ref --short HEAD", cwd=WIKI_DIR,
-    ) or "master"
-    try:
-        run(f"git fetch {remote_name}", cwd=WIKI_DIR)
-        run(
-            f"git branch --set-upstream-to={remote_name}/{branch} {branch}",
-            cwd=WIKI_DIR,
-        )
-    except RuntimeError:
-        # Remote may not have this branch yet (fresh wiki)
-        pass
 
 
 def _install_hook(name, content, version_marker, hooks_dir=None, label="hooks"):
@@ -385,24 +127,6 @@ def setup_hooks():
     _install_hook("pre-commit", PRE_COMMIT_HOOK, "PUBLIC_REPO_VERIFIED")
     _install_hook("pre-push", PRE_PUSH_HOOK, "Public Repo Push Summary")
     _install_hook("commit-msg", COMMIT_MSG_HOOK, "Co-Authored-By")
-    _install_hook("post-commit", POST_COMMIT_HOOK, "sync wiki/ changes")
-
-
-def setup_wiki_hooks():
-    """Install git hooks in the wiki repo."""
-    wiki_hooks_dir = WIKI_DIR / ".git" / "hooks"
-    if not (WIKI_DIR / ".git").exists():
-        print("[wiki-hooks] Wiki not cloned yet, skipping.")
-        return
-    wiki_hooks_dir.mkdir(exist_ok=True)
-    _install_hook(
-        "pre-commit", PRE_COMMIT_HOOK, "PUBLIC_REPO_VERIFIED",
-        hooks_dir=wiki_hooks_dir, label="wiki-hooks",
-    )
-    _install_hook(
-        "commit-msg", COMMIT_MSG_HOOK, "Co-Authored-By",
-        hooks_dir=wiki_hooks_dir, label="wiki-hooks",
-    )
 
 
 def _load_user_config():
@@ -539,11 +263,7 @@ def main():
     print()
     setup_workspaces()
     print()
-    setup_wiki()
-    print()
     setup_hooks()
-    print()
-    setup_wiki_hooks()
     print("\nSetup complete.")
 
 

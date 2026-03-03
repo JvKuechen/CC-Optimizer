@@ -1,0 +1,51 @@
+name: Sync wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wiki/**'
+
+jobs:
+  sync-wiki:
+    runs-on: self-hosted
+    steps:
+      - name: Trust internal CA
+        env:
+          INTERNAL_CA_PEM: ${{ secrets.INTERNAL_CA_PEM }}
+        run: |
+          echo "${INTERNAL_CA_PEM}" > /usr/local/share/ca-certificates/internal-ca.crt
+          update-ca-certificates
+
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync wiki content
+        env:
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          REPO_PATH="${{ github.repository }}"
+
+          git clone --depth 1 \
+            "https://ci:${CI_TOKEN}@${SERVER_URL#https://}/${REPO_PATH}.wiki.git" \
+            /tmp/wiki
+
+          # Clear existing files (except .git) and copy fresh content
+          find /tmp/wiki -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r wiki/. /tmp/wiki/
+
+          cd /tmp/wiki
+          git config user.email "ci@noreply.local"
+          git config user.name "Gitea CI"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No wiki changes to push."
+          else
+            MSG=$(git -C "${GITHUB_WORKSPACE}" log -1 --format="%s")
+            git commit -m "${MSG}"
+            git push origin master
+          fi

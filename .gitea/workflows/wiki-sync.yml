@@ -6,8 +6,14 @@ on:
     paths:
       - 'wiki/**'
 
+concurrency:
+  group: wiki-sync
+  cancel-in-progress: true
+
 jobs:
   sync-wiki:
+    # For multi-runner setups, pin to a specific runner label to avoid
+    # blocking deploy jobs. Example: runs-on: [self-hosted, build-runner]
     runs-on: self-hosted
     steps:
       - name: Trust internal CA

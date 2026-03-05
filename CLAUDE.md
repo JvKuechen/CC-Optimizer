@@ -16,7 +16,7 @@ This is a **Claude Optimizer** workspace. It maintains a local mirror of the Cla
 
 ## Post-Clone Setup
 
-IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace directories and installs git hooks. Wiki sync to GitHub/Gitea wikis is handled by CI workflows (no local setup needed). The script is idempotent.
+IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace directories, pins Claude Code to the stable release channel, and installs git hooks. Wiki sync to GitHub/Gitea wikis is handled by CI workflows (no local setup needed). The script is idempotent.
 
 ## Workflow
 

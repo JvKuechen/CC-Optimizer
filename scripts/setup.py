@@ -121,6 +121,32 @@ def _install_hook(name, content, version_marker, hooks_dir=None, label="hooks"):
     print(f"[{label}] {name} hook installed.")
 
 
+def setup_claude_stable():
+    """Pin Claude Code to the stable release channel."""
+    try:
+        result = subprocess.run(
+            "claude update-channel",
+            capture_output=True, text=True, shell=True,
+        )
+        current = result.stdout.strip().lower()
+        if "stable" in current:
+            print("[claude] Already on stable channel.")
+            return
+    except Exception:
+        pass
+
+    print("[claude] Switching to stable release channel...")
+    try:
+        subprocess.run(
+            "claude install stable",
+            capture_output=True, text=True, shell=True,
+        )
+        print("[claude] Switched to stable channel.")
+    except Exception as e:
+        print(f"[claude] WARNING: Could not switch to stable: {e}")
+        print("  Run manually: claude install stable")
+
+
 def setup_hooks():
     """Install git hooks if missing or outdated."""
     HOOKS_DIR.mkdir(exist_ok=True)
@@ -262,6 +288,8 @@ def main():
     setup_long_paths()
     print()
     setup_workspaces()
+    print()
+    setup_claude_stable()
     print()
     setup_hooks()
     print("\nSetup complete.")

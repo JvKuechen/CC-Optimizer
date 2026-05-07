@@ -1,3 +1,13 @@
+---
+paths:
+  - "playbook/**"
+  - "templates/**"
+  - ".claude/skills/**"
+  - ".claude/agents/**"
+  - ".claude/rules/**"
+  - "**/CLAUDE.md"
+---
+
 # Optimization Principles
 
 When optimizing another Claude Code workspace, follow these rules:
@@ -9,7 +19,7 @@ When optimizing another Claude Code workspace, follow these rules:
 - Reserve LLM reasoning for decisions that genuinely require judgment
 
 ## CLAUDE.md Authoring
-- Target under 500 lines. Every line must pass: "Would removing this cause Claude to make mistakes?"
+- Target under 200 lines per CLAUDE.md file. Every line must pass: "Would removing this cause Claude to make mistakes?"
 - Use `@path` imports to reference existing docs (README.md, package.json) rather than duplicating
 - Move detailed reference material to `.claude/skills/` (loaded on-demand, not every request)
 - Use `.claude/rules/` with `paths:` frontmatter for file-pattern-scoped rules

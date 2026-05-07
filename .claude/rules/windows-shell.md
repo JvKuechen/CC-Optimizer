@@ -1,6 +1,17 @@
+---
+paths:
+  - "scripts/**"
+  - "templates/hooks/**"
+  - "**/*.bat"
+  - "**/*.cmd"
+  - "**/*.ps1"
+  - "**/*.psm1"
+  - "**/*.psd1"
+---
+
 # Windows Shell Rules
 
-This workspace targets **Windows 11 only**. YOU MUST follow these rules in all shell commands.
+These rules apply when authoring shell or hook code targeted at native Windows (Git Bash, CMD, PowerShell). They do not apply in WSL. YOU MUST follow them when editing files matched by the `paths:` above.
 
 ## Path Separators
 

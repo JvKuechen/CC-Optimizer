@@ -91,7 +91,7 @@ Settings precedence: managed > CLI args > local > project > user.
 ## CLAUDE.md Authoring Rules
 
 When writing CLAUDE.md for other workspaces:
-- Target under 500 lines. Every line must pass: "Would removing this cause mistakes?"
+- Target under 200 lines per CLAUDE.md file. Every line must pass: "Would removing this cause mistakes?"
 - Use `@path` imports for existing docs (README, package.json) — don't duplicate
 - Move detailed reference to `.claude/skills/` (loaded on-demand, not every request)
 - Use `.claude/rules/` with `paths:` frontmatter for file-pattern-scoped conventions
@@ -146,9 +146,15 @@ This workspace handles **Claude Code CLI** optimization only.
 
 ## Doc Pages Quick Index
 
-For optimization: best-practices, memory, settings, features-overview, model-config
-For extensibility: skills, hooks, hooks-guide, sub-agents, plugins, plugins-reference, mcp, plugin-marketplace-reference (internal)
-For workflows: common-workflows, cli-reference, interactive-mode, authentication
-For new features: agent-teams, checkpointing, fast-mode, keybindings, permissions, server-managed-settings
-For infrastructure: headless, github-actions, gitlab-ci-cd, sandboxing, monitoring-usage
-For surfaces: desktop, desktop-quickstart, vs-code, chrome, slack, claude-code-on-the-web
+For optimization: best-practices, memory, settings, features-overview, model-config, output-styles, context-window, costs, env-vars
+For extensibility: skills, hooks, hooks-guide, sub-agents, plugins, plugins-reference, mcp, plugin-marketplaces, plugin-dependencies, discover-plugins, tools-reference, commands, plugin-marketplace-reference (internal)
+For workflows: common-workflows, cli-reference, interactive-mode, authentication, scheduled-tasks, routines, remote-control, code-review, ultraplan, ultrareview, voice-dictation
+For permissions: permissions, permission-modes, auto-mode-config, sandboxing, server-managed-settings
+For UI/terminal: fullscreen, statusline, terminal-config, keybindings, deep-links, sessions
+For team features: agent-teams, channels, channels-reference, champion-kit, communications-kit
+For diagnostics: debug-your-config, troubleshoot-install, troubleshooting, errors, glossary, how-claude-code-works, claude-directory, whats-new, changelog
+For new features: checkpointing, fast-mode, analytics, computer-use
+For infrastructure: headless, github-actions, github-enterprise-server, gitlab-ci-cd, monitoring-usage, network-config, devcontainer, platforms, setup, third-party-integrations
+For provider/cloud: amazon-bedrock, google-vertex-ai, microsoft-foundry, llm-gateway
+For surfaces: desktop, desktop-quickstart, desktop-scheduled-tasks, vs-code, jetbrains, chrome, slack, claude-code-on-the-web, web-quickstart
+For compliance: legal-and-compliance, zero-data-retention, data-usage, security

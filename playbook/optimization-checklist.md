@@ -1,7 +1,8 @@
 # Workspace Optimization Playbook
 
-Last updated from docs: 2026-02-22
+Last updated from docs: 2026-05-07
 Docs version baseline: sitemap lastmod dates from `docs/manifest.json`
+Major changes since 2026-03-13: Opus 4.7 default + `xhigh` effort, auto mode (classifier-handled permissions), expanded hook events (`if` field, `mcp_tool` type, HTTP hooks, `async: true`), Routines (cloud-scheduled agents), Ultraplan/Ultrareview cloud workflows, Monitor tool, native PowerShell tool, fullscreen alt-screen renderer, custom themes
 
 ---
 
@@ -20,12 +21,12 @@ Docs version baseline: sitemap lastmod dates from `docs/manifest.json`
 
 ### LSP Plugin Setup (Complete)
 
-All three LSP plugins are installed at user scope:
+Installed at user scope:
 - `pyright-lsp` — Python projects
 - `typescript-lsp` — JS/TS projects
 - `csharp-lsp` — .NET projects
 
-No PowerShell LSP plugin exists in the official marketplace. Rust (`rust-analyzer-lsp`) and Go (`gopls-lsp`) available if needed later.
+Also available in official marketplace: C/C++ (`clangd-lsp`), Java (`jdtls-lsp`), Kotlin, Lua, PHP, Swift, Rust (`rust-analyzer-lsp`), Go (`gopls-lsp`). Install as needed per project.
 
 ### Shared Assets at User Scope (Complete)
 
@@ -33,7 +34,7 @@ These assets are deployed to `~/.claude/` and automatically available in ALL wor
 
 **Rules** (`~/.claude/rules/`):
 - `context-handoff.md` — Context handoff protocol for long sessions
-- `windows-shell.md` — Windows-specific shell rules (paths, null device, ASCII only)
+- `windows-shell.md` — **Optional (user choice)**. Windows-specific shell rules (paths, null device, ASCII only). Deploy at user scope only if you primarily run Claude Code natively on Windows (Git Bash). If you're in WSL, skip it; if mixed, deploy at project scope per workspace
 
 **Agents** (`~/.claude/agents/`):
 - `docs-reference` — Haiku agent for quick doc lookups (points to CC-Optimizer/docs/en/)
@@ -52,7 +53,7 @@ When you update these files in `~/.claude/`, all workspaces benefit immediately.
 ### Context cost awareness
 | Feature | When loaded | Context cost |
 |---------|-------------|-------------|
-| CLAUDE.md | Every request | Keep small (<500 lines) |
+| CLAUDE.md | Every request | Keep small (<200 lines per file) |
 | Rules (.claude/rules/) | When editing matching files | Low (path-scoped) |
 | Skills | On-demand when invoked | Zero until invoked |
 | Skills with `disable-model-invocation: true` | Only when user invokes | Zero passively |
@@ -60,6 +61,7 @@ When you update these files in `~/.claude/`, all workspaces benefit immediately.
 | MCP with tool search | On-demand | Defers beyond 10% threshold |
 | Subagents | Fresh context per spawn | Separate from main window |
 | Hooks (command) | N/A | Zero tokens (shell scripts) |
+| Hooks (http) | N/A | Zero tokens (external POST) |
 | Hooks (prompt/agent) | When triggered | Uses tokens per invocation |
 
 ---
@@ -125,6 +127,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 - [ ] If so, review `MEMORY.md` for stale or misleading content from prior sessions
 - [ ] Check for misdirected writes (documentation content that belongs in actual docs, not memory)
 - [ ] Clean or delete stale entries -- they load into every session
+- [ ] Check `autoMemoryDirectory` setting if memory should be stored in a custom location (not accepted from project settings)
 
 ### 1.6 Select applicable patterns
 - [ ] Review `playbook/patterns.md` toolbelt
@@ -157,16 +160,36 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
   - `/sandbox` enables bash command isolation
   - Settings: `sandbox.enabled`, `sandbox.autoAllowBashIfSandboxed`, `sandbox.network.allowedDomains`
   - Claude can only write to the folder where it was started and subfolders (read outside is OK)
-- [ ] **Fan-out candidates** -- Are there bulk operations (migrations, refactors) that benefit from parallel headless runs?
+- [ ] **Fan-out candidates** -- Are there bulk operations (migrations, refactors) that benefit from parallel headless runs? Note: `/batch` bundled skill handles this natively (researches codebase, decomposes into 5-30 units, spawns agents in isolated worktrees, each runs tests and opens a PR)
 - [ ] **Checkpointing awareness** -- Note Esc+Esc for rewind menu and targeted "summarize from here" for context recovery
 - [ ] **Fast mode** -- Is this workspace used for interactive dev? Note `/fast` toggle (same Opus 4.6 model, faster output)
-- [ ] **Effort level** -- For Opus 4.6: `effortLevel` setting or `CLAUDE_CODE_EFFORT_LEVEL` (`low`/`medium`/`high`). `MAX_THINKING_TOKENS` is ignored on Opus 4.6 except when set to 0
-- [ ] **1M context** -- Both Opus 4.6 and Sonnet 4.6 support 1M tokens. Standard rates until 200K, then long-context pricing. `CLAUDE_CODE_DISABLE_1M_CONTEXT=1` to disable
+- [ ] **Effort level** -- `effortLevel` setting or `CLAUDE_CODE_EFFORT_LEVEL` accepts `low`/`medium`/`high`/`xhigh`. `xhigh` is the **default** on Opus 4.7. Use the `/effort` slider to dial in interactively. `--effort` overrides for one session. `MAX_THINKING_TOKENS` is ignored except when set to 0. `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` reverts to fixed thinking budget controlled by `MAX_THINKING_TOKENS`
+- [ ] **1M context** -- Opus 4.6/4.7 and Sonnet 4.6 support 1M tokens. Standard rates until 200K, then long-context pricing. `CLAUDE_CODE_DISABLE_1M_CONTEXT=1` to disable. Append `[1m]` to any model name (e.g., `sonnet[1m]`) for the explicit alias
+- [ ] **Renderer** -- `tui: "fullscreen"` for flicker-free alt-screen rendering with virtualized scrollback (set via `/tui` or `CLAUDE_CODE_NO_FLICKER`). Default is the classic main-screen renderer. `autoScrollEnabled: false` to stop following new output to bottom
+- [ ] **PowerShell tool (Windows)** -- Auto-enabled on Windows without Git Bash; opt-in elsewhere via `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`. Set `defaultShell: "powershell"` to route input-box `!` commands through PowerShell. Auto-detects pwsh.exe (PS 7+) with fallback to powershell.exe (PS 5.1). On Linux/macOS/WSL requires PowerShell 7+ on PATH
+- [ ] **Git instructions** -- `includeGitInstructions: false` drops the built-in commit/PR workflow + git status snapshot from the system prompt. Useful when project has its own git workflow skill. `CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS` env var takes precedence
+- [ ] **Skill visibility** (v2.1.129+) -- `skillOverrides` keys by skill name with `"on"` / `"name-only"` / `"user-invocable-only"` / `"off"`. Use to hide unused bundled skills (`/simplify`, `/loop`, etc.) without editing SKILL.md. Plugin skills are managed through `/plugin` instead
+- [ ] **Worktree settings** (monorepos) -- `worktree.symlinkDirectories: ["node_modules", ".cache"]` avoids duplicating big dirs. `worktree.sparsePaths: ["packages/my-app"]` does sparse-checkout (cone mode), faster on large monorepos. Use `.worktreeinclude` file (not a setting) to copy gitignored files like `.env` into worktrees
+- [ ] **PR URL template** -- `prUrlTemplate` substitutes `{host}/{owner}/{repo}/{number}/{url}` for footer/result PR badges. Use to point at internal review tools (e.g., Phabricator/Sapling) instead of github.com
+- [ ] **Notification channel** -- `preferredNotifChannel` accepts `"auto"`/`"terminal_bell"`/`"iterm2"`/`"iterm2_with_bell"`/`"kitty"`/`"ghostty"`/`"notifications_disabled"`. Default `"auto"` does desktop notif in iTerm2/Ghostty/Kitty, nothing elsewhere. `"terminal_bell"` rings any terminal
+- [ ] **Bedrock/Vertex/Foundry deploys** -- `skipWebFetchPreflight: true` skips the WebFetch domain safety check (which calls api.anthropic.com per request). Required when egress to Anthropic is blocked
+- [ ] **Min version pinning** -- `minimumVersion: "2.1.100"` blocks background auto-updates and `claude update` from installing below that version. Pair with `autoUpdatesChannel: "stable"` for organizational stability
+- [ ] **Routines** -- For unattended cloud-side automation (PR review, alert triage, deploy verification, docs drift): `/schedule` from CLI or claude.ai/code/routines. Triggers: schedule (>=1 hr cadence), API (HTTP POST + bearer token), GitHub event (`pull_request.*`, `release.*`). Routines run as full Claude Code cloud sessions with no permission prompts -- scope branch-push permissions, environment, and connectors carefully
+- [ ] **Cloud collaboration** -- `/ultraplan` drafts plan in cloud with browser-side commenting; `/ultrareview` runs parallel multi-agent code review and reports back. Both require Claude Code on the web, not available on Bedrock/Vertex/Foundry. `/team-onboarding` packages your setup into a replayable guide
 - [ ] **Task list** -- Replaces old TODO list. `Ctrl+T` toggles view. `CLAUDE_CODE_TASK_LIST_ID` to share across sessions. `CLAUDE_CODE_ENABLE_TASKS=false` to revert
-- [ ] **Session mobility** -- `/desktop` (hand off to Desktop app), `/teleport` (resume web session), `--from-pr` (resume PR-linked session), `--remote` (create web session)
+- [ ] **Session mobility** -- `/desktop` (hand off to Desktop app), `/teleport` (resume web session), `--from-pr` (resume PR-linked session), `--remote` (create web session), `/rc` or `claude remote-control` (continue session from phone/tablet/browser -- all execution stays local, `allow_remote_sessions` managed setting)
 - [ ] **CI resilience** -- `--fallback-model` for automatic model fallback when primary is overloaded (print mode only)
 - [ ] **Keybindings** -- Does the team need custom shortcuts? Note `/keybindings` creates `~/.claude/keybindings.json`
 - [ ] **Authentication** -- For Teams/Enterprise: verify auth method. Note `apiKeyHelper` setting for custom credential scripts
+- [ ] **Output styles** -- For non-engineering use cases: custom `.claude/output-styles/` markdown files. `outputStyle` setting. Custom styles exclude coding instructions unless `keep-coding-instructions: true` is set in frontmatter
+- [ ] **Scheduled tasks** -- `/loop` bundled skill for session-scoped cron (poll deploys, babysit PRs). 3-day expiry. `CLAUDE_CODE_DISABLE_CRON=1` to disable
+- [ ] **Code cleanup** -- `/simplify` bundled skill spawns 3 review agents on recently changed files for reuse, quality, and efficiency issues
+- [ ] **Side questions** -- `/btw` asks a question using full context but no tools, answer in dismissible overlay, never enters history. Can run while Claude is processing
+- [ ] **Diagnostics** -- `/context` (visualize context usage as colored grid), `/insights` (session analysis report), `/stats` (daily usage, streaks, model preferences), `/debug` (reads session debug log), `/doctor` (validate config files, surface schema errors), `/status` (active settings sources including managed), `/usage` (what's driving your limits), `/memory` (which CLAUDE.md/rules loaded + auto-memory entries), `/skills` (skills from project/user/plugin sources, with type-to-filter), `/agents` (configured subagents), `/permissions` (resolved allow/deny). Start a session with `claude --debug hooks` or `claude --debug-file /tmp/claude.log` for hook debugging
+- [ ] **Monorepo filtering** -- `claudeMdExcludes` setting to skip irrelevant ancestor CLAUDE.md files by path or glob
+- [ ] **Model governance** (Enterprise) -- `modelOverrides` maps Anthropic model IDs to provider-specific IDs (Bedrock ARNs, Vertex names). `availableModels` restricts which models users can select
+- [ ] **Prompt caching control** -- `DISABLE_PROMPT_CACHING` (all models) or per-tier: `DISABLE_PROMPT_CACHING_HAIKU`, `_SONNET`, `_OPUS`
+- [ ] **1M context alias** -- `sonnet[1m]` explicit alias, or append `[1m]` to any full model name
 
 ---
 
@@ -200,26 +223,41 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
   - `path` or `./path` -- Relative to cwd (`Read(*.env)`)
 - [ ] IMPORTANT: `/Users/alice/file` is NOT absolute -- use `//Users/alice/file`
 - [ ] `*` matches single directory; `**` matches recursively
-- [ ] Use `Task(AgentName)` in deny/allow to control subagent access (e.g., `Task(Explore)`, `Task(Plan)`, `Task(my-custom-agent)`)
+- [ ] Use `Agent(AgentName)` in deny/allow to control subagent access (e.g., `Agent(Explore)`, `Agent(Plan)`, `Agent(my-custom-agent)`). `Task(...)` still works as alias
 - [ ] Bash pattern security: argument matching is fragile (options before URL, variables, extra spaces can bypass). For network control, prefer WebFetch domain restrictions or PreToolUse hooks
 - [ ] Bash is shell-operator-aware: `Bash(safe-cmd *)` won't permit `safe-cmd && other-cmd`
 - [ ] WebFetch alone doesn't prevent network access if Bash is allowed (curl/wget bypass it)
 - [ ] For Teams/Enterprise: check managed settings (`C:\Program Files\ClaudeCode\managed-settings.json`)
-- [ ] Managed-only settings: `disableBypassPermissionsMode`, `allowManagedPermissionRulesOnly`, `allowManagedHooksOnly`
+- [ ] Managed-only settings: `disableBypassPermissionsMode`, `allowManagedPermissionRulesOnly`, `allowManagedHooksOnly`, `allow_remote_sessions`, `strictKnownMarketplaces`, `blockedMarketplaces`, `pluginTrustMessage`
+- [ ] Managed CLAUDE.md locations: macOS `/Library/Application Support/ClaudeCode/CLAUDE.md`, Linux/WSL `/etc/claude-code/CLAUDE.md`, Windows `C:\Program Files\ClaudeCode\CLAUDE.md`
 - [ ] Server-managed settings (beta): Teams/Enterprise can push settings from Claude.ai web interface, polled hourly
 
 ### 2.5 Add settings schema and permission modes
 - [ ] Add `"$schema": "https://json.schemastore.org/claude-code-settings.json"` to `.claude/settings.json` for editor autocomplete
-- [ ] Know the 5 permission modes: `default`, `plan` (read-only), `acceptEdits`, `dontAsk` (auto-deny unless pre-approved), `bypassPermissions`
-- [ ] `dontAsk` mode: auto-denies tools unless pre-approved via `/permissions` or `permissions.allow` rules -- good for locked-down workflows
+- [ ] Know the 6 permission modes: `default`, `plan` (read-only), `acceptEdits`, `auto` (classifier-checked, see 2.6), `dontAsk` (auto-deny unless pre-approved), `bypassPermissions`
+- [ ] `dontAsk` mode: auto-denies tools unless pre-approved via `/permissions` or `permissions.allow` rules -- good for locked-down CI workflows; explicit `ask` rules are denied rather than prompted
+- [ ] `bypassPermissions` cannot be entered mid-session unless launched with `--dangerously-skip-permissions`, `--permission-mode bypassPermissions`, `--allow-dangerously-skip-permissions`, or `defaultMode: "bypassPermissions"`. As of v2.1.126, also disables protected-path prompts (earlier versions still prompted). `rm -rf /` and `rm -rf ~` still prompt as a circuit breaker
+- [ ] **Protected paths** (auto-approval blocked in every mode except bypassPermissions) -- directories: `.git`, `.vscode`, `.idea`, `.husky`, `.claude` (except `.claude/commands`, `.claude/agents`, `.claude/skills`, `.claude/worktrees`); files: `.gitconfig`, `.gitmodules`, `.bashrc`, `.bash_profile`, `.zshrc`, `.zprofile`, `.profile`, `.ripgreprc`, `.mcp.json`, `.claude.json`
 - [ ] Set default mode via `permissions.defaultMode` in settings
+
+### 2.6 Auto mode (classifier-handled permissions, v2.1.83+)
+- [ ] **Requirements** -- Max/Team/Enterprise/API plan (NOT Pro), Sonnet 4.6 / Opus 4.6 / Opus 4.7 (Opus 4.7 only on Max), Anthropic API only (NOT Bedrock/Vertex/Foundry). On Team/Enterprise an admin must enable in Claude Code admin settings
+- [ ] **What the classifier blocks by default** -- `curl | bash`, sending sensitive data to external endpoints, prod deploys/migrations, mass cloud-storage deletion, IAM/repo permission grants, modifying shared infra, irreversibly destroying pre-session files, force push, pushing to `main`
+- [ ] **What's allowed by default** -- local file ops in working dir, declared deps install, reading `.env` and sending to matching API, read-only HTTP, push to current branch or one Claude created
+- [ ] **Boundaries from conversation** -- statements like "don't push" or "wait until I review" act as block signals. NOT stored as rules: classifier re-reads the transcript on each check, so context compaction can lose them. For hard guarantees, use a deny rule
+- [ ] **Broad rules dropped on entry** -- `Bash(*)`, `PowerShell(*)`, `Bash(python*)`, package-manager runs, `Agent(*)` allow rules. Narrow rules like `Bash(npm test)` carry over. Restored on leaving auto mode
+- [ ] **Fallback behavior** -- 3 consecutive blocks or 20 total per session pauses auto mode and resumes prompting. Approving the prompted action resumes. Non-interactive (`-p`) aborts on repeated blocks
+- [ ] **Configure trusted infra** -- `autoMode` setting with `environment`, `allow`, `soft_deny` arrays of prose rules. Include `"$defaults"` to inherit built-in rules. See `/en/auto-mode-config`. Not read from shared project settings
+- [ ] **Lock off** -- `disableAutoMode: "disable"` (typically managed setting). Removes auto from Shift+Tab cycle and rejects `--permission-mode auto`
+- [ ] **In plan mode** -- `useAutoModeDuringPlan` (default `true`) gives plan mode auto mode semantics when available
+- [ ] **Subagent checks** -- classifier checks at spawn (delegated task), each action (parent rules apply, subagent's own `permissionMode` ignored), and on finish (full action history reviewed)
 
 ---
 
 ## Phase 3: Optimize CLAUDE.md
 
 ### 3.1 Content audit
-- [ ] Under 500 lines? If not, identify what to move out
+- [ ] Under 200 lines per CLAUDE.md file? If not, move content to skills or rules. (Docs recommend 200 per file for adherence; total across imports can be higher but keep individual files tight)
 - [ ] Each line passes: "Would removing this cause mistakes?" — if not, cut it
 - [ ] No file-by-file descriptions (Claude discovers these)
 - [ ] No generic best practices (Claude already knows)
@@ -240,6 +278,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 - [ ] `@README.md` for project overview (don't duplicate)
 - [ ] `@package.json` or equivalent for available commands
 - [ ] `@docs/CONTRIBUTING.md` if it exists
+- [ ] Import depth limit: 5 hops max (imported files can recursively import others)
 
 ### 3.4 Port content from other AI configs
 - [ ] Migrate useful rules from .cursorrules / copilot-instructions.md
@@ -251,8 +290,8 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 
 ### 4.1 Verify user-scope rules are present
 - [ ] Confirm `~/.claude/rules/context-handoff.md` exists (deployed during machine setup)
-- [ ] Confirm `~/.claude/rules/windows-shell.md` exists (deployed during machine setup)
-- [ ] If missing, run machine setup again or copy from CC-Optimizer `.claude/rules/`
+- [ ] `~/.claude/rules/windows-shell.md` is now optional (depends on whether the user runs natively on Windows or in WSL). See Phase 8.0 for the decision tree
+- [ ] If missing rules need to be installed, copy from CC-Optimizer `.claude/rules/`
 
 ### 4.2 Create project-specific rules
 - [ ] Identify logical groupings (API, frontend, testing, database, etc.)
@@ -302,7 +341,10 @@ paths:
 - Use `allowed-tools` to auto-approve tools the skill needs
 - Use `context: fork` for isolated analysis tasks
 - Use `!`command`` syntax for dynamic context (git branch, PR diff, etc.)
+- Use `$ARGUMENTS[0]` / `$0` shorthand for positional argument access
+- Use `${CLAUDE_SKILL_DIR}` to reference files bundled with the skill regardless of cwd
 - Keep SKILL.md focused; put details in supporting files
+- Skill description budget: 2% of context window (fallback 16,000 chars). Run `/context` to check if skills are being excluded. Override with `SLASH_COMMAND_TOOL_CHAR_BUDGET`
 
 ---
 
@@ -318,6 +360,7 @@ paths:
 - Use `tools:` to restrict to minimum needed (allowlist)
 - Use `model: haiku` for speed on simple tasks
 - Use `model: opus` for complex reasoning (security, architecture)
+- Model field accepts short names (`sonnet`, `opus`, `haiku`), full IDs (`claude-opus-4-6`), or `inherit` (use parent's model)
 - Use `permissionMode: plan` for read-only agents
 - Use `memory: user|project|local` for persistent cross-session learning (auto-includes MEMORY.md, good for code-reviewer/workspace-analyzer agents)
 - Use `isolation: worktree` for code-modifying agents (auto-creates isolated git worktree, auto-cleans if no changes)
@@ -330,7 +373,7 @@ paths:
 ### 6.3 CLI and CI subagent patterns
 - [ ] `--agents` flag: define subagents via JSON at launch (session-scoped, not saved to disk). Useful for CI/CD and testing
 - [ ] `--tools` flag: restrict which built-in tools Claude can use (`""` = none, `"default"` = all, `"Bash,Edit,Read"` = specific)
-- [ ] `Task(agent_type)` in `tools:` field controls which subagent types can be spawned when using `claude --agent`
+- [ ] `Agent(agent_type)` in `tools:` field controls which subagent types can be spawned when using `claude --agent` (`Task(...)` still works as alias)
 - [ ] SubagentStart/SubagentStop hooks for lifecycle automation (setup/teardown, logging)
 - [ ] Subagent scope priority: CLI flag (1, highest) > Project (2) > User (3) > Plugin (4, lowest)
 
@@ -352,20 +395,27 @@ paths:
 
 ### 7.1 Hook types
 - [ ] `type: "command"` -- Shell command. Zero tokens. Exit code 0 = success, 2 = block. Use for deterministic automation
+- [ ] `type: "http"` -- POSTs event data to an HTTP endpoint. Zero tokens. Supports `headers` with env var interpolation and `allowedEnvVars`. Constrain at the settings layer with `allowedHttpHookUrls: ["https://hooks.example.com/*"]` and `httpHookAllowedEnvVars: ["MY_TOKEN"]` (both arrays merge across sources). Use for webhooks, logging, external integrations
+- [ ] `type: "mcp_tool"` -- Calls a tool on an already-connected MCP server. Use when the action you want is already exposed by an MCP server (e.g., post to Slack, create a Linear ticket) without writing shell glue
 - [ ] `type: "prompt"` -- Single-turn LLM evaluation (Haiku by default, override with `model` field). Returns `{ok: true/false, reason: "..."}`. Use for judgment-based quality gates without full agent overhead
-- [ ] `type: "agent"` -- Multi-turn agent with tool access (Read, Grep, Glob). Up to 50 turns, 60s default timeout. Use for codebase-aware verification (e.g., "did the agent actually run the tests?")
-- [ ] Choose wisely: `command` for speed/determinism, `prompt` for simple judgment, `agent` for complex verification
+- [ ] `type: "agent"` -- Multi-turn agent with tool access (Read, Grep, Glob). Up to 50 turns, 60s default timeout. **Experimental** -- behavior may change. Use for codebase-aware verification (e.g., "did the agent actually run the tests?")
+- [ ] Choose wisely: `command`/`http`/`mcp_tool` for speed/determinism, `prompt` for simple judgment, `agent` for complex verification
 
 ### 7.2 Common hook patterns
 - [ ] **Gitignored search reminder** -- PostToolUse on Grep, reminds Claude to search gitignored dirs (wiki, docs, nested repos). See `patterns/gitignored-search-reminder.md`
 - [ ] **Auto-format on save** -- PostToolUse on Write/Edit, runs formatter
 - [ ] **Lint on save** -- PostToolUse on Write/Edit, runs linter
-- [ ] **Filter test output** -- PreToolUse on Bash for test commands, reduces tokens
-- [ ] **Block dangerous commands** -- PreToolUse on Bash, exit code 2 to block
-- [ ] **Audit config changes** -- ConfigChange event for compliance logging, can block unauthorized modifications
-- [ ] **Pre-compact context preservation** -- PreCompact event to save critical state before compaction
-- [ ] **Session lifecycle** -- SessionStart for environment setup, SessionEnd for cleanup/logging
-- [ ] **Input modification** -- PreToolUse `updatedInput` can modify tool input before execution (combine with `allow` to auto-approve)
+- [ ] **Filter test output** -- PreToolUse on Bash for test commands, reduces tokens. PostToolUse can replace tool output for any tool via `hookSpecificOutput.updatedToolOutput` (was MCP-only previously)
+- [ ] **Block dangerous commands** -- PreToolUse on Bash, exit code 2 to block. PreToolUse hooks fire BEFORE permission-mode checks: `permissionDecision: "deny"` blocks even in `bypassPermissions` mode
+- [ ] **Filter by tool args with `if`** (v2.1.85+) -- `"if": "Bash(git *)"` only spawns the hook when the command matches that pattern (or is too complex to parse). Goes beyond `matcher`, which filters at group level by tool name. Compound commands like `npm test && git push` evaluate each subcommand. Only works on tool events
+- [ ] **Audit config changes** -- ConfigChange event for compliance logging, can block unauthorized modifications. Matchers: `user_settings`, `project_settings`, `local_settings`, `policy_settings`, `skills`
+- [ ] **Pre-compact context preservation** -- PreCompact event to save critical state before compaction. PostCompact fires after
+- [ ] **Re-inject context after compaction** -- SessionStart hook with `compact` matcher. Anything written to stdout is added to Claude's context (`echo 'reminder: use Bun. current sprint: auth refactor.'`)
+- [ ] **Session lifecycle** -- SessionStart for environment setup (use `$CLAUDE_ENV_FILE` to persist env vars for subsequent Bash commands). Pair with `CwdChanged` + `FileChanged` (matcher = pipe-separated literal filenames like `.envrc|.env`) for direnv/devbox/nix style reactive env management. SessionEnd for cleanup/logging
+- [ ] **Input modification** -- PreToolUse `updatedInput` can modify tool input before execution (combine with `allow` to auto-approve). Note: when multiple PreToolUse hooks rewrite the same tool's input, last-to-finish wins (parallel; non-deterministic order)
+- [ ] **Auto-approve permission prompts** -- `PermissionRequest` hook with narrow matcher (e.g., `ExitPlanMode`) and stdout `{"hookSpecificOutput": {"hookEventName": "PermissionRequest", "decision": {"behavior": "allow"}}}`. Can also include `updatedPermissions` array with `setMode` entry to change permission mode for the session. Don't leave matcher empty -- that auto-approves every prompt
+- [ ] **Background hooks** -- `async: true` on command hooks runs them in the background; output is delivered on the next turn via `systemMessage`. Use for slow, non-blocking automation
+- [ ] **Kill switch** -- `disableAllHooks: true` in settings disables all hooks and any custom status line. Useful for debugging
 
 ### 7.3 Hook design guidelines
 - `command` hooks run outside the LLM (zero token cost). `prompt`/`agent` hooks use tokens
@@ -380,7 +430,20 @@ paths:
 - Hooks can be defined in skill/agent YAML frontmatter (scoped to component lifecycle)
 
 ### 7.4 Hook events reference
-All events: PreToolUse, PostToolUse, PostToolUseFailure, PreCompact, PermissionRequest, UserPromptSubmit, Notification, Stop, SessionStart, SessionEnd, ConfigChange, WorktreeCreate, WorktreeRemove, SubagentStart, SubagentStop, TeammateIdle, TaskCompleted
+All events (~30 total): SessionStart, Setup, UserPromptSubmit, UserPromptExpansion, PreToolUse, PermissionRequest, PermissionDenied, PostToolUse, PostToolUseFailure, PostToolBatch, Notification, SubagentStart, SubagentStop, TaskCreated, TaskCompleted, Stop, StopFailure, TeammateIdle, InstructionsLoaded, ConfigChange, CwdChanged, FileChanged, WorktreeCreate, WorktreeRemove, PreCompact, PostCompact, Elicitation, ElicitationResult, SessionEnd
+
+Notable additions since baseline:
+- `Setup` -- fires for `--init-only`, or `--init`/`--maintenance` in `-p` mode. CI-style one-time prep
+- `UserPromptExpansion` -- when a typed `/command` expands into a prompt, before it reaches Claude. Can block expansion
+- `PermissionDenied` -- fires when auto mode classifier denies. Return `{retry: true}` to let the model retry
+- `PostToolBatch` -- after a batch of parallel tool calls resolves, before the next model call
+- `TaskCreated` -- fires for every TaskCreate. Pairs with TaskCompleted as a quality gate
+- `StopFailure` -- turn ended due to API error. Output and exit code ignored. Matchers: `rate_limit`, `authentication_failed`, `oauth_org_not_allowed`, `billing_error`, `invalid_request`, `server_error`, `max_output_tokens`, `unknown`
+- `CwdChanged`, `FileChanged` -- reactive env management (see 7.2)
+- `PostCompact` -- after compaction completes
+- `Elicitation`, `ElicitationResult` -- MCP server requests user input; `ElicitationResult` fires after user responds, before response goes back to server
+
+`InstructionsLoaded` fires when CLAUDE.md or `.claude/rules/*.md` files are loaded (session start for eager, later for lazy). Matchers: `session_start`, `nested_traversal`, `path_glob_match`, `include`, `compact`. No blocking. Useful for audit logging.
 
 ### 7.5 Public repo commit lock
 - [ ] Check `git remote -v` for public hosting (github.com, gitlab.com, etc.)
@@ -400,10 +463,15 @@ All events: PreToolUse, PostToolUse, PostToolUseFailure, PreCompact, PermissionR
 
 ## Phase 8: Windows Compatibility
 
-### 8.1 Verify Windows shell rules are present
-- [ ] Confirm `~/.claude/rules/windows-shell.md` exists (deployed during machine setup)
+### 8.0 Decide: native Windows vs WSL
+- [ ] **WSL workspaces** behave like Linux. Standard Unix tooling, LF line endings by default, `python3` works, `nul` redirect fails as expected. Most Windows-shell pitfalls evaporate. Skip 8.1 / windows-shell rule for these. Setting `wslInheritsWindowsSettings: true` (Windows managed settings only) lets WSL also pick up the Windows policy chain
+- [ ] **Native Windows workspaces** still need windows-shell rules (Git Bash quirks remain). 8.1 applies. Consider enabling the PowerShell tool (`CLAUDE_CODE_USE_POWERSHELL_TOOL=1` + `defaultShell: "powershell"`) so Claude doesn't have to fight Git Bash translation issues for shell-heavy work
+- [ ] **Hybrid** (host on Windows, projects in WSL) -- the user-scope rule may not apply broadly. Deploy windows-shell at project scope only, when needed
+
+### 8.1 Verify Windows shell rules are present (native Windows only)
+- [ ] Confirm `~/.claude/rules/windows-shell.md` exists if user has chosen user-scope deployment, OR `.claude/rules/windows-shell.md` if project-scope. As of May 2026, the optimizer no longer auto-deploys this user-wide -- it's a per-user / per-project choice
 - [ ] Key rules enforced: forward slashes in Bash, `/dev/null` not `nul`, `python` not `python3`, ASCII only in code
-- [ ] If missing, run machine setup again or copy from CC-Optimizer `.claude/rules/`
+- [ ] If missing, copy from CC-Optimizer `.claude/rules/windows-shell.md`
 
 ### 8.2 Verify scripts are cross-platform
 - [ ] No `grep -P`, `mapfile`, `readarray`, `sed -i` in any scripts
@@ -437,14 +505,20 @@ All events: PreToolUse, PostToolUse, PostToolUseFailure, PreCompact, PermissionR
 
 ---
 
-## Deprecations (as of Feb 2026)
+## Deprecations (as of May 2026)
 
 - `includeCoAuthoredBy` setting -> use `attribution` setting instead (has `commit` and `pr` sub-keys, empty string hides)
+- `voiceEnabled` setting -> use the `voice` object (`{ "enabled": true, "mode": "tap" }`)
 - `ANTHROPIC_SMALL_FAST_MODEL` env var -> use `ANTHROPIC_DEFAULT_HAIKU_MODEL`
 - PreToolUse hook: top-level `decision`/`reason` fields deprecated -> use `hookSpecificOutput.permissionDecision`/`permissionDecisionReason`. Old values `"approve"`/`"block"` map to `"allow"`/`"deny"`
 - MCP SSE transport deprecated -> use HTTP transport (`--transport http`)
 - MCP scope names changed: `local` (was `project`), `user` (was `global`), `project` (shared `.mcp.json`)
 - Plugin `commands/` directory is legacy -> use `skills/` with `SKILL.md` for new plugins
+- `.claude/commands/` files still work but skills are preferred (skill takes precedence on name collision; skills support supporting files, frontmatter, auto-invocation)
+- `/review` command deprecated -> install `code-review` plugin: `claude plugin install code-review@claude-code-marketplace`
+- `Task` tool renamed to `Agent` (v2.1.63) -> `Task(...)` references in settings/agents still work as aliases but prefer `Agent(...)`
+- `TaskOutput` tool deprecated -> prefer `Read` on the task's output file path
+- Legacy Windows path `C:\ProgramData\ClaudeCode\managed-settings.json` no longer supported as of v2.1.75 -> migrate to `C:\Program Files\ClaudeCode\managed-settings.json`
 
 ---
 

@@ -53,6 +53,19 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
 
 7. **Per-project feature decisions** -- MCP, LSP, Chrome, sandboxing, fan-out.
 
+7.5. **Coordination protocol detection** -- Scan for multi-thread signals:
+   - Multiple `handoff.md` sections from different dates / threads (Read and count `## ` date-tagged sections)
+   - Multiple active branches: `git -C "<target>" branch --no-merged main` returns 2+
+   - Multiple distinct workstreams in flight (scan CLAUDE.md, README, recent commits)
+   - User describes "main thread" / "subthread" / "spawn a subthread" language naturally
+
+   If 2+ signals present, propose installing the coordination protocol (see `playbook/patterns/coordination-protocol.md`):
+   - Plant `BOUNTY.md` (from `templates/BOUNTY.md`)
+   - Plant `subthread-brief.md` (from `templates/subthread-brief.md`)
+   - Add Coordination section to CLAUDE.md pointing at `~/.claude/rules/coordination.md`
+
+   Skip silently if signals don't fire — solo / linear workspaces don't benefit.
+
 ## Implementation Phase (Playbook Phases 2-8)
 
 8. **Fix permissions** (Phase 2) -- Create `.claude/settings.json` with `$schema` reference, stack-specific allows and deny rules. Use explicit git subcommands, not `Bash(git *)`. Use `//path` for absolute paths (not `/path`). Consider `dontAsk` mode for locked-down workflows.

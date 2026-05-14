@@ -61,6 +61,16 @@ def main():
         shutil.copy2(src_hook, dst_hook)
         print(f"Deployed: {dst_hook}")
 
+    # Deploy rules from templates/rules/
+    rules_src_dir = script_dir / "rules"
+    rules_dst_dir = claude_dir / "rules"
+    if rules_src_dir.exists():
+        rules_dst_dir.mkdir(exist_ok=True)
+        for rule_file in sorted(rules_src_dir.glob("*.md")):
+            dst = rules_dst_dir / rule_file.name
+            shutil.copy2(rule_file, dst)
+            print(f"Deployed: {dst}")
+
     print()
     print("Done. Restart any active Claude Code sessions for changes to take effect.")
     print("Hook is snapshotted at session start, so existing sessions won't see it.")

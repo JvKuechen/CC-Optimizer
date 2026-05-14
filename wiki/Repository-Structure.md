@@ -16,7 +16,6 @@ CC-Optimizer/
 │   │   ├── windows-shell.md     # Windows 11 shell rules
 │   │   └── writing-settings.md  # Settings syntax reference
 │   ├── skills/                  # On-demand workflows
-│   │   ├── sync-docs/           # Fetch docs from code.claude.com
 │   │   ├── optimize-workspace/  # Analyze and optimize a workspace
 │   │   ├── init-workspace/      # Initialize or import a workspace
 │   │   └── update-playbook/     # Review doc changes, update playbook
@@ -29,7 +28,7 @@ CC-Optimizer/
 ├── docs/
 │   ├── manifest.json            # Sync timestamps (tracked in git)
 │   ├── plugin-marketplace-reference.md
-│   └── en/                      # 56 doc pages (gitignored, fetched via /sync-docs)
+│   └── en/                      # 56 doc pages (gitignored, fetched via python scripts/sync-docs.py)
 ├── playbook/
 │   ├── optimization-checklist.md # Primary optimization reference
 │   ├── cheatsheet.md            # Feature quick reference
@@ -38,6 +37,7 @@ CC-Optimizer/
 │   └── roadmap.md               # Optimization progress tracker
 ├── scripts/
 │   ├── setup.py                 # Post-clone setup (workspaces, hooks)
+│   ├── sync-docs.py             # Fetch docs from code.claude.com (incremental sync)
 │   ├── verified-commit.sh       # Commit wrapper for public repo (bypasses pre-commit lock)
 │   ├── migrate-sessions.py      # Move /resume history when workspace path changes
 │   └── delete-nul-files.py      # Remove undeletable 'nul' files (Win32 API)
@@ -57,7 +57,7 @@ CC-Optimizer/
 | Path | Tracked? | Why |
 |------|----------|-----|
 | `WS/` | No | Nested workspace clones with their own git repos |
-| `docs/en/` | No | Fetched on demand via `/sync-docs` - each user syncs their own |
+| `docs/en/` | No | Fetched on demand via `python scripts/sync-docs.py` - each user syncs their own |
 | `docs/manifest.json` | Yes | Tracks lastmod timestamps for incremental sync |
 | `configs/user-config.json` | No | User-specific settings (org folders, remotes, etc.) |
 | `findings/` | No | Temporary audit reports, per-user |

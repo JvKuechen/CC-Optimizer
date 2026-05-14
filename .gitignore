@@ -10,7 +10,7 @@ configs/projects.json
 # Nested workspaces (own git repos, never committed to optimizer)
 WS/
 
-# Synced docs are fetched on demand via /sync-docs
+# Synced docs are fetched on demand via python scripts/sync-docs.py
 docs/en/
 
 # Environment-specific files (contain hostnames, credentials, infra details)

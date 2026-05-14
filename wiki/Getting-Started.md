@@ -63,13 +63,13 @@ Or use `/plugin` to browse and install interactively.
 
 ## 4. Sync the Documentation
 
-Open Claude Code in the CC-Optimizer directory and run:
+Run:
 
-```
-/sync-docs
+```bash
+python scripts/sync-docs.py
 ```
 
-This fetches the latest Claude Code documentation from code.claude.com into `docs/en/`. The docs are gitignored (fetched on demand, not stored in the repo) so each user syncs their own copy.
+This fetches the latest Claude Code documentation from code.claude.com into `docs/en/`. The docs are gitignored (fetched on demand, not stored in the repo) so each user syncs their own copy. No Claude Code session required — the work is deterministic, so it's a plain script.
 
 ## 5. Verify Everything Works
 

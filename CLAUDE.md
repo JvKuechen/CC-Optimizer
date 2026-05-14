@@ -20,7 +20,7 @@ IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace d
 
 ## Workflow
 
-1. **`/sync-docs`** -- Fetches updated docs from code.claude.com/docs via curl script. Run before optimization work.
+1. **Sync docs** -- Run `python scripts/sync-docs.py` to fetch updated docs from code.claude.com/docs. Run before optimization work.
 2. **Follow the playbook** at `playbook/optimization-checklist.md` -- Distilled from the docs into an actionable checklist. This is the primary reference during optimization (not raw docs).
 3. **`/update-playbook`** -- After a doc sync shows changes, reviews what changed and updates the playbook.
 4. **`/init-workspace [name or path]`** -- Bootstraps a new workspace. With a name only, creates under `WS/`. With a path, initializes in place.
@@ -40,7 +40,7 @@ IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace d
 - `findings/` -- Per-workspace audit reports (gitignored, temporary)
 - `templates/` -- Reusable config: `user-settings.json`, `hooks/guardrail.py`, `deploy-user-settings.py`
 - `.claude/rules/` -- Path-scoped rules for this workspace
-- `.claude/skills/` -- sync-docs, optimize-workspace, init-workspace, update-playbook
+- `.claude/skills/` -- optimize-workspace, init-workspace, update-playbook
 - `.claude/agents/` -- docs-reference (haiku, fast lookup), workspace-analyzer (sonnet, read-only audit)
 
 ## Machine Setup (once per computer)
@@ -112,6 +112,12 @@ When writing CLAUDE.md for other workspaces:
 ## Workspace Consolidation
 
 Active workspaces live as nested clones under `WS/` in this repo (flat layout, no org subfolders). Each nested workspace keeps its own `.git` and remotes. The `WS/` directory is gitignored -- nothing inside is committed to the optimizer repo. External paths still work for in-place optimization.
+
+## Coordination
+
+Multi-thread / multi-workspace coordination uses the protocol at `~/.claude/rules/coordination.md` (deployed via `templates/deploy-user-settings.py`). Vocabulary: main thread = coordinator, subthread = focused executor, bounty board = cross-thread task state, close-out report = structured subthread return.
+
+Cross-cutting work for CC-Optimizer itself is tracked in `BOUNTY.md` at the workspace root. Per-workspace coordination state lives inside each `WS/<project>/`. Spawn subthreads using the brief template at `subthread-brief.md` (customize per task before pasting). Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in those files plus `handoff.md` only — never in tracked source, docs, or rules.
 
 ## Public Repo Commit Workflow
 

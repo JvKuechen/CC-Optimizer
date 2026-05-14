@@ -4,22 +4,6 @@ Skills are on-demand workflows invoked with slash commands. They're only loaded 
 
 ## Available Skills
 
-### /sync-docs
-
-**Purpose:** Fetch updated Claude Code documentation from code.claude.com
-
-**When to use:** Before optimization work, or when you suspect docs have changed.
-
-**What it does:**
-- Fetches the sitemap XML to discover pages and their lastmod timestamps
-- Only downloads pages that are new or have changed (incremental sync)
-- Updates `docs/manifest.json` with new timestamps
-- Currently tracks 56 English documentation pages
-
-**Defined in:** `.claude/skills/sync-docs/SKILL.md`
-
----
-
 ### /optimize-workspace [name or path]
 
 **Purpose:** Analyze and optimize another Claude Code workspace
@@ -63,7 +47,7 @@ Skills are on-demand workflows invoked with slash commands. They're only loaded 
 
 **Purpose:** Refresh the optimization playbook after a docs sync
 
-**When to use:** After `/sync-docs` shows updated pages.
+**When to use:** After `python scripts/sync-docs.py` shows updated pages.
 
 **What it does:**
 - Compares doc lastmod dates against the playbook's baseline
@@ -73,6 +57,17 @@ Skills are on-demand workflows invoked with slash commands. They're only loaded 
 **Defined in:** `.claude/skills/update-playbook/SKILL.md`
 
 ## Utility Scripts
+
+### scripts/sync-docs.py
+
+**Purpose:** Fetch updated Claude Code documentation from code.claude.com.
+
+**Usage:**
+```bash
+python scripts/sync-docs.py
+```
+
+Fetches the sitemap XML to discover pages and their lastmod timestamps, downloads only pages that are new or have changed (incremental sync via `docs/manifest.json`), and reports a summary. Currently tracks 56 English documentation pages. Pure Python stdlib, no skill wrapper — the work is deterministic enough that a slash-command wrapper would be dead weight.
 
 ### scripts/migrate-sessions.py
 

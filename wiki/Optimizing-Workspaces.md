@@ -4,7 +4,7 @@
 
 The primary workflow for optimizing a Claude Code workspace:
 
-1. Ensure docs are up to date: `/sync-docs`
+1. Ensure docs are up to date: `python scripts/sync-docs.py`
 2. Import or target the workspace: `/init-workspace` to bring it into `WS/`, or use a path
 3. Optimize: `/optimize-workspace <name or path>`
 4. Follow the checklist in `playbook/optimization-checklist.md`

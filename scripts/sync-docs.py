@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Sync Claude Code English documentation from code.claude.com/docs.
 
-Usage: python sync.py [docs-dir]
+Usage: python scripts/sync-docs.py [docs-dir]
 docs-dir defaults to ./docs relative to the script's parent project.
 """
 
 import json
-import os
 import sys
 import urllib.error
 import urllib.request
@@ -41,10 +40,8 @@ def fetch_url(url):
 
 def find_project_root():
     """Walk up from script location to find the project root (where docs/ lives)."""
-    script_dir = Path(__file__).resolve().parent
-    # Script is at .claude/skills/sync-docs/scripts/sync.py
-    # Project root is 4 levels up
-    return script_dir.parent.parent.parent.parent
+    # Script is at scripts/sync-docs.py — project root is 1 level up.
+    return Path(__file__).resolve().parent.parent
 
 
 def main():

@@ -115,6 +115,25 @@ For new workspaces (no existing project to import):
 
 10. **Report** -- Tell the user what was created and what they should customize.
 
+## Optional: Coordination Protocol
+
+After step 10, ask the user: "Will this workspace have multi-thread / multi-session / coordination-heavy work?"
+
+If yes, plant the coordination protocol:
+- Copy `templates/BOUNTY.md` from CC-Optimizer to `<target>/BOUNTY.md` (skeleton bounty board).
+- Copy `templates/subthread-brief.md` from CC-Optimizer to `<target>/subthread-brief.md` (subthread brief template).
+- Append this section to the workspace CLAUDE.md:
+
+  ```markdown
+  ## Coordination
+
+  Multi-thread work uses the coordination protocol — see `~/.claude/rules/coordination.md` for vocabulary (main thread, subthread, bounty board, close-out report) and discipline (staging, thread-local IDs).
+
+  Maintain task state in `BOUNTY.md`. Spawn subthreads with the brief at `subthread-brief.md`. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in those two files plus `handoff.md` only — never in tracked source or docs.
+  ```
+
+If no, skip silently. The global rule remains available either way (deployed via `templates/deploy-user-settings.py`).
+
 ## What This Does NOT Do
 
 - No skills, subagents, hooks, or MCP setup (use `/optimize-workspace` for that)

@@ -15,7 +15,7 @@ This is the key decision when adding external documentation to a workspace:
 | **Format** | Already web-native (markdown, HTML) | Not machine-optimized (scanned PDFs, Word docs) |
 | **Processing** | Mirror as-is, no transformation | Parse and restructure into agent-friendly markdown |
 | **Storage** | `docs/` or `deps/docs/` (raw mirror) | `docs/` (parsed, one .md per source document) |
-| **Skill** | `/sync-docs` or `/sync-vendor-docs` | `/ingest-docs` |
+| **Delivery** | `scripts/sync-docs.py` (skill wrapper optional) | `/ingest-docs` skill (judgment-heavy) |
 | **Re-run** | Regularly (before optimization work, on schedule) | Once per source document (idempotent, re-runnable) |
 | **Examples** | Claude Code docs, framework docs, SaaS API docs | Vendor PDFs, instrument manuals, validation docs |
 
@@ -45,7 +45,7 @@ If you cannot find an official online source after checking the vendor's website
 
 ### Manifest-Based Delta Sync
 
-The proven pattern (from CC-Optimizer's sync.py):
+The proven pattern (from CC-Optimizer's `scripts/sync-docs.py`):
 
 ```
 docs/
@@ -76,18 +76,17 @@ Manifest structure:
 - Reports summary: total pages, fetched, skipped, failed
 - Writes with `newline="\n"` on Windows
 
-### Skill Shape
+### Delivery: script-direct, skill optional
 
-```yaml
----
-name: sync-docs
-description: Sync official documentation from <product> docs site
-disable-model-invocation: true
-allowed-tools: Bash
----
+For deterministic doc sync (sitemap-driven, fetch + write), use a plain script — no skill wrapper needed:
+
+```bash
+python scripts/sync-docs.py
 ```
 
-The skill runs a Python script. No LLM reasoning needed for fetching -- this is deterministic.
+The script does the work. A slash-command skill wrapper is dead weight if the entire skill body is "run this script" — drop it. CC-Optimizer learned this after the original `/sync-docs` skill turned out to wrap a one-line invocation.
+
+When a skill IS worth it: when the sync needs judgment (which sources to pull, when to ingest vs sync, when to skip), wrap in a skill so Claude can branch. For sitemap-driven mirror, the script suffices.
 
 ## Where Synced Docs Live
 

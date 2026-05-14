@@ -21,6 +21,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 | QA Scripts Directory | [qa-directory.md](patterns/qa-directory.md) | Projects with 5+ validation/test scripts |
 | Health Check + Remediation | [health-check-remediation.md](patterns/health-check-remediation.md) | Operational/infrastructure projects |
 | Isolation Bisect | [isolation-bisect.md](patterns/isolation-bisect.md) | Debugging workspaces, plugin/mod systems |
+| Coordination Protocol | [coordination-protocol.md](patterns/coordination-protocol.md) | Multi-thread / multi-session / cross-workspace coordination work |
 
 ## Architecture
 

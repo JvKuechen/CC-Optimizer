@@ -68,7 +68,7 @@ When you update these files in `~/.claude/`, all workspaces benefit immediately.
 
 ## Pre-flight: Per Optimization
 
-- [ ] Run `/sync-docs` to ensure local documentation is current
+- [ ] Run `python scripts/sync-docs.py` to ensure local documentation is current
 - [ ] Open target workspace with `--add-dir` flag: `claude --add-dir /path/to/target`
 
 ---
@@ -330,7 +330,7 @@ paths:
 - [ ] PR creation → `/create-pr` skill
 - [ ] Bug investigation → `/investigate` skill
 - [ ] **Docs sync or ingest** -- Determine which approach fits the project's external documentation:
-  - **Evolving docs** (online, machine-readable, changes regularly): create a `/sync-docs` skill with manifest-based delta sync. Mirror as-is -- don't parse what will change next week. See `patterns/vendor-docs-sync.md`
+  - **Evolving docs** (online, machine-readable, changes regularly): create a `scripts/sync-docs.py` (or similar) with manifest-based delta sync. Mirror as-is -- don't parse what will change next week. See `patterns/vendor-docs-sync.md`. A skill wrapper is optional and usually dead weight if the script is the work.
   - **Static docs** (PDFs, .docx, ships with installer, pinned version): create an `/ingest-docs` skill that parses into agent-optimized markdown. Worth the effort because the content is stable and the raw format is hostile to agents. See `patterns/knowledge-base-repo.md`
   - If no official online source is found, ask the user -- they may know of internal mirrors or have offline copies
 - [ ] **Knowledge base pipeline** (KB repos only) → `/ingest-docs`, `/update-wiki`, `/search-helpdesk` skills (see `patterns/knowledge-base-repo.md`)
@@ -524,7 +524,7 @@ Notable additions since baseline:
 
 ## Playbook Maintenance
 
-When docs are updated (detected by `/sync-docs`):
+When docs are updated (detected by `python scripts/sync-docs.py`):
 1. Diff the updated pages against previous versions
 2. Identify new features, changed syntax, or deprecated patterns
 3. Update this playbook to reflect changes

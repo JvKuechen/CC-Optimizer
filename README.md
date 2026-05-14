@@ -19,7 +19,7 @@ python scripts/setup.py
 python templates/deploy-user-settings.py
 ```
 
-Then open Claude Code in this directory and run `/sync-docs` to fetch the latest documentation. Optionally install plugins with `/plugin`.
+Then run `python scripts/sync-docs.py` to fetch the latest documentation. Optionally open Claude Code and install plugins with `/plugin`.
 
 ## What You Get
 
@@ -47,7 +47,7 @@ Edit them with your own values (remote URLs, project lists, etc.). See the examp
 
 | Task | Command |
 |------|---------|
-| Sync official docs | `/sync-docs` |
+| Sync official docs | `python scripts/sync-docs.py` |
 | Optimize a project | `/optimize-workspace C:/path/to/project` |
 | Bootstrap a new project | `/init-workspace C:/path/to/project` |
 | Update playbook after sync | `/update-playbook` |

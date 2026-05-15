@@ -117,7 +117,7 @@ Active workspaces live as nested clones under `WS/` in this repo (flat layout, n
 
 Multi-thread / multi-workspace coordination uses the protocol at `~/.claude/rules/coordination.md` (deployed via `templates/deploy-user-settings.py`). Vocabulary: main thread = coordinator, subthread = focused executor, bounty board = cross-thread task state, close-out report = structured subthread return.
 
-Cross-cutting work for CC-Optimizer itself is tracked in `BOUNTY.md` at the workspace root. Per-workspace coordination state lives inside each `WS/<project>/`. Spawn subthreads using the brief template at `subthread-brief.md` (customize per task before pasting). Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in those files plus `handoff.md` only — never in tracked source, docs, or rules.
+Cross-cutting work for CC-Optimizer itself is tracked in `BOUNTY.md` at the workspace root. Per-workspace coordination state lives inside each `WS/<project>/`. Start a main-thread session by pasting `main-thread-kickoff.md`; spawn subthreads using the brief template at `subthread-brief.md` (customize each per task before pasting). Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in those files plus `handoff.md` only — never in tracked source, docs, or rules.
 
 ## Public Repo Commit Workflow
 

@@ -36,7 +36,8 @@ Most recent first. Trim older entries to `handoff.md` archive sections when this
 
 | ID | Subject | Commit |
 |----|---------|--------|
-| coord-rollout | Coordination protocol scaffolding (global rule, BOUNTY/brief templates, pattern entry, init/optimize skill updates, sync-docs skill -> script migration) | (commit pending) |
+| coord-kickoff | main-thread-kickoff template (generalized from FortrOS) wired into pattern + both skills + coordination rule | (commit pending) |
+| coord-rollout | Coordination protocol scaffolding (global rule, BOUNTY/brief templates, pattern entry, init/optimize skill updates, sync-docs skill -> script migration) | 2ece5f3 |
 
 ## Recommended sequencing
 

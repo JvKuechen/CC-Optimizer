@@ -62,6 +62,7 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
    If 2+ signals present, propose installing the coordination protocol (see `playbook/patterns/coordination-protocol.md`):
    - Plant `BOUNTY.md` (from `templates/BOUNTY.md`)
    - Plant `subthread-brief.md` (from `templates/subthread-brief.md`)
+   - Plant `main-thread-kickoff.md` (from `templates/main-thread-kickoff.md`)
    - Add Coordination section to CLAUDE.md pointing at `~/.claude/rules/coordination.md`
 
    Skip silently if signals don't fire — solo / linear workspaces don't benefit.

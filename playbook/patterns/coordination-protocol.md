@@ -27,6 +27,7 @@ Two or more signals = strong candidate. Single signal = optional; ask the user.
 | `coordination.md` rule | `~/.claude/rules/` (global, deployed via `templates/deploy-user-settings.py`) | Once per machine |
 | `BOUNTY.md` | Workspace root | When workspace has the signals above |
 | `subthread-brief.md` template | Workspace root or `playbook/` | Alongside BOUNTY.md |
+| `main-thread-kickoff.md` template | Workspace root | Alongside BOUNTY.md |
 | Coordination section | Generated CLAUDE.md | Init / optimize when planting BOUNTY.md |
 
 ## Deployment steps
@@ -41,7 +42,8 @@ This deploys the global coordination rule to `~/.claude/rules/coordination.md` a
 
 1. Copy `templates/BOUNTY.md` to workspace root.
 2. Copy `templates/subthread-brief.md` to workspace root.
-3. Append the Coordination section to CLAUDE.md:
+3. Copy `templates/main-thread-kickoff.md` to workspace root.
+4. Append the Coordination section to CLAUDE.md:
 
 ```markdown
 ## Coordination

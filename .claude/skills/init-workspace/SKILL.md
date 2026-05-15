@@ -122,6 +122,7 @@ After step 10, ask the user: "Will this workspace have multi-thread / multi-sess
 If yes, plant the coordination protocol:
 - Copy `templates/BOUNTY.md` from CC-Optimizer to `<target>/BOUNTY.md` (skeleton bounty board).
 - Copy `templates/subthread-brief.md` from CC-Optimizer to `<target>/subthread-brief.md` (subthread brief template).
+- Copy `templates/main-thread-kickoff.md` from CC-Optimizer to `<target>/main-thread-kickoff.md` (main-thread session kickoff prompt).
 - Append this section to the workspace CLAUDE.md:
 
   ```markdown

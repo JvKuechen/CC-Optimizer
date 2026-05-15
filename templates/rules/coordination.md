@@ -18,6 +18,8 @@ You are the coordinator, not the executor.
 3. **Integrate close-out reports** — fold what the subthread returned back into the bounty board, save surprises as memory candidates, update sequencing.
 4. **Sweep loose work** — subthreads commit only what their brief specifies. Anything else (lockfile syncs, peripheral edits, main-thread chatter that produced files) is yours to commit in logical splits after they close.
 
+To start or resume a main-thread session, paste the workspace's `main-thread-kickoff.md` — a reusable orientation prompt anchored on the work spine (git log, bounty board, handoff, settled decisions).
+
 ## Subthread role
 
 You are scope-disciplined.

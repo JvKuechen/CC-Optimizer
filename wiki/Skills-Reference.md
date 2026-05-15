@@ -67,7 +67,7 @@ Skills are on-demand workflows invoked with slash commands. They're only loaded 
 python scripts/sync-docs.py
 ```
 
-Fetches the sitemap XML to discover pages and their lastmod timestamps, downloads only pages that are new or have changed (incremental sync via `docs/manifest.json`), and reports a summary. Currently tracks 56 English documentation pages. Pure Python stdlib, no skill wrapper — the work is deterministic enough that a slash-command wrapper would be dead weight.
+Fetches the sitemap XML to discover pages and their lastmod timestamps, downloads only pages that are new or have changed (incremental sync via `docs/manifest.json`), and reports a summary. Pure Python stdlib, no skill wrapper — the work is deterministic enough that a slash-command wrapper would be dead weight.
 
 ### scripts/migrate-sessions.py
 

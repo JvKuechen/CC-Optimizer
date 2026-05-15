@@ -106,6 +106,6 @@ Two placement options depending on workspace type:
 
 ## Real-World Examples
 
-- **CC-Optimizer** -- Syncs 56 English doc pages from `code.claude.com/docs/sitemap.xml`. Delta sync via lastmod timestamps. Pure Python, stdlib only. Docs change regularly as Claude Code ships features.
+- **CC-Optimizer** -- Syncs the English doc pages from `code.claude.com/docs/sitemap.xml`. Delta sync via lastmod timestamps. Pure Python, stdlib only. Docs change regularly as Claude Code ships features.
 - **Lab instrument CDS** -- No online vendor docs (vendor ships PDFs with installers). Uses **ingest**, not sync. All documentation is static and version-pinned.
 - **XRD analysis software** -- Pending source discovery. Vendor may have online docs; if not, ingest only.

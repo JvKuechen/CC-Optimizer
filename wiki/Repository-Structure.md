@@ -28,7 +28,7 @@ CC-Optimizer/
 ├── docs/
 │   ├── manifest.json            # Sync timestamps (tracked in git)
 │   ├── plugin-marketplace-reference.md
-│   └── en/                      # 56 doc pages (gitignored, fetched via python scripts/sync-docs.py)
+│   └── en/                      # English doc mirror (gitignored, fetched via python scripts/sync-docs.py)
 ├── playbook/
 │   ├── optimization-checklist.md # Primary optimization reference
 │   ├── cheatsheet.md            # Feature quick reference

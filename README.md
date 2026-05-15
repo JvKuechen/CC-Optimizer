@@ -29,8 +29,8 @@ Then run `python scripts/sync-docs.py` to fetch the latest documentation. Option
 | Guardrail hook | `~/.claude/hooks/guardrail.py` | Blocks destructive commands (`rm -rf /`, force push, `DROP DATABASE`) before they execute |
 | Notification hook | `~/.claude/settings.json` | Audio alert when Claude needs your input |
 | Optimization playbook | `playbook/` | Step-by-step checklist for bringing any project up to Claude Code best practices |
-| 16 reusable patterns | `playbook/patterns/` | Proven techniques from 22+ workspace audits |
-| Doc mirror | `docs/en/` (after sync) | 56 pages from code.claude.com, searchable offline |
+| Reusable patterns | `playbook/patterns/` | Proven techniques distilled from workspace audits |
+| Doc mirror | `docs/en/` (after sync) | code.claude.com docs, searchable offline |
 
 ## Configuration
 

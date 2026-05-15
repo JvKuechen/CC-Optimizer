@@ -29,11 +29,11 @@ IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace d
 ## Key Directories
 
 - `WS/` -- Nested workspace clones (flat layout). Gitignored. Each project has its own .git. Use explicit Grep paths since rg skips gitignored dirs.
-- `docs/en/` -- Local mirror of 56 English doc pages (raw markdown from code.claude.com)
+- `docs/en/` -- Local mirror of the English doc pages (raw markdown from code.claude.com)
 - `docs/manifest.json` -- Tracks lastmod timestamps per page for incremental sync
 - `docs/plugin-marketplace-reference.md` -- Internal reference on plugin system and demo marketplace
 - `playbook/` -- Actionable optimization checklist distilled from docs
-- `playbook/patterns.md` -- Toolbelt: 16 reusable patterns discovered across 22 workspace audits
+- `playbook/patterns.md` -- Toolbelt: reusable patterns distilled from workspace audits
 - `wiki/` -- GitHub/Gitea wiki content (tracked by main repo, synced to wiki remotes via CI on push to main). Searchable with Grep.
 - `scripts/setup.py` -- Post-clone setup: creates workspace directories, installs git hooks
 - `playbook/patterns/` -- Individual pattern files (current-state-capsule, gate-pattern, etc.)

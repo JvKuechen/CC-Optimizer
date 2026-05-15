@@ -58,6 +58,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 |---------|------|-------------|
 | Knowledge Base Repo | [knowledge-base-repo.md](patterns/knowledge-base-repo.md) | Non-code repos for external software. **Ingest** static docs (PDFs, manuals) into agent-optimized markdown |
 | Vendor Docs Sync | [vendor-docs-sync.md](patterns/vendor-docs-sync.md) | **Sync** evolving online docs as-is. Don't parse what will change next week |
+| Code-Resident Docs | [code-resident-docs.md](patterns/code-resident-docs.md) | Internal impl-spec docs that drift from code. Move item-level "why" into doc-comments so agents must read + update it while editing |
 
 ## Safety
 

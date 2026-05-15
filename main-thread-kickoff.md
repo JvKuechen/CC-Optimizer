@@ -13,15 +13,17 @@ dig into.
 Anchor the sweep on the work spine -- not random file reading:
 
 - `git log` -- recent commits, what shipped lately
-- `BOUNTY.md` -- workspace-root task tracker (READY / BLOCKED / PARALLEL-TRACK / SHIPPED)
-- `handoff.md` -- narrative continuity from the last session, if one exists
+- `handoff.md` -- narrative continuity + task state from the last session, if one exists
 - `CLAUDE.md` -- settled decisions and per-area status (shipped / partial / proposed)
 
 Spawn Explore (or other read-only) subagents for breadth so the main context stays
 clean.
 
 For each area, report: what's shipped and live, what's partial, what's blocked, and
-what it's waiting on. I want the full picture first.
+what it's waiting on. That report is the bounty board for this session -- a
+structured READY / BLOCKED / PARALLEL-TRACK / SHIPPED tracker held in this
+conversation, not a file. Rebuild it from the spine; never read it from or write it
+to disk. I want the full picture first.
 
 <ENVIRONMENT READINESS -- replace with workspace-specific checks, or delete if the
 workspace has no separate dev/test environment. Example: "The dev environment was

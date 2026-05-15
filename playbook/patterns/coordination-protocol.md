@@ -25,10 +25,11 @@ Two or more signals = strong candidate. Single signal = optional; ask the user.
 | File | Where | When |
 |------|-------|------|
 | `coordination.md` rule | `~/.claude/rules/` (global, deployed via `templates/deploy-user-settings.py`) | Once per machine |
-| `BOUNTY.md` | Workspace root | When workspace has the signals above |
-| `subthread-brief.md` template | Workspace root or `playbook/` | Alongside BOUNTY.md |
-| `main-thread-kickoff.md` template | Workspace root | Alongside BOUNTY.md |
-| Coordination section | Generated CLAUDE.md | Init / optimize when planting BOUNTY.md |
+| `subthread-brief.md` template | Workspace root | When the workspace has the signals above |
+| `main-thread-kickoff.md` template | Workspace root | Alongside the brief template |
+| Coordination section | Generated CLAUDE.md | Init / optimize, alongside the templates |
+
+The bounty board is **not** a planted file — it's an in-chat artifact the main thread reconstructs each session (see the coordination rule). `handoff.md` (gitignored, per-workstation) is the only persistent local tracker.
 
 ## Deployment steps
 
@@ -40,17 +41,16 @@ This deploys the global coordination rule to `~/.claude/rules/coordination.md` a
 
 **Per-workspace (init or optimize):**
 
-1. Copy `templates/BOUNTY.md` to workspace root.
-2. Copy `templates/subthread-brief.md` to workspace root.
-3. Copy `templates/main-thread-kickoff.md` to workspace root.
-4. Append the Coordination section to CLAUDE.md:
+1. Copy `templates/subthread-brief.md` to workspace root.
+2. Copy `templates/main-thread-kickoff.md` to workspace root.
+3. Append the Coordination section to CLAUDE.md:
 
 ```markdown
 ## Coordination
 
 Multi-thread work in this repo uses the coordination protocol. See `~/.claude/rules/coordination.md` for vocabulary (main thread, subthread, bounty board, close-out report) and discipline.
 
-Spawn subthreads with the brief at `subthread-brief.md`. Maintain task state in `BOUNTY.md`. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in those two files plus `handoff.md` only — never in tracked source/docs.
+The bounty board is an in-chat tracker, rebuilt each session from `git log` + `handoff.md` — not a file. Start a main-thread session with `main-thread-kickoff.md`; spawn subthreads with `subthread-brief.md`. `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — never in tracked source/docs.
 ```
 
 ## Outcomes observed (FortrOS, source of this pattern)
@@ -63,10 +63,10 @@ Spawn subthreads with the brief at `subthread-brief.md`. Maintain task state in 
 ## Related patterns
 
 - **Current State Capsule** — what the bounty board references for "where are we right now"
-- **Blocked Task Tracking** — the BOUNTY.md skeleton is an elaboration of this pattern with explicit shape annotations
+- **Blocked Task Tracking** — the bounty board is an elaboration of this pattern with explicit shape annotations
 - **Gate Pattern** — coordination protocol assumes the staging discipline gate (no `git add -A`)
 
 ## Not the same as
 
-- **TaskList (in-thread):** TaskCreate tracks single-conversation progress; bounty board tracks cross-thread state. Both are useful and complementary.
-- **handoff.md (cross-conversation):** Handoff is narrative continuity for resuming a single thread; bounty board is structured task state across many threads. Pair them.
+- **TaskList (in-thread):** TaskCreate tracks single-conversation progress; the bounty board is the main thread's cross-thread coordination view. Both live in context, not in files.
+- **handoff.md (cross-conversation):** `handoff.md` is the durable, gitignored narrative tracker that survives across sessions. The bounty board is live in-chat working state, reconstructed from `handoff.md` + git log each session. Persist `handoff.md`; never persist the board.

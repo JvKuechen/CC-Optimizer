@@ -60,7 +60,6 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
    - User describes "main thread" / "subthread" / "spawn a subthread" language naturally
 
    If 2+ signals present, propose installing the coordination protocol (see `playbook/patterns/coordination-protocol.md`):
-   - Plant `BOUNTY.md` (from `templates/BOUNTY.md`)
    - Plant `subthread-brief.md` (from `templates/subthread-brief.md`)
    - Plant `main-thread-kickoff.md` (from `templates/main-thread-kickoff.md`)
    - Add Coordination section to CLAUDE.md pointing at `~/.claude/rules/coordination.md`

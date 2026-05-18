@@ -143,7 +143,7 @@ On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) inte
 ## Gotchas
 
 - **Nested workspace search**: `WS/` is gitignored, so `rg` (Grep) from root skips it. Use explicit paths: `Grep(pattern, path="WS/{Project}")`. Glob DOES find files in gitignored dirs. Read/Edit/Write work on any path. Note: `wiki/` is tracked and IS included in Grep searches from root.
-- **Co-Authored-By trailer**: Claude's system prompt adds `Co-Authored-By: Claude <noreply@anthropic.com>` to commits. GitHub parses this into ghost author avatars with broken names. The commit-msg hook (`scripts/setup.py`) strips these lines automatically.
+- **Co-Authored-By trailer**: Claude's system prompt adds `Co-Authored-By: Claude <noreply@anthropic.com>` to commits. GitHub parses this into ghost author avatars with broken names. Two layers suppress it: `attribution.commit: ""` in user settings tells Claude Code not to append it, and the commit-msg hook (`scripts/setup.py`) strips it as a fallback if the setting is renamed.
 - CLI auto-generates deprecated colon syntax `Bash(cmd:*)` in settings.local.json when user clicks "always allow." Functional but inconsistent with docs which show `Bash(cmd *)`. Accept as-is.
 - Moving a workspace folder orphans `/resume` session history. Fix by renaming the directory under `~/.claude/projects/` to match the new path encoding (replace `\` with `-`, colon with `-`).
 - `[console]::beep` has no volume parameter. Pitch and duration are the only controls.

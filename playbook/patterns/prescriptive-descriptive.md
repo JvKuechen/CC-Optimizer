@@ -13,7 +13,7 @@ Separate CLAUDE.md into two clear sections. Prescriptive rules go in CLAUDE.md (
 ```
 CLAUDE.md (prescriptive - always loaded):
   "All new systems MUST use the plugin pattern. Create a Plugin struct, register in app.rs."
-  "NEVER use direct component access. Always go through the facade."
+  "Access components through the facade. Rejected: direct component access."
 
 .claude/rules/architecture.md (descriptive - loaded when editing src/):
   "The ECS pattern separates data (Components) from logic (Systems).
@@ -25,7 +25,7 @@ CLAUDE.md (prescriptive - always loaded):
 
 ## Rules
 
-- CLAUDE.md = commands ("do X", "never Y", "always Z")
+- CLAUDE.md = directives — positive targets ("do X", "always Z"); anti-patterns labeled ("Rejected: Y")
 - Rules/skills = explanations ("X works by...", "the reason for Y is...")
 - If a descriptive section in CLAUDE.md doesn't prevent mistakes, move it out
 - Learning mode (teaching Claude a framework) belongs in skills, not CLAUDE.md

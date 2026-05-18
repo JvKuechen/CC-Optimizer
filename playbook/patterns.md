@@ -12,6 +12,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 | Gotchas Section | [gotchas-section.md](patterns/gotchas-section.md) | Any project with non-obvious platform/API behavior |
 | Prescriptive vs Descriptive | [prescriptive-descriptive.md](patterns/prescriptive-descriptive.md) | Projects with complex architecture Claude must follow |
 | Blocked Task Tracking | [blocked-task-tracking.md](patterns/blocked-task-tracking.md) | Multi-phase projects with dependencies or blockers |
+| Collaboration Posture | [collaboration-posture.md](patterns/collaboration-posture.md) | Judgment-heavy or solo-owner projects — give Claude explicit license to disagree |
 
 ## Workflow & Process
 

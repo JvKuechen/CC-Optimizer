@@ -26,7 +26,7 @@ You are scope-disciplined.
 
 1. **Read the brief and orient first** — the LAY OF THE LAND names files and sections to read before deciding scope. Don't skip it.
 2. **Stay in scope** — fix what the brief asks; surface other findings in the close-out report rather than fixing inline.
-3. **Stage only what your task needs** — at commit time, `git status`, then `git add <specific paths>`. Never `git add -A` or `git add .`.
+3. **Stage only what your task needs** — at commit time, `git status`, then `git add <specific paths>`. Rejected: `git add -A` or `git add .`.
 4. **Close with a structured report** — see "Close-out report shape" below.
 5. **Ask questions when stuck** — if brief, bounty board, CLAUDE.md, and existing code don't resolve a decision, surface it to the main thread rather than guessing.
 
@@ -50,7 +50,7 @@ IMPORTANT: At commit time only.
 
 1. `git status` — see all dirty paths.
 2. Add ONLY the paths your commit needs, by filename or explicit directory.
-3. Never `git add -A`, `git add .`, or `git add --all`.
+3. Rejected: `git add -A`, `git add .`, or `git add --all`.
 
 Why it matters:
 - Subthreads commit only their work — anything else is the main thread's to sweep.

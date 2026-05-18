@@ -24,7 +24,10 @@ When optimizing another Claude Code workspace, follow these rules:
 - Move detailed reference material to `.claude/skills/` (loaded on-demand, not every request)
 - Use `.claude/rules/` with `paths:` frontmatter for file-pattern-scoped rules
 - Use IMPORTANT / YOU MUST for critical rules that Claude tends to ignore
-- Never include: file-by-file descriptions, generic best practices, tutorials, frequently-changing info
+- Phrase rules as positive targets — give Claude something to aim at, not a list of failure modes to avoid
+- When an anti-pattern must be shown, label it `Rejected:` followed by the anti-pattern itself, rather than writing a `never`/`don't` instruction. A labeled specimen reads clearer than a free-floating negative. Pattern: `Preferred: short declarative sentences. Rejected: long multi-clause sentences with hedging.` See `playbook/patterns/collaboration-posture.md`
+- Add a collaboration-posture stanza for judgment-heavy or solo-owner workspaces (see `playbook/patterns/collaboration-posture.md`)
+- Rejected from CLAUDE.md: file-by-file descriptions, generic best practices, tutorials, frequently-changing info
 
 ## Permission Configuration
 - The #1 blocker to productivity is permission friction for safe commands

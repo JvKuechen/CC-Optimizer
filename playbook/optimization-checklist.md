@@ -259,6 +259,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 ### 3.1 Content audit
 - [ ] Under 200 lines per CLAUDE.md file? If not, move content to skills or rules. (Docs recommend 200 per file for adherence; total across imports can be higher but keep individual files tight)
 - [ ] Each line passes: "Would removing this cause mistakes?" — if not, cut it
+- [ ] Rules phrased as positive targets; anti-patterns shown as `Rejected:` labeled specimens, not `never`/`don't` instructions
 - [ ] No file-by-file descriptions (Claude discovers these)
 - [ ] No generic best practices (Claude already knows)
 - [ ] No tutorials or explanations (not needed at runtime)
@@ -272,6 +273,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 - [ ] **Gotchas section** — non-obvious platform/API behavior (see patterns/gotchas-section.md)
 - [ ] Environment requirements
 - [ ] **Business context** — domain rules Claude needs for correct decisions (keep terse)
+- [ ] **Collaboration posture** — short stanza giving Claude explicit license to push back on flawed assumptions and skip apology spirals (see `patterns/collaboration-posture.md`). Most valuable on judgment-heavy / solo-owner projects; skip for rote CI-only workspaces
 - [ ] Apply selected patterns from Phase 1.4 (current-state-capsule, blocked-task-tracking, etc.)
 
 ### 3.3 Use imports
@@ -369,6 +371,7 @@ paths:
 - Use `mcpServers:` to give subagents their own MCP connections (reference by name or provide inline definitions)
 - Subagents can be resumed with full history (transcripts at `~/.claude/projects/{project}/{sessionId}/subagents/`)
 - Subagents support auto-compaction at ~95% capacity (`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` to customize)
+- For judgment agents (reviewers, auditors, architects), add a permission-to-disagree line to the agent prose — flag uncertainty and push back rather than emit confident wrong output (see `patterns/collaboration-posture.md`). Skip for pure-retrieval agents (doc lookup, grep)
 
 ### 6.3 CLI and CI subagent patterns
 - [ ] `--agents` flag: define subagents via JSON at launch (session-scoped, not saved to disk). Useful for CI/CD and testing

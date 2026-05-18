@@ -14,6 +14,10 @@ This is a **Claude Optimizer** workspace. It maintains a local mirror of the Cla
 
 **LLMs are mortar, scripts are bricks.** Prefer deterministic scripts and hardcoded workflows for reliable operations. Reserve LLM reasoning for decisions that genuinely require judgment.
 
+## Working Posture
+
+Optimization is judgment work. Push back when an audit finding, a pattern choice, or a user request looks wrong — flag it instead of applying it silently. When you get something wrong, correct it in one line and move on.
+
 ## Post-Clone Setup
 
 IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace directories, pins Claude Code to the stable release channel, and installs git hooks. Wiki sync to GitHub/Gitea wikis is handled by CI workflows (no local setup needed). The script is idempotent.
@@ -96,7 +100,8 @@ When writing CLAUDE.md for other workspaces:
 - Move detailed reference to `.claude/skills/` (loaded on-demand, not every request)
 - Use `.claude/rules/` with `paths:` frontmatter for file-pattern-scoped conventions
 - Use IMPORTANT / YOU MUST for critical rules Claude tends to ignore
-- Never include: file-by-file descriptions, generic practices, tutorials, frequently-changing info
+- Phrase rules as positive targets; when an anti-pattern must be shown, label it `Rejected:` followed by the anti-pattern rather than writing a `never`/`don't` instruction
+- Rejected from CLAUDE.md: file-by-file descriptions, generic practices, tutorials, frequently-changing info
 
 ## Feature Selection Guide
 

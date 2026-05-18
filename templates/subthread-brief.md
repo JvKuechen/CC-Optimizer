@@ -18,7 +18,7 @@ YOU MUST NOT pre-stage. At commit time only:
 
 1. `git status` to see all dirty paths.
 2. Add ONLY the paths your task needs, by filename or explicit directory.
-3. Never `git add -A` / `git add .`.
+3. Rejected: `git add -A` / `git add .`.
 
 Anything else dirty in the tree is the main thread's to sweep after you close.
 
@@ -33,6 +33,8 @@ Anything else dirty in the tree is the main thread's to sweep after you close.
 ## ASKING QUESTIONS
 
 When a decision isn't settled by the brief (the embedded board included), CLAUDE.md, or existing code, raise it to the main thread. The main thread will fork to resolve and resume the subthread with the answer.
+
+If the brief's approach itself looks wrong — not merely unclear, but headed somewhere bad — say so before executing rather than complying cleanly. A flawed brief caught early is cheaper than a polished execution of it.
 
 Look-ups (file reads, grep, re-reading sections already cited above) stay in-thread.
 

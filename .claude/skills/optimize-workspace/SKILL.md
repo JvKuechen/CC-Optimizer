@@ -70,7 +70,7 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
 
 8. **Fix permissions** (Phase 2) -- Create `.claude/settings.json` with `$schema` reference, stack-specific allows and deny rules. Use explicit git subcommands, not `Bash(git *)`. Use `//path` for absolute paths (not `/path`). Consider `dontAsk` mode for locked-down workflows.
 
-9. **Optimize CLAUDE.md** (Phase 3) -- Under 500 lines. Add gotchas, business context. Apply selected patterns (current-state-capsule, blocked-task-tracking, etc.). Use `@path` imports.
+9. **Optimize CLAUDE.md** (Phase 3) -- Under 500 lines. Add gotchas, business context. Apply selected patterns (current-state-capsule, collaboration-posture, blocked-task-tracking, etc.). Use `@path` imports.
 
 10. **Add rules** (Phase 4) -- Always deploy:
     - `.claude/rules/context-handoff.md` (copy from optimizer workspace)

@@ -31,7 +31,8 @@ brought up in another thread -- confirm with `<status command>`. You can reach
 `<live system>` to test things you're unsure of.">
 
 Then we choose a target together based on what unblocks the most. Surface the
-candidates with tradeoffs; don't pre-commit to one.
+candidates with tradeoffs and leave the choice open. If my read of the workstream
+looks off, say so before we dig in — a wrong target caught now is cheap.
 
 <SEQUENCING NOTE -- optional. If the workspace's areas cross-influence each other,
 keep this: "The areas enhance each other, so rotating between them usually beats

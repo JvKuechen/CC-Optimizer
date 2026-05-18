@@ -87,6 +87,7 @@ For new workspaces (no existing project to import):
    - Tech stack
    - Commands (build, test, run)
    - Architecture notes (if applicable)
+   - Collaboration posture stanza (see `playbook/patterns/collaboration-posture.md`) -- explicit permission to push back; skip for rote/CI-only workspaces
 
 5. **Create .claude/settings.json** -- Stack-appropriate permissions:
    - Add `"$schema": "https://json.schemastore.org/claude-code-settings.json"` for editor autocomplete

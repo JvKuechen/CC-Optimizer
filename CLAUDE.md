@@ -69,9 +69,11 @@ The **fix-line-endings hook** (PostToolUse on Write|Edit) converts CRLF to LF im
 The guardrail is a deterministic Python script (zero tokens, can't be reasoned around). It blocks:
 - Docker data destruction (volume rm/prune, system prune, compose down -v)
 - Broad filesystem deletion (rm -rf on root/home/C:, rmdir /s /q, del /s /q)
-- Windows hazards (format, diskpart, > nul redirect)
+- Windows hazards (format, diskpart)
 - Git destruction (force push, hard reset, clean -f)
 - Database destruction (DROP DATABASE/SCHEMA)
+
+Two PreToolUse **rewriter hooks** fix Windows-hostile constructs deterministically instead of blocking (which would force a retry). `shell-rewrite.py` rewrites `> nul` to `/dev/null` and `python3` to `python` in Bash commands. `ascii-normalize.py` transliterates non-ASCII typography to ASCII in source files, and blocks writes whose non-ASCII has no ASCII mapping (use a Bash heredoc for those). Both no-op on WSL/Linux.
 
 This follows documented best practice: hooks-guide.md lists "Custom permissions: Block modifications to production files or sensitive directories" as a primary use case, and best-practices.md states hooks are "deterministic and guarantee the action happens" unlike advisory CLAUDE.md instructions.
 

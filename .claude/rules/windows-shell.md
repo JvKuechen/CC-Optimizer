@@ -13,6 +13,8 @@ paths:
 
 These rules apply when authoring shell or hook code targeted at native Windows (Git Bash, CMD, PowerShell). They do not apply in WSL. YOU MUST follow them when editing files matched by the `paths:` above.
 
+On a machine set up with `deploy-user-settings.py`, the `shell-rewrite.py` and `ascii-normalize.py` user hooks auto-correct the most common violations (`nul` redirects, `python3`, non-ASCII typography) before they take effect. Treat the hooks as a safety net -- these rules still describe the code to write.
+
 ## Path Separators
 
 - ALWAYS use forward slashes (`/`) in paths passed to Bash, even on Windows. Git Bash, Python, Node, and most CLI tools handle them correctly.

@@ -12,6 +12,21 @@
             "type": "command",
             "command": "python \"~/.claude/hooks/guardrail.py\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python \"~/.claude/hooks/shell-rewrite.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"~/.claude/hooks/ascii-normalize.py\"",
+            "timeout": 5
           }
         ]
       }

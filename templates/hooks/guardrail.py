@@ -43,10 +43,8 @@ HARD_BLOCK = [
     (r"DROP\s+SCHEMA", "BLOCKED: DROP SCHEMA"),
 ]
 
-# Patterns that trigger a warning (command still proceeds but stderr warns Claude)
-SOFT_WARN = [
-    (r">\s*nul\b", "WARNING: '> nul' creates an undeletable file on Windows. Use '> /dev/null 2>&1' instead."),
-]
+# `> nul` redirects are no longer handled here -- the shell-rewrite.py PreToolUse
+# hook auto-rewrites them to `/dev/null` before the command runs.
 
 
 def main():
@@ -70,12 +68,6 @@ def main():
             print(f"Command was: {command[:200]}", file=sys.stderr)
             print("If you need to run this command, ask the user to run it manually.", file=sys.stderr)
             sys.exit(2)
-
-    # Check soft warnings (allow but warn)
-    for pattern, message in SOFT_WARN:
-        if re.search(pattern, command, re.IGNORECASE):
-            print(message, file=sys.stderr)
-            sys.exit(2)  # Block nul redirect too - it creates real damage
 
     sys.exit(0)
 

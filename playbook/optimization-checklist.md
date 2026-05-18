@@ -11,9 +11,11 @@ Major changes since 2026-03-13: Opus 4.7 default + `xhigh` effort, auto mode (cl
 - [ ] Set git to use LF line endings: `git config --global core.autocrlf false && git config --global core.eol lf`
 - [ ] Raise output token limit: add `export CLAUDE_CODE_MAX_OUTPUT_TOKENS=64000` to `~/.bashrc` (default 32000 truncates large file reads and multi-file responses)
 - [ ] Run `python templates/deploy-user-settings.py` to deploy global permissions + hooks + notifications
-- [ ] Verify `~/.claude/settings.json` has `permissions`, `hooks.PreToolUse` (guardrail), `hooks.PostToolUse` (line endings), and `hooks.Notification` (audio alert) sections
+- [ ] Verify `~/.claude/settings.json` has `permissions`, `hooks.PreToolUse` (guardrail + shell-rewrite + ascii-normalize), `hooks.PostToolUse` (line endings), and `hooks.Notification` (audio alert) sections
 - [ ] Verify `~/.claude/hooks/guardrail.py` exists
 - [ ] Verify `~/.claude/hooks/fix-line-endings.py` exists (converts CRLF to LF after Write/Edit)
+- [ ] Verify `~/.claude/hooks/shell-rewrite.py` exists (rewrites `nul`/`python3` in Bash commands; Windows-only, no-op in WSL)
+- [ ] Verify `~/.claude/hooks/ascii-normalize.py` exists (transliterates non-ASCII in source files; Windows-only, no-op in WSL)
 - [ ] Restart any active Claude Code sessions (hooks are snapshotted at session start)
 - [ ] Test notification: start a session and wait for a permission prompt -- should hear two tones
 - [x] Install LSP plugins (global -- available in all workspaces) — **DONE 2026-01-28**
@@ -211,7 +213,8 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 
 ### 2.3 Verify guardrail hook is active
 - [ ] Confirm `~/.claude/settings.json` has PreToolUse hook pointing to `guardrail.py`
-- [ ] Hook blocks: docker volume/system destruction, broad rm -rf, git force-push, disk format, `> nul`
+- [ ] Hook blocks: docker volume/system destruction, broad rm -rf, git force-push, disk format
+- [ ] `shell-rewrite.py` + `ascii-normalize.py` PreToolUse hooks auto-correct Windows-hostile syntax (`nul`, `python3`, non-ASCII in source) by rewriting, not blocking -- no retry loop. Windows-only (no-op in WSL)
 - [ ] Hook is deterministic (Python script, zero tokens, can't be reasoned around)
 - [ ] If user hasn't set up global hooks yet, recommend copying from this workspace's config
 

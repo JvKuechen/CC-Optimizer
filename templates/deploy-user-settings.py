@@ -1,9 +1,13 @@
-"""Deploy user-level Claude Code settings, guardrail hook, and notifications.
+"""Deploy user-level Claude Code settings, hooks, and notifications.
 
 Run this on any machine to set up:
-1. ~/.claude/settings.json  (global permissions + hooks)
-2. ~/.claude/hooks/guardrail.py (PreToolUse destructive command blocker)
-3. Notification hook (audio alert when Claude needs input)
+1. ~/.claude/settings.json   (global permissions + hooks)
+2. ~/.claude/hooks/*.py      (every hook in templates/hooks/)
+3. ~/.claude/rules/*.md      (shared rules from templates/rules/)
+
+Hooks deployed: guardrail (block destructive commands), fix-line-endings
+(CRLF->LF), shell-rewrite (fix Windows-hostile Bash syntax), ascii-normalize
+(strip non-ASCII from source). The audio notification hook is settings-only.
 
 Safe to re-run. Overwrites existing files with the latest templates.
 
@@ -32,21 +36,15 @@ def main():
     # Load template settings
     template = json.loads(src_settings.read_text(encoding="utf-8"))
 
-    # Resolve guardrail path (template uses ~, deploy uses absolute)
-    guardrail_path = str(hooks_dir / "guardrail.py").replace("\\", "/")
-
-    # Override hook commands with resolved absolute paths
-    # (template has ~ placeholder, deployed version needs real path)
-    for hook_group in template.get("hooks", {}).get("PreToolUse", []):
-        for hook in hook_group.get("hooks", []):
-            if "guardrail" in hook.get("command", ""):
-                hook["command"] = f'python "{guardrail_path}"'
-
-    fix_eol_path = str(hooks_dir / "fix-line-endings.py").replace("\\", "/")
-    for hook_group in template.get("hooks", {}).get("PostToolUse", []):
-        for hook in hook_group.get("hooks", []):
-            if "fix-line-endings" in hook.get("command", ""):
-                hook["command"] = f'python "{fix_eol_path}"'
+    # Resolve hook command paths: the template uses a ~/.claude/hooks placeholder,
+    # the deployed settings need the real absolute path. Applies to every event.
+    hooks_prefix = str(hooks_dir).replace("\\", "/")
+    for event_hooks in template.get("hooks", {}).values():
+        for hook_group in event_hooks:
+            for hook in hook_group.get("hooks", []):
+                cmd = hook.get("command", "")
+                if "~/.claude/hooks" in cmd:
+                    hook["command"] = cmd.replace("~/.claude/hooks", hooks_prefix)
 
     dst_settings.write_text(
         json.dumps(template, indent=2, ensure_ascii=False) + "\n",
@@ -54,10 +52,9 @@ def main():
     )
     print(f"Deployed: {dst_settings}")
 
-    # Deploy hooks
-    for hook_file in ["guardrail.py", "fix-line-endings.py"]:
-        src_hook = script_dir / "hooks" / hook_file
-        dst_hook = hooks_dir / hook_file
+    # Deploy every hook script in templates/hooks/
+    for src_hook in sorted((script_dir / "hooks").glob("*.py")):
+        dst_hook = hooks_dir / src_hook.name
         shutil.copy2(src_hook, dst_hook)
         print(f"Deployed: {dst_hook}")
 

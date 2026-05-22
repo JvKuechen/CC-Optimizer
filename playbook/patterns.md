@@ -13,6 +13,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 | Prescriptive vs Descriptive | [prescriptive-descriptive.md](patterns/prescriptive-descriptive.md) | Projects with complex architecture Claude must follow |
 | Blocked Task Tracking | [blocked-task-tracking.md](patterns/blocked-task-tracking.md) | Multi-phase projects with dependencies or blockers |
 | Collaboration Posture | [collaboration-posture.md](patterns/collaboration-posture.md) | Judgment-heavy or solo-owner projects — give Claude explicit license to disagree |
+| Positive Instruction Framing | [positive-instruction-framing.md](patterns/positive-instruction-framing.md) | Any authored agent surface — reframe negative directives that prime the failure they warn against |
 
 ## Workflow & Process
 
@@ -58,7 +59,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 | Pattern | File | When to Use |
 |---------|------|-------------|
 | Knowledge Base Repo | [knowledge-base-repo.md](patterns/knowledge-base-repo.md) | Non-code repos for external software. **Ingest** static docs (PDFs, manuals) into agent-optimized markdown |
-| Vendor Docs Sync | [vendor-docs-sync.md](patterns/vendor-docs-sync.md) | **Sync** evolving online docs as-is. Don't parse what will change next week |
+| Vendor Docs Sync | [vendor-docs-sync.md](patterns/vendor-docs-sync.md) | **Sync** evolving online docs as-is; reserve parsing for docs stable enough to stay valid |
 | Code-Resident Docs | [code-resident-docs.md](patterns/code-resident-docs.md) | Internal impl-spec docs that drift from code. Move item-level "why" into doc-comments so agents must read + update it while editing |
 
 ## Safety

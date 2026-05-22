@@ -24,8 +24,9 @@ When optimizing another Claude Code workspace, follow these rules:
 - Move detailed reference material to `.claude/skills/` (loaded on-demand, not every request)
 - Use `.claude/rules/` with `paths:` frontmatter for file-pattern-scoped rules
 - Use IMPORTANT / YOU MUST for critical rules that Claude tends to ignore
-- Phrase rules as positive targets — give Claude something to aim at, not a list of failure modes to avoid
-- When an anti-pattern must be shown, label it `Rejected:` followed by the anti-pattern itself, rather than writing a `never`/`don't` instruction. A labeled specimen reads clearer than a free-floating negative. Pattern: `Preferred: short declarative sentences. Rejected: long multi-clause sentences with hedging.` See `playbook/patterns/collaboration-posture.md`
+- Phrase rules as positive targets — give Claude something to aim at. A negative directive names a failure mode, and naming it in context raises that failure's probability: the model is a next-token predictor, so the negation rides along with the priming rather than cancelling it.
+- When an anti-pattern must be shown, label it `Rejected:` followed by the anti-pattern itself. A labeled specimen reads clearer than a free-floating negative. Pattern: `Preferred: short declarative sentences. Rejected: long multi-clause sentences with hedging.`
+- This applies to every authored agent surface, not just CLAUDE.md — rules, skills, subagent and memory files, subthread briefs, kickoffs. For subthread briefs, also omit time/context-budget framing: an anticipated "running low" makes the subthread stop short of finishing. See `playbook/patterns/positive-instruction-framing.md`
 - Add a collaboration-posture stanza for judgment-heavy or solo-owner workspaces (see `playbook/patterns/collaboration-posture.md`)
 - Rejected from CLAUDE.md: file-by-file descriptions, generic best practices, tutorials, frequently-changing info
 

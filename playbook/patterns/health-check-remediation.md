@@ -31,5 +31,5 @@ Key principle: health checks are ALWAYS safe to run (read-only). Remediation scr
 - Health checks must be idempotent and side-effect free
 - Health checks return structured output (JSON or exit codes), not prose
 - Remediation scripts log every action taken
-- Never auto-remediate without explicit opt-in (dry-run by default)
+- Auto-remediate only on explicit opt-in -- dry-run by default
 - Pair with remediation-config pattern for production use

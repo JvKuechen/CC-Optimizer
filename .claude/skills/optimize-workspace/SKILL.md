@@ -41,7 +41,7 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
 
 3. **Read findings** -- Check `findings/` in this workspace for an existing audit report on the target. If found, use it as the starting point instead of re-auditing.
 
-4. **Follow the playbook** -- Use `playbook/optimization-checklist.md` as the authoritative checklist. Do NOT consult raw docs unless the playbook is insufficient.
+4. **Follow the playbook** -- Use `playbook/optimization-checklist.md` as the authoritative checklist. Consult raw docs only when the playbook is insufficient.
 
 ## Analysis Phase (Playbook Phases 1-1.5)
 
@@ -64,7 +64,7 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
    - Plant `main-thread-kickoff.md` (from `templates/main-thread-kickoff.md`)
    - Add Coordination section to CLAUDE.md pointing at `~/.claude/rules/coordination.md`
 
-   Skip silently if signals don't fire — solo / linear workspaces don't benefit.
+   Skip silently unless the signals fire — the value lands on multi-thread / multi-session work.
 
 ## Implementation Phase (Playbook Phases 2-8)
 
@@ -112,4 +112,4 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
 - CLAUDE.md under 500 lines
 - Credential hygiene check is always applicable
 - Git safety net before and after
-- NEVER regress functionality -- smoke test before and after
+- Preserve functionality -- smoke test before and after

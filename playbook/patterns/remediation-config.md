@@ -20,7 +20,7 @@ global:
 actions:
   restart_plex:
     enabled: true
-    cooldown_minutes: 30   # Don't run again within 30 min
+    cooldown_minutes: 30   # Wait 30 min before re-running
     max_retries: 3         # Give up after 3 attempts
     requires_confirmation: false
     command: "ssh admin@nas 'systemctl restart plex'"

@@ -280,7 +280,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 - [ ] Apply selected patterns from Phase 1.4 (current-state-capsule, blocked-task-tracking, etc.)
 
 ### 3.3 Use imports
-- [ ] `@README.md` for project overview (don't duplicate)
+- [ ] `@README.md` for project overview (reference, single-source)
 - [ ] `@package.json` or equivalent for available commands
 - [ ] `@docs/CONTRIBUTING.md` if it exists
 - [ ] Import depth limit: 5 hops max (imported files can recursively import others)
@@ -335,7 +335,7 @@ paths:
 - [ ] PR creation → `/create-pr` skill
 - [ ] Bug investigation → `/investigate` skill
 - [ ] **Docs sync or ingest** -- Determine which approach fits the project's external documentation:
-  - **Evolving docs** (online, machine-readable, changes regularly): create a `scripts/sync-docs.py` (or similar) with manifest-based delta sync. Mirror as-is -- don't parse what will change next week. See `patterns/vendor-docs-sync.md`. A skill wrapper is optional and usually dead weight if the script is the work.
+  - **Evolving docs** (online, machine-readable, changes regularly): create a `scripts/sync-docs.py` (or similar) with manifest-based delta sync. Mirror as-is -- parsing pays off only for static docs. See `patterns/vendor-docs-sync.md`. A skill wrapper is optional and usually dead weight if the script is the work.
   - **Static docs** (PDFs, .docx, ships with installer, pinned version): create an `/ingest-docs` skill that parses into agent-optimized markdown. Worth the effort because the content is stable and the raw format is hostile to agents. See `patterns/knowledge-base-repo.md`
   - If no official online source is found, ask the user -- they may know of internal mirrors or have offline copies
 - [ ] **Knowledge base pipeline** (KB repos only) → `/ingest-docs`, `/update-wiki`, `/search-helpdesk` skills (see `patterns/knowledge-base-repo.md`)
@@ -419,7 +419,7 @@ paths:
 - [ ] **Re-inject context after compaction** -- SessionStart hook with `compact` matcher. Anything written to stdout is added to Claude's context (`echo 'reminder: use Bun. current sprint: auth refactor.'`)
 - [ ] **Session lifecycle** -- SessionStart for environment setup (use `$CLAUDE_ENV_FILE` to persist env vars for subsequent Bash commands). Pair with `CwdChanged` + `FileChanged` (matcher = pipe-separated literal filenames like `.envrc|.env`) for direnv/devbox/nix style reactive env management. SessionEnd for cleanup/logging
 - [ ] **Input modification** -- PreToolUse `updatedInput` can modify tool input before execution (combine with `allow` to auto-approve). Note: when multiple PreToolUse hooks rewrite the same tool's input, last-to-finish wins (parallel; non-deterministic order)
-- [ ] **Auto-approve permission prompts** -- `PermissionRequest` hook with narrow matcher (e.g., `ExitPlanMode`) and stdout `{"hookSpecificOutput": {"hookEventName": "PermissionRequest", "decision": {"behavior": "allow"}}}`. Can also include `updatedPermissions` array with `setMode` entry to change permission mode for the session. Don't leave matcher empty -- that auto-approves every prompt
+- [ ] **Auto-approve permission prompts** -- `PermissionRequest` hook with narrow matcher (e.g., `ExitPlanMode`) and stdout `{"hookSpecificOutput": {"hookEventName": "PermissionRequest", "decision": {"behavior": "allow"}}}`. Can also include `updatedPermissions` array with `setMode` entry to change permission mode for the session. Scope the matcher narrowly -- an empty matcher auto-approves every prompt
 - [ ] **Background hooks** -- `async: true` on command hooks runs them in the background; output is delivered on the next turn via `systemMessage`. Use for slow, non-blocking automation
 - [ ] **Kill switch** -- `disableAllHooks: true` in settings disables all hooks and any custom status line. Useful for debugging
 
@@ -427,7 +427,7 @@ paths:
 - `command` hooks run outside the LLM (zero token cost). `prompt`/`agent` hooks use tokens
 - Use exit code 0 for success, 2 for blocking errors
 - Default timeouts: `command` 600s (10 min), `prompt` 30s, `agent` 60s. Set explicit timeout for fast hooks
-- Hooks run in parallel -- don't create order dependencies
+- Hooks run in parallel -- keep each hook independent of the others
 - Hook snapshot security: hooks are captured at session start. External edits trigger a warning requiring `/hooks` review
 - Use `statusMessage` field for custom spinner text while hook runs
 - Use `once: true` for hooks that should run only once per session (skills only)

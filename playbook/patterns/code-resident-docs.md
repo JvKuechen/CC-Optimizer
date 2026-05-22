@@ -83,7 +83,7 @@ Once migrated, new design work follows:
 
 ## Enforcement
 
-- **Rule** — a `.claude/rules/` file with `paths:` scoped to source files: "Implementation and its doc-comments land in the same commit. If a signature, invariant, or error condition changes, the comment above it changes in the same diff. Preserve rejected-alternative rationale — don't trim 'we ruled out X because Y' just because the code now makes the choice look obvious; the next reader needs it."
+- **Rule** — a `.claude/rules/` file with `paths:` scoped to source files: "Implementation and its doc-comments land in the same commit. If a signature, invariant, or error condition changes, the comment above it changes in the same diff. Preserve rejected-alternative rationale — keep 'we ruled out X because Y' even when the code now makes the choice look obvious; the next reader needs it."
 - **CI doc lint** — most renderers have a broken-link or missing-doc lint. Run it; promote warn → deny once the codebase is clean.
 - **Review norm** — reject a code-only diff that breaks a documented contract.
 

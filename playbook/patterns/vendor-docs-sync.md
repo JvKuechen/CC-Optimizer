@@ -2,7 +2,7 @@
 
 ## Summary
 
-Pull official documentation from a vendor's online source into the workspace, using manifest-based delta sync. This is for **evolving docs** -- documentation that updates regularly and is already in a machine-readable format. Don't waste effort parsing what will change next week.
+Pull official documentation from a vendor's online source into the workspace, using manifest-based delta sync. This is for **evolving docs** -- documentation that updates regularly and is already in a machine-readable format. Reserve parsing for static docs that stay valid; evolving docs are mirrored as-is.
 
 ## Sync vs Ingest
 
@@ -39,7 +39,7 @@ When setting up sync for a new product, check for official sources:
 5. **Version-tagged downloads** -- Docs bundled with releases (GitHub releases, vendor download pages).
 6. **No online source** -- Vendor only ships PDFs/docs with installers. This is **ingest** territory, not sync. See the Knowledge Base Repo pattern.
 
-If you cannot find an official online source after checking the vendor's website, support portal, and GitHub/GitLab presence -- **ask the user**. They may know of internal mirrors, have offline copies, or know the vendor's documentation strategy. Do not assume no source exists without asking.
+If you cannot find an official online source after checking the vendor's website, support portal, and GitHub/GitLab presence -- **ask the user**. They may know of internal mirrors, have offline copies, or know the vendor's documentation strategy. Confirm with the user before concluding no source exists.
 
 ## Implementation
 
@@ -97,12 +97,12 @@ Two placement options depending on workspace type:
 
 ## Rules
 
-- Never scrape vendor sites without user knowledge -- the skill should clearly state what URLs it fetches
+- Scrape vendor sites only with the user's knowledge -- the skill should clearly state what URLs it fetches
 - Respect robots.txt and rate limits (add delays between fetches if hitting many pages)
 - Include User-Agent header identifying the sync tool
 - Store the source URL in manifest.json so it's auditable
-- Delta sync only -- never re-download unchanged pages
-- Do NOT parse/restructure synced docs -- they are already machine-readable and will change. Mirror as-is.
+- Delta sync only -- re-download solely the pages that changed
+- Mirror synced docs as-is -- they are already machine-readable and will change, so parsing is wasted effort.
 
 ## Real-World Examples
 

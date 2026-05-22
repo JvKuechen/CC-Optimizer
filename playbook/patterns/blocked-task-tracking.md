@@ -32,4 +32,4 @@ Add a status section to CLAUDE.md with three categories.
 - Update status at session end, not just when something blocks
 - Include ticket/issue numbers for blocked items so you can follow up
 - "Next" items should be concrete actions, not vague goals
-- When a blocked item unblocks, move it to Completed (don't delete the history)
+- When a blocked item unblocks, move it to Completed -- preserve the history

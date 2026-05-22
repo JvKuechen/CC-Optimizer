@@ -8,7 +8,7 @@ This is a **Claude Optimizer** workspace. It maintains a local mirror of the Cla
 
 ## Platform
 
-**Windows 11 only.** See `.claude/rules/windows-shell.md` for mandatory shell rules. Key points: always use forward slashes in Bash, redirect to `/dev/null` (never `nul`), use `python` not `python3`, and always quote paths.
+**Windows 11 only.** See `.claude/rules/windows-shell.md` for mandatory shell rules. Key points: always use forward slashes in Bash, redirect to `/dev/null` rather than `nul`, call `python` (Windows has no `python3`), and always quote paths.
 
 ## Core Philosophy
 
@@ -98,7 +98,7 @@ Settings precedence: managed > CLI args > local > project > user.
 
 When writing CLAUDE.md for other workspaces:
 - Target under 200 lines per CLAUDE.md file. Every line must pass: "Would removing this cause mistakes?"
-- Use `@path` imports for existing docs (README, package.json) — don't duplicate
+- Use `@path` imports for existing docs (README, package.json) — reference, single-source
 - Move detailed reference to `.claude/skills/` (loaded on-demand, not every request)
 - Use `.claude/rules/` with `paths:` frontmatter for file-pattern-scoped conventions
 - Use IMPORTANT / YOU MUST for critical rules Claude tends to ignore
@@ -124,7 +124,7 @@ Active workspaces live as nested clones under `WS/` in this repo (flat layout, n
 
 Multi-thread / multi-workspace coordination uses the protocol at `~/.claude/rules/coordination.md` (deployed via `templates/deploy-user-settings.py`). Vocabulary: main thread = coordinator, subthread = focused executor, bounty board = in-chat cross-thread task state, close-out report = structured subthread return.
 
-The bounty board is an in-chat artifact, reconstructed each session from `git log` + `handoff.md` — never a tracked file (a persisted board only goes stale once its thread closes). Start a main-thread session by pasting `main-thread-kickoff.md`; spawn subthreads using the brief template at `subthread-brief.md` (customize each per task before pasting). `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — never in tracked source, docs, or rules.
+The bounty board is an in-chat artifact, reconstructed each session from `git log` + `handoff.md`, and lives only in conversation context (a persisted board goes stale once its thread closes). Start a main-thread session by pasting `main-thread-kickoff.md`; spawn subthreads using the brief template at `subthread-brief.md` (customize each per task before pasting). `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — tracked source, docs, and rules use commit hashes or descriptive names instead.
 
 ## Public Repo Commit Workflow
 

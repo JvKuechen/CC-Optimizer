@@ -28,7 +28,7 @@ configs/
 }
 ```
 
-Generator code reads config, never contains variant-specific logic:
+Generator code reads config; all variant-specific logic lives in the config:
 ```python
 def generate_report(config_path, data_path):
     config = json.load(open(config_path))

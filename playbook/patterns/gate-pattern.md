@@ -53,4 +53,4 @@ Gates measurably slow down development. The reviewer loop adds a full agent roun
 - Gate agents should be read-only (no Edit/Write tools)
 - Use sonnet or opus for gates, not haiku (judgment required)
 - Gate rejection must include actionable feedback, not just "rejected"
-- Don't gate trivial changes -- use judgment on when to invoke
+- Reserve the gate for changes that warrant review -- use judgment on when to invoke

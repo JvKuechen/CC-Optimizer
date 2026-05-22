@@ -35,7 +35,7 @@ parent-repo/
 - `git status` in parent will NOT show nested repo changes (it's gitignored)
 - `git add -A` in parent will NOT capture nested repo content
 - Claude Code may not realize the nested directory is a separate repo unless told in CLAUDE.md
-- **GitHub wikis require the `master` branch** -- do not rename to `main`. GitHub's wiki tab only reads from `master`. Gitea wikis also default to `master`. If your pre-push hook pushes the wiki, detect the branch dynamically rather than hardcoding `main`
+- **GitHub wikis require the `master` branch** -- keep the wiki branch as `master`. GitHub's wiki tab only reads from `master`. Gitea wikis also default to `master`. If your pre-push hook pushes the wiki, detect the branch dynamically rather than hardcoding `main`
 - On Windows, avoid symlinks -- just use a real nested directory
 - If using `--add-dir`, the nested repo gets its own context but shares permissions
 - Both repos need separate push/pull workflows (consider a pre-push hook on the parent to auto-sync the nested repo)

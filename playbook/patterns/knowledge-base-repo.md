@@ -18,7 +18,7 @@ These repos deal primarily with **static documentation** -- vendor manuals, PDFs
 
 See `patterns/vendor-docs-sync.md` for the full decision framework. The short version:
 
-- **Evolving docs** (online, machine-readable, changes regularly) = **sync** as-is. Don't parse what will change next week.
+- **Evolving docs** (online, machine-readable, changes regularly) = **sync** as-is. Parsing pays off only for static docs that stay valid.
 - **Static docs** (PDFs, .docx, ships with installer) = **ingest** into agent-optimized markdown. Worth the parsing effort because the content is stable and the raw format is not machine-friendly.
 
 Most knowledge base repos are ingest-heavy. Some products have both -- sync the online release notes, ingest the offline manuals.
@@ -114,7 +114,7 @@ The CLAUDE.md for a knowledge base repo is different from a code repo:
 
 - Import/ is always gitignored (large files, installers, ISOs)
 - Wiki uses `master` branch (Gitea/GitHub wiki requirement)
-- Never auto-push wiki changes -- human review required
+- Wiki changes push only after human review
 - Configuration exports in config/ are committed (small, useful for reference)
 - Python venv for ingestion tools (.venv/, gitignored)
 

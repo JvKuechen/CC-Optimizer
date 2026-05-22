@@ -24,5 +24,5 @@ Add a `## Gotchas` section to CLAUDE.md with terse entries. Each gotcha states t
 
 - One line per gotcha, no paragraphs
 - State the mistake AND the fix (not just "watch out for X")
-- Add new gotchas as they're discovered, don't wait for a cleanup pass
+- Add new gotchas the moment they're discovered, while the context is fresh
 - If a gotcha has a code fix, put the fix inline or link to the commit

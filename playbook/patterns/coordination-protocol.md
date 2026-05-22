@@ -50,7 +50,7 @@ This deploys the global coordination rule to `~/.claude/rules/coordination.md` a
 
 Multi-thread work in this repo uses the coordination protocol. See `~/.claude/rules/coordination.md` for vocabulary (main thread, subthread, bounty board, close-out report) and discipline.
 
-The bounty board is an in-chat tracker, rebuilt each session from `git log` + `handoff.md` — not a file. Start a main-thread session with `main-thread-kickoff.md`; spawn subthreads with `subthread-brief.md`. `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — never in tracked source/docs.
+The bounty board is an in-chat tracker, rebuilt each session from `git log` + `handoff.md` — not a file. Start a main-thread session with `main-thread-kickoff.md`; spawn subthreads with `subthread-brief.md`. `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — tracked source/docs use commit hashes or descriptive names instead.
 ```
 
 ## Outcomes observed (FortrOS, source of this pattern)
@@ -69,4 +69,4 @@ The bounty board is an in-chat tracker, rebuilt each session from `git log` + `h
 ## Not the same as
 
 - **TaskList (in-thread):** TaskCreate tracks single-conversation progress; the bounty board is the main thread's cross-thread coordination view. Both live in context, not in files.
-- **handoff.md (cross-conversation):** `handoff.md` is the durable, gitignored narrative tracker that survives across sessions. The bounty board is live in-chat working state, reconstructed from `handoff.md` + git log each session. Persist `handoff.md`; never persist the board.
+- **handoff.md (cross-conversation):** `handoff.md` is the durable, gitignored narrative tracker that survives across sessions. The bounty board is live in-chat working state, reconstructed from `handoff.md` + git log each session. Persist `handoff.md` only; the board stays in-chat.

@@ -36,7 +36,7 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/db
 }
 ```
 
-**Don't:**
+**Rejected:**
 - Plaintext password files in the project root
 - API keys hardcoded in scripts (`api_key = "sk-abc123"`)
 - Credentials in CLAUDE.md (Claude reads this every request)
@@ -45,6 +45,6 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/db
 ## Rules
 
 - `.env.example` is the contract for required secrets
-- Real `.env` is never committed (verify with `git status`)
+- Real `.env` stays gitignored and uncommitted (verify with `git status`)
 - Claude's deny rules prevent accidental reads of secret files
 - If credentials are already exposed in git history, rotate them

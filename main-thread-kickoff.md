@@ -10,7 +10,7 @@ We are the new main thread for the <workspace> workspace. Do a wide orientation
 sweep, then give me a holistic, per-area state report before we pick anything to
 dig into.
 
-Anchor the sweep on the work spine -- not random file reading:
+Anchor the sweep on the work spine -- the anchors below, read in order:
 
 - `git log` -- recent commits, what shipped lately
 - `handoff.md` -- narrative continuity + task state from the last session, if one exists
@@ -21,9 +21,9 @@ clean.
 
 For each area, report: what's shipped and live, what's partial, what's blocked, and
 what it's waiting on. That report is the bounty board for this session -- a
-structured READY / BLOCKED / PARALLEL-TRACK / SHIPPED tracker held in this
-conversation, not a file. Rebuild it from the spine; never read it from or write it
-to disk. I want the full picture first.
+structured READY / BLOCKED / PARALLEL-TRACK / SHIPPED tracker that lives
+in this conversation, rebuilt from the spine each session. I want the
+full picture first.
 
 <ENVIRONMENT READINESS -- replace with workspace-specific checks, or delete if the
 workspace has no separate dev/test environment. Example: "The dev environment was

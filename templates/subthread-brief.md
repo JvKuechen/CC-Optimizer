@@ -14,7 +14,7 @@ The current bounty board is embedded in the Task scope section below — the mai
 
 ## STAGING DISCIPLINE
 
-YOU MUST NOT pre-stage. At commit time only:
+Stage at commit time only:
 
 1. `git status` to see all dirty paths.
 2. Add ONLY the paths your task needs, by filename or explicit directory.
@@ -28,11 +28,11 @@ Anything else dirty in the tree is the main thread's to sweep after you close.
 
 - Example: pre-commit hook blocks `git commit` on this repo; use `scripts/verified-commit.sh -m "..."` instead.
 - Example: rustdoc intra-doc links to non-dep crates fail; use plain backticks for cross-workspace references.
-- Example: file writes produce CRLF on Windows; fix-line-endings hook handles it but don't manually re-encode.
+- Example: file writes produce CRLF on Windows; the fix-line-endings hook handles it — leave file encoding to the hook.
 
 ## ASKING QUESTIONS
 
-When a decision isn't settled by the brief (the embedded board included), CLAUDE.md, or existing code, raise it to the main thread. The main thread will fork to resolve and resume the subthread with the answer.
+When the brief (the embedded board included), CLAUDE.md, or existing code leave a decision open, raise it to the main thread. The main thread will fork to resolve and resume the subthread with the answer.
 
 If the brief's approach itself looks wrong — not merely unclear, but headed somewhere bad — say so before executing rather than complying cleanly. A flawed brief caught early is cheaper than a polished execution of it.
 

@@ -12,13 +12,24 @@ Read these in order before deciding scope:
 
 The current bounty board is embedded in the Task scope section below — the main thread rewrote it fresh for this spawn. Read source-of-truth for your task before committing to scope (the scoping doc, the existing module's doc-comments, related ADRs) — not just the one-line bounty subject.
 
+## YOUR WORKTREE -- confirm before editing
+
+Before any edit, confirm whether you are in an isolated worktree:
+
+    git rev-parse --show-toplevel && git branch --show-current
+
+You are isolated when the toplevel is under `.claude/worktrees/` and the branch is `worktree-<slug>`. Then act by task type:
+
+- **Read-only / research task** -> proceed as-is; you need no worktree.
+- **Edit task, already isolated** -> do all edits + commits here; the lead merges the branch to main at close-out.
+- **Edit task, NOT isolated** (toplevel is the repo root / branch is `main`) -> do not edit. Return `BLOCKED: spawned without worktree isolation` and stop. A background subagent cannot create its own worktree (the harness blocks `EnterWorktree` from a subagent), so the lead re-spawns you with isolation set.
+
 ## STAGING DISCIPLINE
 
 Stage at commit time only:
 
-1. `git status` to see all dirty paths.
-2. Add ONLY the paths your task needs, by filename or explicit directory.
-3. Rejected: `git add -A` / `git add .`.
+- Confirmed isolated (your own worktree): `git status` to confirm the dirty set is all yours, then `git add -A` is fine -- the checkout holds only your work.
+- On a shared main checkout (a task the lead scoped to run on main): `git status`, then add ONLY the paths your task needs, by explicit filename or directory. Rejected: `git add -A` / `git add .` on a shared main tree -- it sweeps parallel edits or hand-ferried files.
 
 Anything else dirty in the tree is the main thread's to sweep after you close.
 
@@ -53,11 +64,24 @@ Examples:
 
 ## WHAT TO RETURN AT CLOSE-OUT
 
-1. **Task IDs shipped** — with commit hashes.
-2. **Test coverage delta** — per crate/module if applicable.
-3. **Open questions** — for follow-on subthreads.
-4. **Surprises** — non-obvious findings worth saving as memory or settled decisions.
-5. **Recommended next picks** — what should follow, and why.
+End with an explicit state line so the readiness board is deterministic:
+
+    STATE: READY-FOR-MERGE | WAITING-FEEDBACK | BLOCKED
+
+- **READY-FOR-MERGE** — reviewed-clean in your own judgment; branch holds for the lead.
+- **WAITING-FEEDBACK** — a decision is open; say what you need.
+- **BLOCKED** — can't proceed; say on what.
+
+Then the report:
+
+1. **Branch + scope** — your `worktree-<slug>` branch and the files/scope you owned (lets the lead dedupe before spawning the next worker).
+2. **Task IDs shipped** — with commit hashes.
+3. **Test coverage delta** — per crate/module if applicable.
+4. **Open questions** — for follow-on subthreads.
+5. **Surprises** — non-obvious findings worth saving as memory or settled decisions.
+6. **Recommended next picks** — what should follow, and why.
+
+Your FINAL MESSAGE is the close-out the lead reads (together with `git diff main...worktree-<slug>`); lead with the STATE line. **Hold on your branch** — the lead reviews and merges at a seam; do not merge to main yourself. (In the optional agent-team mode, also `SendMessage` it to `team-lead`, since a teammate's plain final message does not reach the lead there.)
 
 For verification/audit work, include a tally table with explicit dispositions:
 

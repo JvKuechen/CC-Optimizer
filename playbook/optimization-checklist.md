@@ -383,12 +383,21 @@ paths:
 - [ ] SubagentStart/SubagentStop hooks for lifecycle automation (setup/teardown, logging)
 - [ ] Subagent scope priority: CLI flag (1, highest) > Project (2) > User (3) > Plugin (4, lowest)
 
-### 6.4 Consider agent teams for parallel inter-agent work
-- [ ] Agent teams are experimental (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` in settings.json `env`)
+### 6.4 Parallel work: background worktree subagents (default) + agent teams (optional)
+
+Default -- background Agent-tool subagents (no tmux, no team env var):
+- [ ] Spawn with `isolation: "worktree"` (+ `run_in_background: true`): each gets its own worktree from local HEAD, runs without moving the lead's checkout, and a completion notification re-invokes the lead (survives compaction).
+- [ ] **Isolation is set at spawn, not self-served** (verified): a subagent cannot create its own worktree -- the harness blocks `EnterWorktree` from a subagent. The brief has the subagent confirm (`git rev-parse --show-toplevel` + `git branch --show-current`) and return `BLOCKED: spawned without worktree isolation` if on `main`; the lead re-spawns with isolation set. Read-only subagents need no worktree.
+- [ ] **Subagents cannot ask the user** (verified): `AskUserQuestion` is unavailable to a subagent; brief it to return `BLOCKED: <decision>, options A/B/C` rather than guess. The lead routes it or escalates with its own `AskUserQuestion` (which pauses an active `/goal`).
+- [ ] Close-out via artifacts: `git diff main...worktree-<slug>` + the returned report -> adversarial-review -> ff-merge -> `git worktree remove --force` + `git branch -d` (no-commit worktrees auto-clean).
+
+Optional -- agent teams (experimental `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`): a multi-teammate UI for when teammates must share findings, challenge each other, or coordinate independently. Most workflows do not need it -- prefer background subagents above.
 - [ ] Use when: teammates need to share findings, challenge each other, coordinate independently
 - [ ] Use subagents when: only the result matters, work is sequential, same-file edits
 - [ ] Key concepts: team lead (coordinator), teammates (independent instances), shared task list, mailbox
 - [ ] Display modes: `teammateMode` setting or `--teammate-mode` flag: `auto` (default), `in-process`, `tmux`
+- [ ] **Worktree-per-teammate needs tmux mode** (verified): teammates do NOT auto-isolate -- they start in the lead's shared checkout and isolate only by calling `EnterWorktree` with `{"name": "<slug>"}`, driven from the subthread brief. Run the lead in tmux mode (`teammateMode: "tmux"`, launched inside tmux); in default in-process mode a teammate's `EnterWorktree` drags the LEAD into the worktree. `bgIsolation` does not govern team teammates (leave it unset).
+- [ ] **Deterministic close-out**: a teammate's plain final message does not reach the lead (only `SendMessage` does). The lead reads close-outs from artifacts -- `git diff main...worktree-<slug>` + the teammate transcript tail; a `TeammateIdle` hook (`templates/hooks/teammate-digest.py`) can auto-capture both. After merging, remove the worktree manually -- tmux `TeamDelete` reports success but leaves teammate worktrees on disk.
 - [ ] Delegate mode: restricts lead to coordination-only (Shift+Tab to toggle)
 - [ ] Plan approval: teammates can be put in plan mode, work read-only until lead approves
 - [ ] Task dependencies: pending tasks with unresolved deps can't be claimed. File locking prevents race conditions

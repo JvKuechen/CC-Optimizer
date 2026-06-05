@@ -15,8 +15,50 @@ Usage: python deploy-user-settings.py
 """
 
 import json
+import re
 import shutil
+import sys
 from pathlib import Path
+
+
+def deploy_monitors(script_dir, claude_dir):
+    """Copy monitor templates to ~/.claude/monitors/ (inert until invoked)."""
+    src = script_dir / "monitors"
+    if not src.exists():
+        return
+    dst = claude_dir / "monitors"
+    dst.mkdir(exist_ok=True)
+    for f in sorted(list(src.glob("*.py")) + list(src.glob("*.md"))):
+        shutil.copy2(f, dst / f.name)
+        print(f"Deployed: {dst / f.name}")
+
+
+def maybe_install_tmux_config(script_dir, home):
+    """Offer the optional tmux teammate-view config (idempotent, opt-in)."""
+    src = script_dir / "tmux.conf"
+    if not src.exists():
+        return
+    block = src.read_text(encoding="utf-8")
+    marker = ">>> claude-code teammate-view"
+    dst = home / ".tmux.conf"
+    existing = dst.read_text(encoding="utf-8") if dst.exists() else ""
+    if marker in existing:
+        print(f"tmux teammate-view already present in {dst} -- skipping.")
+        return
+    print()
+    print("OPTIONAL: tmux teammate-view config (for agent-team tmux / cmux users).")
+    print("  Accordion panes: double-left-click to spotlight a teammate, right-click")
+    print("  to reset, drag dividers to resize, pane labels, 50k scrollback.")
+    if not sys.stdin.isatty():
+        print(f"  Non-interactive -- skipping. To install later, append {src} to ~/.tmux.conf")
+        return
+    if input("  Install into ~/.tmux.conf? [y/N] ").strip().lower() not in ("y", "yes"):
+        print("  Skipped.")
+        return
+    sep = "" if existing == "" or existing.endswith("\n") else "\n"
+    dst.write_text(existing + sep + block, encoding="utf-8")
+    print(f"  Appended teammate-view block to {dst}")
+    print("  Reload with: tmux source-file ~/.tmux.conf")
 
 
 def main():
@@ -36,15 +78,30 @@ def main():
     # Load template settings
     template = json.loads(src_settings.read_text(encoding="utf-8"))
 
+    # Teammates must run as separate processes (tmux/iTerm2 panes) so a teammate's
+    # EnterWorktree isolates only that teammate instead of dragging the lead. Set
+    # this only off native Windows: tmux/iTerm2 exist on Linux/WSL/macOS, where
+    # agent teams run; on Windows leave the default ("auto") so a non-tmux team
+    # session falls back to in-process rather than failing to spawn.
+    if sys.platform != "win32":
+        template.setdefault("teammateMode", "tmux")
+
     # Resolve hook command paths: the template uses a ~/.claude/hooks placeholder,
     # the deployed settings need the real absolute path. Applies to every event.
+    # Pick the Python that exists on this platform: WSL/Linux/macOS ship only
+    # `python3`; native Windows ships only `python`. Hook commands carry a
+    # `python`/`python3` token that we normalize here so a hook never silently
+    # no-ops because the interpreter name is wrong for the OS.
+    py = "python3" if sys.platform != "win32" else "python"
     hooks_prefix = str(hooks_dir).replace("\\", "/")
     for event_hooks in template.get("hooks", {}).values():
         for hook_group in event_hooks:
             for hook in hook_group.get("hooks", []):
                 cmd = hook.get("command", "")
                 if "~/.claude/hooks" in cmd:
-                    hook["command"] = cmd.replace("~/.claude/hooks", hooks_prefix)
+                    cmd = cmd.replace("~/.claude/hooks", hooks_prefix)
+                cmd = re.sub(r"^python3?\b", py, cmd)
+                hook["command"] = cmd
 
     dst_settings.write_text(
         json.dumps(template, indent=2, ensure_ascii=False) + "\n",
@@ -67,6 +124,12 @@ def main():
             dst = rules_dst_dir / rule_file.name
             shutil.copy2(rule_file, dst)
             print(f"Deployed: {dst}")
+
+    # Deploy monitor templates (inert until invoked by an agent)
+    deploy_monitors(script_dir, claude_dir)
+
+    # Optional, opt-in: tmux teammate-view config for agent-team / cmux users
+    maybe_install_tmux_config(script_dir, home)
 
     print()
     print("Done. Restart any active Claude Code sessions for changes to take effect.")

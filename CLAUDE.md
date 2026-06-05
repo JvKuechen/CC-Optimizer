@@ -54,6 +54,10 @@ Run `python templates/deploy-user-settings.py` to deploy to `~/.claude/`:
 - **Guardrail hook** (`hooks/guardrail.py`): PreToolUse hook that blocks destructive Bash commands before execution
 - **Notification hook**: Plays two tones when Claude needs input (permission prompt or idle 60s+)
 
+**Parallel work needs no special machine setup.** The default fan-out model is background Agent-tool subagents spawned with `isolation: "worktree"`: each gets its own worktree from local `HEAD` and runs without moving the lead's checkout -- no tmux, no `cmux`, no `teammateMode`. A completion notification re-invokes the lead (survives compaction). See `templates/rules/coordination.md` for the full pattern.
+
+**Optional -- agent-team mode** (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`): the multi-teammate team UI is a separate model most workflows do not need. There, run the lead in tmux (`teammateMode: "tmux"`) so an in-process teammate's `EnterWorktree` does not drag the lead; details + teardown quirks live in the `agent-teams-worktree-isolation` memory.
+
 Then install recommended plugins (interactive-mode slash commands -- run inside a Claude Code session):
 ```
 /plugin marketplace add anthropics/claude-code
@@ -124,7 +128,7 @@ Active workspaces live as nested clones under `WS/` in this repo (flat layout, n
 
 Multi-thread / multi-workspace coordination uses the protocol at `~/.claude/rules/coordination.md` (deployed via `templates/deploy-user-settings.py`). Vocabulary: main thread = coordinator, subthread = focused executor, bounty board = in-chat cross-thread task state, close-out report = structured subthread return.
 
-The bounty board is an in-chat artifact, reconstructed each session from `git log` + `handoff.md`, and lives only in conversation context (a persisted board goes stale once its thread closes). Start a main-thread session by pasting `main-thread-kickoff.md`; spawn subthreads using the brief template at `subthread-brief.md` (customize each per task before pasting). `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — tracked source, docs, and rules use commit hashes or descriptive names instead.
+The bounty board is an in-chat artifact, reconstructed each session from `git log` + `handoff.md`, and lives only in conversation context (a persisted board goes stale once its thread closes). Start a main-thread session by pasting `templates/main-thread-kickoff.md`; spawn subthreads using the brief template at `templates/subthread-brief.md` (customize each per task before pasting). `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — tracked source, docs, and rules use commit hashes or descriptive names instead.
 
 ## Public Repo Commit Workflow
 

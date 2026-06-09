@@ -24,6 +24,9 @@ Referenced from Phase 1.6 of the optimization checklist.
 | Health Check + Remediation | [health-check-remediation.md](patterns/health-check-remediation.md) | Operational/infrastructure projects |
 | Isolation Bisect | [isolation-bisect.md](patterns/isolation-bisect.md) | Debugging workspaces, plugin/mod systems |
 | Coordination Protocol | [coordination-protocol.md](patterns/coordination-protocol.md) | Multi-thread / multi-session / cross-workspace coordination work |
+| Compaction-Safe Coordination | [compaction-safe-coordination.md](patterns/compaction-safe-coordination.md) | Long-running coordinator that delegates across compactions — keep the coordinator/executor roles surviving a context reset (SessionStart hook + commit-guard + two-strikes) |
+| Dependency-Graph Conformance Ratchet | [dependency-graph-ratchet.md](patterns/dependency-graph-ratchet.md) | Machine-enforcing a convention across a codebase that starts out red — conform + gate per-unit, leaves-to-roots, warn-global/deny-per-unit |
+| CI-Status Surfacing | [ci-status-surfacing.md](patterns/ci-status-surfacing.md) | Workspaces with CI gates — surface failing GitHub Actions runs at SessionStart so a red gate doesn't sit unnoticed across pushes |
 
 ## Architecture
 
@@ -33,6 +36,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 | Handler Registry | [handler-registry.md](patterns/handler-registry.md) | Multiple input formats routed to specific processors |
 | Delta Polling | [delta-polling.md](patterns/delta-polling.md) | Watchers, schedulers, any periodic data processing |
 | Nested Parallel Checkout | [nested-parallel-checkout.md](patterns/nested-parallel-checkout.md) | Gitea wikis, documentation repos alongside code. Variant: track content, gitignore only .git/ |
+| Dependency Spine | [dependency-spine.md](patterns/dependency-spine.md) | Multi-system / monorepo workspaces where bring-up round-robins on cross-system dependencies |
 
 ## Git Infrastructure
 

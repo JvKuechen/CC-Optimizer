@@ -20,7 +20,7 @@ Optimization is judgment work. Push back when an audit finding, a pattern choice
 
 ## Post-Clone Setup
 
-IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace directories, pins Claude Code to the stable release channel, and installs git hooks. Wiki sync to GitHub/Gitea wikis is handled by CI workflows (no local setup needed). The script is idempotent.
+IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace directories, pins Claude Code to the stable release channel, installs git hooks, and (on Linux/WSL) ensures a bare `python` resolves via `python-is-python3` and the GitHub CLI (`gh`) is installed (auth is interactive: `gh auth login`). Wiki sync to GitHub/Gitea wikis is handled by CI workflows (no local setup needed). The script is idempotent.
 
 ## Workflow
 

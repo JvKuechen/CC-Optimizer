@@ -1,6 +1,7 @@
 """Post-clone setup for CC-Optimizer workspace.
 
-Creates WS/ directory for nested workspaces and installs git hooks.
+Creates WS/ directory for nested workspaces, installs git hooks, and
+ensures a bare `python` resolves on Linux/WSL.
 Wiki sync is handled by CI workflows (.github/workflows/wiki-sync.yml
 and .gitea/workflows/wiki-sync.yml). Safe to run multiple times --
 skips steps that are already done.
@@ -228,6 +229,75 @@ def setup_long_paths():
         print("  reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f")
 
 
+def setup_python_alias():
+    """On Linux/WSL, ensure a bare `python` resolves (not just `python3`).
+
+    Agents and scripts routinely assume `python`; Ubuntu ships only `python3`
+    by default, so the call dies with "command not found". The dpkg-managed
+    `python-is-python3` package provides /usr/bin/python -> python3. Windows
+    ships `python` natively, so this is a no-op there.
+    """
+    import platform
+    import shutil
+    if platform.system() != "Linux":
+        print("[python-alias] Not on Linux/WSL, skipping.")
+        return
+
+    if shutil.which("python"):
+        print("[python-alias] `python` already resolves.")
+        return
+
+    if not shutil.which("python3"):
+        print("[python-alias] WARNING: neither `python` nor `python3` found.")
+        return
+
+    # Try the dpkg-managed package non-interactively; never hard-fail.
+    result = subprocess.run(
+        "sudo -n apt-get install -y python-is-python3",
+        capture_output=True, text=True, shell=True,
+    )
+    if result.returncode == 0 and shutil.which("python"):
+        print("[python-alias] Installed python-is-python3 (`python` -> python3).")
+    else:
+        print("[python-alias] WARNING: `python` missing; only `python3` works here.")
+        print("  Fix with: sudo apt-get install -y python-is-python3")
+
+
+def setup_gh_cli():
+    """On Linux/WSL, ensure the GitHub CLI (`gh`) is installed.
+
+    CLAUDE.md assumes `gh` for GitHub ops, and the ci-status SessionStart hook
+    needs it to surface failing CI runs. The binary install is automatable; auth
+    is interactive (`gh auth login`), so the script only ensures the binary is
+    present and reminds the user. Windows installs gh via winget -> no-op here.
+    """
+    import platform
+    import shutil
+    if platform.system() != "Linux":
+        print("[gh-cli] Not on Linux/WSL, skipping.")
+        return
+
+    if shutil.which("gh"):
+        r = subprocess.run("gh auth status", capture_output=True, text=True, shell=True)
+        if r.returncode == 0:
+            print("[gh-cli] gh installed + authed.")
+        else:
+            print("[gh-cli] gh installed but NOT authed -- run `gh auth login` (choose HTTPS) once.")
+        return
+
+    # gh ships in Ubuntu's repos (and has its own apt source as a fallback).
+    result = subprocess.run(
+        "sudo -n apt-get install -y gh",
+        capture_output=True, text=True, shell=True,
+    )
+    if result.returncode == 0 and shutil.which("gh"):
+        print("[gh-cli] Installed gh. Run `gh auth login` (choose HTTPS) once to authenticate.")
+    else:
+        print("[gh-cli] WARNING: `gh` not installed and auto-install failed (needs passwordless sudo).")
+        print("  Install: sudo apt-get install -y gh "
+              "(or https://github.com/cli/cli/blob/trunk/docs/install_linux.md), then `gh auth login`.")
+
+
 def setup_git_identity():
     """Check git user.email is set and linked to a hosting account.
 
@@ -286,6 +356,10 @@ def main():
     setup_git_identity()
     print()
     setup_long_paths()
+    print()
+    setup_python_alias()
+    print()
+    setup_gh_cli()
     print()
     setup_workspaces()
     print()

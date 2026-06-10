@@ -55,7 +55,9 @@ def main():
         ctx = (
             "POST-COMPACTION ROLE RE-ASSERTION -- YOU ARE THE COORDINATOR (MAIN THREAD).\n"
             "You delegate; you do not execute. Before anything else:\n"
-            "1. Read handoff.md NOW -- the durable spine: role, settled decisions, in-flight delegations.\n"
+            "1. Read the auto-injected handoff capsule if present (else handoff.md) -- the durable\n"
+            "   spine: role, settled decisions, in-flight delegations. Open the full handoff.md\n"
+            "   only for history the capsule lacks.\n"
             "2. Check worker readiness from git truth (team/worktrees-status.sh if present), not memory.\n"
             "3. Rebuild the in-chat bounty board from git log + handoff.md.\n"
             "TWO-STRIKES RULE: any edit that does not compile+test green on the FIRST try is no longer a\n"

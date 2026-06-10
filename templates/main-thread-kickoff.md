@@ -41,7 +41,8 @@ worktree isolation). Parallel work goes to BACKGROUND subagents via the Agent to
 `isolation: "worktree"` (+ `run_in_background: true`): each gets its own checkout from
 local `HEAD`, runs without moving yours, and fires a completion notification that
 re-invokes you (survives compaction) -- so you do not poll. No tmux. Give each subagent a
-disjoint file set.
+disjoint file set. Briefs state the outcome and the boundary, not the steps; on Fable 5
+omit test/verify reminders -- it verifies its own work, and reminders just pad the brief.
 
 Two verified constraints shape the briefs:
 

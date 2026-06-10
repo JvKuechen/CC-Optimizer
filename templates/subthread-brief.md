@@ -1,5 +1,10 @@
 # Subthread Brief — <task or initiative name>
 
+<!-- Authoring note (delete before pasting): state the OUTCOME and the boundary, not
+the steps. On Fable 5, omit test/verify reminders -- the model verifies its own work;
+reminders just pad the brief. No time/context-budget framing (see
+positive-instruction-framing). -->
+
 You are a subthread of the main thread for <workspace>. The main thread maintains the bounty board and integrates close-out reports. Get the lay of the land first, then execute the assigned task.
 
 ## LAY OF THE LAND

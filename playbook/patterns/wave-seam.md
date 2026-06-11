@@ -20,7 +20,8 @@ The seam loop, one wave per cycle:
 
 1. Hydrate (capsule injection / kickoff) -> 2. agree the wave -> 3. dispatch worktree
 subagents -> 4. collect close-outs -> 5. review -> 6. fold + test -> 7. update the
-handoff capsule -> 8. **compact or start fresh when hydration is stale**.
+handoff capsule (the wave's one capsule edit; the coordinator is the only writer) ->
+8. **compact or start fresh when hydration is stale**.
 
 Session discipline at each seam:
 

@@ -40,7 +40,7 @@ A board only matters to the thread organizing it; once that thread closes, a per
 - When spawning a new subthread, the main thread **rewrites the whole board fresh** with current state and embeds it in the subthread brief.
 - When a subthread returns and still has context runway for related work, the main thread just hands it the next task — no rewrite, it already has the lay of the land.
 
-`capsule.toml` (gitignored, per-workstation) is the live-state tracker -- structured, injected at SessionStart, schema-validated on edit. The board is live working state rebuilt from it plus `git log` (the durable history). Persist nothing else.
+`capsule.toml` (gitignored, per-workstation) is the live-state tracker -- structured, injected at SessionStart, schema-validated on edit. The main thread is its only writer, and edits it once per wave seam (wave close, direction change, pre-compact), folding subthread close-outs into that one edit; subthreads read it and report back through close-outs. The board is live working state rebuilt from it plus `git log` (the durable history). Persist nothing else.
 
 When to run a board at all: work spans 3+ parallel threads or focus areas, or multiple sessions on one workstream over weeks. Skip for solo / single-session / linear work.
 
@@ -104,7 +104,7 @@ The in-chat bounty board is the volatile working view; this board is the durable
 
 ## Close-out report shape
 
-When a subthread finishes, return a structured report. Open with an explicit state line for the board (`STATE: READY-FOR-MERGE | WAITING-FEEDBACK | BLOCKED`) plus your branch and owned scope, then:
+When a subthread finishes, return a structured report as the final message -- a background subagent's final message arrives at the coordinator verbatim as the tool result, so the report needs no file from the worker; the coordinator persists it to `findings/<slug>-closeout.md` for review cross-checks. Open with an explicit state line for the board (`STATE: READY-FOR-MERGE | WAITING-FEEDBACK | BLOCKED`) plus your branch and owned scope, then:
 
 1. **Task IDs shipped** — with commit hashes.
 2. **Test coverage delta** — what new tests landed, per area.

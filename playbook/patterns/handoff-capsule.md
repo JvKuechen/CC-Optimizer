@@ -32,7 +32,14 @@ open_followons = ["..."]      # optional list
 
 Operating rules (the hook's injected header restates them every session):
 
-- Edit fields **in place** as truth changes. The validator keeps you honest.
+- Edit fields **in place**, **once per wave seam** (wave close, direction change,
+  pre-compact) -- the coordinator folds worker close-outs into that one edit. The
+  validator keeps you honest. Per-step edits are churn: each Edit forces a re-read
+  of the file, and the crash-safety they buy already lives in the task list +
+  `git log`.
+- The **coordinator is the only writer**. Workers get the capsule read-only (via
+  the SessionStart injection or their brief) and report back through close-outs --
+  one shared lay of the land in, one fold per seam out, no write collisions.
 - Keep it **flat** (top-level keys, `"""multi-line"""` for prose, inline arrays for
   lists). Flatness is deliberate: a stray `sed` of one line stays valid TOML, where
   YAML indentation or a JSON brace would not.

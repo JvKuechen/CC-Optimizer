@@ -71,11 +71,13 @@ SECTIONS = [
 REQUIRED = ("role", "current_goal", "current_state", "next_safe_action")
 
 PREAMBLE = (
-    "HANDOFF CAPSULE (auto-injected from capsule.toml) -- this IS the current "
+    "HANDOFF CAPSULE (auto-injected from capsule.toml) -- this is the current "
     "state; trust it before searching for state elsewhere. It is the queryable "
-    "source of truth: keep fields true by editing capsule.toml in place (a "
-    "PostToolUse validator rejects a malformed edit). Wave history lives in git "
-    "log, not here.\n"
+    "source of truth, and the main thread is its only writer: update its fields "
+    "in place at wave seams (wave close, direction change, pre-compact), folding "
+    "worker close-outs into one edit (a PostToolUse validator rejects a "
+    "malformed edit). Workers read it and report back through close-outs. Wave "
+    "history lives in git log, not here.\n"
 )
 
 

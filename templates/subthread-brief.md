@@ -11,7 +11,7 @@ You are a subthread of the main thread for <workspace>. The main thread maintain
 
 Read these in order before deciding scope:
 
-1. `capsule.toml` — most recent section first. Status of the broader workstream.
+1. `capsule.toml` — status of the broader workstream. Read-only for you: the main thread is its sole writer and folds your close-out into it at the wave seam.
 2. `CLAUDE.md` — settled decisions, conventions, gotchas. Note the IMPORTANT / YOU MUST lines.
 3. <task-specific files: scoping doc path, target source files with their doc-comments, related tests, ADRs>
 
@@ -86,7 +86,7 @@ Then the report:
 5. **Surprises** — non-obvious findings worth saving as memory or settled decisions.
 6. **Recommended next picks** — what should follow, and why.
 
-Your FINAL MESSAGE is the close-out the lead reads (together with `git diff main...worktree-<slug>`); lead with the STATE line. **Hold on your branch** — the lead reviews and merges at a seam; do not merge to main yourself. (In the optional agent-team mode, also `SendMessage` it to `team-lead`, since a teammate's plain final message does not reach the lead there.)
+Your FINAL MESSAGE is the close-out: it returns to the lead verbatim as the tool result (together with `git diff main...worktree-<slug>`); lead with the STATE line. The lead persists it to `findings/<slug>-closeout.md` for the review cross-check — the report lives in your message, not in a file you write. **Hold on your branch** — the lead reviews and merges at a seam; merging to main is the lead's move. (In the optional agent-team mode, also `SendMessage` it to `team-lead`, since a teammate's plain final message does not reach the lead there.)
 
 For verification/audit work, include a tally table with explicit dispositions:
 

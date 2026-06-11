@@ -13,7 +13,7 @@ dig into.
 Anchor the sweep on the work spine -- the anchors below, read in order:
 
 - `git log` -- recent commits, what shipped lately
-- `capsule.toml` -- the live-state capsule (role, current state, holds, next action), auto-injected at session start; edit fields in place as truth changes
+- `capsule.toml` -- the live-state capsule (role, current state, holds, next action), auto-injected at session start. You are its only writer: edit its fields once per wave seam (wave close, direction change, pre-compact), folding worker close-outs in then; workers read it and report back through their close-outs
 - `CLAUDE.md` -- settled decisions and per-area status (shipped / partial / proposed)
 
 Spawn Explore (or other read-only) subagents for breadth so the main context stays
@@ -57,7 +57,12 @@ Two verified constraints shape the briefs:
   active `/goal`, since it blocks mid-turn before the goal evaluator fires at turn end).
 
 Read each close-out from artifacts -- `git diff main...worktree-<slug>` + the subagent's
-returned report -- and run the adversarial-reviewer against the diff. Accept/Conditional
+returned report (its final message arrives verbatim as the tool result). Persist that
+report to `findings/<slug>-closeout.md` yourself -- the worker's job ends at the message,
+and the reviewer's claims cross-check reads the file (`--closeout`). Then run the
+adversarial-reviewer (or the Codex reviewer leg, backgrounded:
+`scripts/codex-review.sh --base main --repo <worktree> --tag <slug> --closeout
+findings/<slug>-closeout.md`) against the diff. Accept/Conditional
 -> mergeable (Conditional files follow-ups); Reject -> re-spawn with the report. ff-merge
 the reviewed branch, then `git worktree remove --force <path>` + `git branch -d
 worktree-<slug>` (a worktree whose subagent made no commit auto-cleans). Full builds /

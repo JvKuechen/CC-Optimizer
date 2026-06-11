@@ -59,13 +59,15 @@
 #     --effort <level>   reasoning effort: minimal|low|medium|high (default:
 #                        Codex's built-in default). Spend high on security/wire
 #                        legs, low on mechanical renames.
-#     --closeout <file>  the worker's close-out report. Injected into the
-#                        prompt so the rubric's CLAIMS CROSS-CHECK step runs
-#                        against the actual claims (without it Codex skips that
-#                        highest-value step -- "no close-out provided"). The
-#                        coordinator writes this file itself from the worker's
-#                        returned final message; a missing file warns and the
-#                        review proceeds without the cross-check.
+#     --closeout-text <string>  the worker's close-out report, passed inline
+#                        (the coordinator already holds it -- a worker's final
+#                        message returns verbatim as the tool result). Injected
+#                        into the prompt so the rubric's CLAIMS CROSS-CHECK step
+#                        runs against the actual claims, and persisted to
+#                        findings/<tag>-closeout.md as the durable copy.
+#     --closeout <file>  the same report, read from a file instead. A missing
+#                        file warns and the review proceeds without the
+#                        cross-check. --closeout-text wins when both are given.
 #     --read-only        review in place with the read-only sandbox (skip the
 #                        disposable worktree + toolchain access).
 #
@@ -93,6 +95,7 @@ TAG=""
 MODEL=""
 EFFORT=""
 CLOSEOUT_IN=""
+CLOSEOUT_TEXT=""
 SELECTOR=""   # commit | base | uncommitted
 SELVAL=""     # sha or branch
 TARGET_DESC=""
@@ -131,6 +134,7 @@ while [ $# -gt 0 ]; do
     --model)       MODEL="$2"; shift 2 ;;
     --effort)      EFFORT="$2"; shift 2 ;;
     --closeout)    CLOSEOUT_IN="$2"; shift 2 ;;
+    --closeout-text) CLOSEOUT_TEXT="$2"; shift 2 ;;
     --read-only)   READ_ONLY=1; shift ;;
     -h|--help)     sed -n '2,/^set -euo/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//; $d'; exit 0 ;;
     *)             die "unknown argument: $1 (see --help)" ;;
@@ -142,7 +146,7 @@ command -v codex >/dev/null 2>&1 || die "codex not on PATH. Install the CLI bina
 [ -f "$RUBRIC" ] || die "rubric not found: $RUBRIC"
 [ -d "$TARGET_REPO" ] || die "repo dir not found: $TARGET_REPO"
 case "$EFFORT" in ""|minimal|low|medium|high) ;; *) die "invalid --effort '$EFFORT' (minimal|low|medium|high)" ;; esac
-if [ -n "$CLOSEOUT_IN" ] && [ ! -f "$CLOSEOUT_IN" ]; then
+if [ -z "$CLOSEOUT_TEXT" ] && [ -n "$CLOSEOUT_IN" ] && [ ! -f "$CLOSEOUT_IN" ]; then
   echo "codex-review: WARNING closeout file not found ($CLOSEOUT_IN); proceeding without the claims cross-check" >&2
   CLOSEOUT_IN=""
 fi
@@ -154,6 +158,12 @@ TARGET_REPO="$(canon "$TARGET_REPO")"
 mkdir -p "$OUTDIR"
 CLOSEOUT="$OUTDIR/codex-review-$TAG.md"
 LOG="$OUTDIR/codex-review-$TAG.log"
+
+# Inline close-out: persist the durable copy, then treat it like the file form.
+if [ -n "$CLOSEOUT_TEXT" ]; then
+  CLOSEOUT_IN="$OUTDIR/$TAG-closeout.md"
+  printf '%s\n' "$CLOSEOUT_TEXT" > "$CLOSEOUT_IN"
+fi
 
 # Compute the diff under review deterministically (script = brick).
 case "$SELECTOR" in

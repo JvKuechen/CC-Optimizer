@@ -104,7 +104,7 @@ The in-chat bounty board is the volatile working view; this board is the durable
 
 ## Close-out report shape
 
-When a subthread finishes, return a structured report as the final message -- a background subagent's final message arrives at the coordinator verbatim as the tool result, so the report needs no file from the worker; the coordinator persists it to `findings/<slug>-closeout.md` for review cross-checks. Open with an explicit state line for the board (`STATE: READY-FOR-MERGE | WAITING-FEEDBACK | BLOCKED`) plus your branch and owned scope, then:
+When a subthread finishes, return a structured report as the final message -- a background subagent's final message arrives at the coordinator verbatim as the tool result, so the report needs no file from the worker; the coordinator hands it to the reviewer inline (`--closeout-text`), which persists it to `findings/<slug>-closeout.md` as the durable copy. Open with an explicit state line for the board (`STATE: READY-FOR-MERGE | WAITING-FEEDBACK | BLOCKED`) plus your branch and owned scope, then:
 
 1. **Task IDs shipped** — with commit hashes.
 2. **Test coverage delta** — what new tests landed, per area.

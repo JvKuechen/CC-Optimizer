@@ -97,7 +97,7 @@ For new workspaces (no existing project to import):
    - Use `//path` for absolute paths (not `/path` which is relative to settings file)
 
 6. **Deploy standard rules** -- Copy from this optimizer workspace:
-   - `.claude/rules/context-handoff.md`
+   - `.claude/rules/context-capsule.toml`
    - `.claude/rules/windows-shell.md`
 
 7. **Create .gitignore** -- If none exists, create one appropriate for the stack. Always include `.claude/settings.local.json`. For nested workspaces, ensure `deps/` is included.
@@ -130,7 +130,7 @@ If yes, plant the coordination protocol:
 
   Multi-thread work uses the coordination protocol — see `~/.claude/rules/coordination.md` for vocabulary (main thread, subthread, bounty board, close-out report) and discipline (staging, thread-local IDs).
 
-  The bounty board is an in-chat tracker, rebuilt each session from `git log` + `handoff.md` — not a file. Start a main-thread session with `main-thread-kickoff.md`; spawn subthreads with `subthread-brief.md`. `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — tracked source and docs use commit hashes or descriptive names instead.
+  The bounty board is an in-chat tracker, rebuilt each session from `git log` + `capsule.toml` — not a file. Start a main-thread session with `main-thread-kickoff.md`; spawn subthreads with `subthread-brief.md`. `capsule.toml` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `capsule.toml` and chat only — tracked source and docs use commit hashes or descriptive names instead.
   ```
 
 If no, skip silently. The global rule remains available either way (deployed via `templates/deploy-user-settings.py`).

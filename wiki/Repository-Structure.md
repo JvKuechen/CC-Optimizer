@@ -11,7 +11,7 @@ CC-Optimizer/
 │   ├── settings.json            # Project-level permissions + hooks
 │   ├── hooks/                   # Project-specific hook scripts
 │   ├── rules/                   # Path-scoped conventions
-│   │   ├── context-handoff.md   # Multi-session context protocol
+│   │   ├── context-capsule.toml   # Multi-session context protocol
 │   │   ├── optimization-principles.md
 │   │   ├── windows-shell.md     # Windows 11 shell rules
 │   │   └── writing-settings.md  # Settings syntax reference

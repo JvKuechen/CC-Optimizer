@@ -34,7 +34,11 @@ playbook/my-roadmap.md
 playbook/plan-*.md
 
 # Session handoff files
-handoff.md
+/handoff.md
+# Live coordination state (per-workstation; injected at session start).
+# Anchored to root so the tracked schema template (templates/state/capsule.toml)
+# is NOT ignored.
+/capsule.toml
 
 # Python artifacts
 __pycache__/

@@ -11,7 +11,7 @@ You are a subthread of the main thread for <workspace>. The main thread maintain
 
 Read these in order before deciding scope:
 
-1. `handoff.md` — most recent section first. Status of the broader workstream.
+1. `capsule.toml` — most recent section first. Status of the broader workstream.
 2. `CLAUDE.md` — settled decisions, conventions, gotchas. Note the IMPORTANT / YOU MUST lines.
 3. <task-specific files: scoping doc path, target source files with their doc-comments, related tests, ADRs>
 

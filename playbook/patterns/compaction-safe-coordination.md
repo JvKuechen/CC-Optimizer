@@ -29,7 +29,7 @@ exactly what a compaction erases.
    *survives* compaction -- it re-invokes the lead on completion. Work the lead holds in its
    own context *evaporates*. So "delegate aggressively" is the only compaction-durable
    choice, not a preference.
-3. **Role-first handoff.** `handoff.md` leads with `ROLE: coordinator` + the in-flight
+3. **Role-first handoff.** `capsule.toml` leads with `ROLE: coordinator` + the in-flight
    delegation list, so the first fact reconstructed after compaction is the posture.
 4. **Post-compaction re-assertion hook** -- `templates/hooks/sessionstart-coordinator.py`,
    a `SessionStart` hook with matcher `"compact"`. It re-injects the posture, and is
@@ -52,7 +52,7 @@ exactly what a compaction erases.
 ## Variants
 
 - **STEP 0 for a resume kickoff:** confirm `.claude/coordinator.marker` exists + the hook is
-  wired, then read the `handoff.md` RESUME block before reconstructing the in-chat board.
+  wired, then read the `capsule.toml` RESUME block before reconstructing the in-chat board.
 - **Residual gap (by design):** a solo subthread sharing the *main* checkout (no worktree)
   reads as coordinator -- which is why worktree-isolated subthreads are the default model.
 - Pairs with [Coordination Protocol](coordination-protocol.md), [Gate Pattern](gate-pattern.md)

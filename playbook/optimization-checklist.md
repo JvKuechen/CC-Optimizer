@@ -35,7 +35,7 @@ Also available in official marketplace: C/C++ (`clangd-lsp`), Java (`jdtls-lsp`)
 These assets are deployed to `~/.claude/` and automatically available in ALL workspaces:
 
 **Rules** (`~/.claude/rules/`):
-- `context-handoff.md` — Context handoff protocol for long sessions
+- `context-capsule.toml` — Context handoff protocol for long sessions
 - `windows-shell.md` — **Optional (user choice)**. Windows-specific shell rules (paths, null device, ASCII only). Deploy at user scope only if you primarily run Claude Code natively on Windows (Git Bash). If you're in WSL, skip it; if mixed, deploy at project scope per workspace
 
 **Agents** (`~/.claude/agents/`):
@@ -294,7 +294,7 @@ Sessions are stored in `~/.claude/projects/` keyed by the **encoded workspace pa
 ## Phase 4: Add Path-Scoped Rules
 
 ### 4.1 Verify user-scope rules are present
-- [ ] Confirm `~/.claude/rules/context-handoff.md` exists (deployed during machine setup)
+- [ ] Confirm `~/.claude/rules/context-capsule.toml` exists (deployed during machine setup)
 - [ ] `~/.claude/rules/windows-shell.md` is now optional (depends on whether the user runs natively on Windows or in WSL). See Phase 8.0 for the decision tree
 - [ ] If missing rules need to be installed, copy from CC-Optimizer `.claude/rules/`
 

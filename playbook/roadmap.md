@@ -7,7 +7,7 @@ Last updated: 2026-02-22
 ### Core Optimization
 - [x] Audit all workspaces
 - [x] Create .claude/settings.json with consolidated permissions
-- [x] Deploy context-handoff.md and windows-shell.md rules
+- [x] Deploy context-capsule.toml and windows-shell.md rules
 - [x] Evaluate/trim CLAUDE.md files
 - [x] Windows compatibility checks
 

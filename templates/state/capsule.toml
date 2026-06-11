@@ -1,0 +1,50 @@
+# capsule.toml -- live coordination state (the handoff capsule).
+#
+# This is the SINGLE source of truth for current thread state. A SessionStart
+# hook (handoff-capsule.py) injects it into every fresh/resumed/post-compact
+# session; a PostToolUse hook (capsule-validate.py) rejects a malformed edit.
+# Wave HISTORY is NOT here -- git log is the durable record.
+#
+# EDIT IN PLACE as truth changes. Keep it valid: required string keys must be
+# non-empty; list keys must be lists of strings. The validator runs on every
+# Write/Edit and fails loud if you break it. Flat keys + """multi-line""" make
+# a stray line-edit survivable; deep nesting would not be.
+#
+# This file is gitignored (per-workstation live state). Copy it to the project
+# root as capsule.toml and fill it in.
+
+schema_version = 1
+updated = "2026-01-01"            # ISO date; bump on a meaningful change
+thread = "example-main"          # which thread owns this capsule
+
+# --- required (non-empty strings) ---
+
+role = """
+Who am I and what is my lane. One paragraph: coordinator vs executor, the
+deliverable, how work flows.
+"""
+
+current_goal = """
+The one objective this thread is driving toward right now.
+"""
+
+current_state = """
+Where things stand: what just landed, what is in flight, the live commit/branch
+anchors. This changes most often.
+"""
+
+next_safe_action = """
+The single next action to take. Concrete and resumable from a cold start.
+"""
+
+# --- optional ---
+
+active_wave = "none"             # in-flight wave, or "none"
+
+holds_and_gates = [              # blocking conditions; one string per line
+  "Example: change X left uncommitted for thread Y to review",
+]
+
+open_followons = [               # deferred work, not blocking
+  "Example: revisit Z if it proves expensive",
+]

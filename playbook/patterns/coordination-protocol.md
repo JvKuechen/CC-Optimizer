@@ -6,7 +6,7 @@ A coordination model for workspaces with multi-thread, multi-session, or cross-w
 
 Audit signals from the target workspace:
 
-- Multiple `handoff.md` sections from different dates / threads
+- Multiple `capsule.toml` sections from different dates / threads
 - Multiple active branches in flight simultaneously
 - Multiple distinct workstreams (e.g., code + docs migration + audit-trail + parallel-track feature)
 - User describes "main thread" / "subthread" / "spawn a subthread" naturally
@@ -29,7 +29,7 @@ Two or more signals = strong candidate. Single signal = optional; ask the user.
 | `main-thread-kickoff.md` template | Workspace root | Alongside the brief template |
 | Coordination section | Generated CLAUDE.md | Init / optimize, alongside the templates |
 
-The bounty board is **not** a planted file — it's an in-chat artifact the main thread reconstructs each session (see the coordination rule). `handoff.md` (gitignored, per-workstation) is the only persistent local tracker.
+The bounty board is **not** a planted file — it's an in-chat artifact the main thread reconstructs each session (see the coordination rule). `capsule.toml` (gitignored, per-workstation) is the only persistent local tracker.
 
 ## Deployment steps
 
@@ -50,7 +50,7 @@ This deploys the global coordination rule to `~/.claude/rules/coordination.md` a
 
 Multi-thread work in this repo uses the coordination protocol. See `~/.claude/rules/coordination.md` for vocabulary (main thread, subthread, bounty board, close-out report) and discipline.
 
-The bounty board is an in-chat tracker, rebuilt each session from `git log` + `handoff.md` — not a file. Start a main-thread session with `main-thread-kickoff.md`; spawn subthreads with `subthread-brief.md`. `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — tracked source/docs use commit hashes or descriptive names instead.
+The bounty board is an in-chat tracker, rebuilt each session from `git log` + `capsule.toml` — not a file. Start a main-thread session with `main-thread-kickoff.md`; spawn subthreads with `subthread-brief.md`. `capsule.toml` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `capsule.toml` and chat only — tracked source/docs use commit hashes or descriptive names instead.
 ```
 
 ## Outcomes observed (FortrOS, source of this pattern)
@@ -69,4 +69,4 @@ The bounty board is an in-chat tracker, rebuilt each session from `git log` + `h
 ## Not the same as
 
 - **TaskList (in-thread):** TaskCreate tracks single-conversation progress; the bounty board is the main thread's cross-thread coordination view. Both live in context, not in files.
-- **handoff.md (cross-conversation):** `handoff.md` is the durable, gitignored narrative tracker that survives across sessions. The bounty board is live in-chat working state, reconstructed from `handoff.md` + git log each session. Persist `handoff.md` only; the board stays in-chat.
+- **capsule.toml (cross-conversation):** `capsule.toml` is the structured, gitignored live-state tracker -- injected at SessionStart, schema-validated on edit -- that carries current state across sessions (history is `git log`). The bounty board is live in-chat working state, reconstructed from `capsule.toml` + git log each session. Persist `capsule.toml` only; the board stays in-chat.

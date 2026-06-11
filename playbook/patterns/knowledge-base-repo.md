@@ -31,7 +31,7 @@ project/
   README.md             # Quick start for cloning and using
   .claude/
     settings.json       # Permissions for git, python, curl, file ops
-    rules/              # context-handoff.md, windows-shell.md
+    rules/              # context-capsule.toml, windows-shell.md
     skills/
       ingest-docs/      # Parse Import/ -> docs/ (static materials)
       search-helpdesk/  # Query helpdesk API for tickets/articles

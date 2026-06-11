@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
-"""SessionStart handoff-capsule injector -- single-file state, zero re-mining.
+"""SessionStart capsule injector -- structured, schema-validated, queryable.
 
-Reads handoff.md from the project root and injects ONLY the marker-delimited
-live-state capsule into context, so a fresh/resumed/post-compact session starts
-oriented instead of re-reading (or re-deriving) the whole handoff narrative.
+Reads capsule.toml from the project root and injects the live coordination
+state into context, so a fresh/resumed/post-compact session starts oriented
+instead of re-reading (or re-deriving) state from scattered prose.
 
-Wire it in the project's .claude/settings.json WITHOUT a matcher, so it fires
+The capsule is TOML, not markdown, on purpose: the state has known fields
+(role / current_goal / current_state / ...), so a structured file gives back
+schema enforcement (a PostToolUse validator, capsule-validate.py, rejects a
+malformed edit) and queryability (tomllib / a one-line read) that hand-rolled
+marker extraction over markdown only approximated. Wave HISTORY is not stored
+here -- git log is the durable record; the capsule holds only live state.
+
+Wire it in the project's .claude/settings.json WITHOUT a matcher so it fires
 on every SessionStart source (startup, resume, compact, clear):
 
   {"hooks": {"SessionStart": [
@@ -13,18 +20,19 @@ on every SessionStart source (startup, resume, compact, clear):
                 "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/handoff-capsule.py\""}]}
   ]}}
 
-Capsule shape inside handoff.md (one block near the top; in-place edits for
-current truth, append-only wave closeouts BELOW the block):
+capsule.toml shape (flat keys for sed-survivability; one block, edited in
+place as truth changes):
 
-  <!-- CLAUDE_HANDOFF_CAPSULE_BEGIN -->
-  ## ROLE
-  ## CURRENT GOAL
-  ## CURRENT STATE
-  ## ACTIVE WAVE
-  ## HOLDS AND GATES
-  ## NEXT SAFE ACTION
-  ## OPEN FOLLOW-ONS
-  <!-- CLAUDE_HANDOFF_CAPSULE_END -->
+  schema_version = 1
+  updated = "2026-06-10"
+  thread = "cc-optimizer-main"
+  role = \"\"\"...\"\"\"
+  current_goal = \"\"\"...\"\"\"
+  current_state = \"\"\"...\"\"\"
+  active_wave = \"\"\"...\"\"\"           # optional ("none" is fine)
+  holds_and_gates = ["...", "..."]      # optional list
+  next_safe_action = \"\"\"...\"\"\"
+  open_followons = ["...", "..."]       # optional list
 
 Design verdicts (settled in the optimizer thread, 2026-06-10):
   - Inject on EVERY SessionStart source. The capsule costs ~1-2k tokens;
@@ -32,30 +40,42 @@ Design verdicts (settled in the optimizer thread, 2026-06-10):
   - COORDINATOR-ONLY: skip silently for subagents (agent_id / agent_type
     present) and worktree subthreads (cwd under .claude/worktrees/). A scoped
     executor must not inherit the coordinator's NEXT SAFE ACTION.
-  - Degrade QUIETLY when markers are missing: fall back to a small
-    top-of-handoff heuristic plus one self-heal line asking the session to add
-    markers on its next handoff update. A loud failure would block sessions
-    over a formatting issue.
-  - The extractor is marker-based ONLY. The heading set above is convention;
-    enforcing it is a (later, optional) validator's job, surfaced here as a
-    prepended warning line -- never a commit gate, since handoff.md is
-    gitignored and commit hooks cannot see it.
+  - Structured + validated, not markdown + graceful-degradation. A malformed
+    capsule fails LOUD: the validator blocks a bad write, and this injector
+    surfaces a parse/schema error as a visible nudge rather than silently
+    degrading (which hid drift). It still never BLOCKS a session over a
+    formatting issue -- it injects what it can plus the error.
 """
 import json
 import os
-import re
 import sys
 from pathlib import Path
 
-CAPSULE_BEGIN = "<!-- CLAUDE_HANDOFF_CAPSULE_BEGIN -->"
-CAPSULE_END = "<!-- CLAUDE_HANDOFF_CAPSULE_END -->"
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:  # pragma: no cover - older interpreters
+    tomllib = None
+
 MAX_CHARS = 8000
 
-SELF_HEAL = (
-    "NOTE: handoff.md has no capsule markers yet. On your next handoff update, "
-    "wrap the live-state block (ROLE / CURRENT GOAL / CURRENT STATE / ACTIVE WAVE / "
-    "HOLDS AND GATES / NEXT SAFE ACTION / OPEN FOLLOW-ONS) in "
-    + CAPSULE_BEGIN + " ... " + CAPSULE_END + " so future sessions start oriented."
+# (toml key, display heading). Order is the injection order.
+SECTIONS = [
+    ("role", "ROLE"),
+    ("current_goal", "CURRENT GOAL"),
+    ("current_state", "CURRENT STATE"),
+    ("active_wave", "ACTIVE WAVE"),
+    ("holds_and_gates", "HOLDS AND GATES"),
+    ("next_safe_action", "NEXT SAFE ACTION"),
+    ("open_followons", "OPEN FOLLOW-ONS"),
+]
+REQUIRED = ("role", "current_goal", "current_state", "next_safe_action")
+
+PREAMBLE = (
+    "HANDOFF CAPSULE (auto-injected from capsule.toml) -- this IS the current "
+    "state; trust it before searching for state elsewhere. It is the queryable "
+    "source of truth: keep fields true by editing capsule.toml in place (a "
+    "PostToolUse validator rejects a malformed edit). Wave history lives in git "
+    "log, not here.\n"
 )
 
 
@@ -67,37 +87,49 @@ def is_executor(data):
     return ".claude/worktrees/" in cwd.replace("\\", "/")
 
 
-def extract_marked_capsule(text):
-    start = text.find(CAPSULE_BEGIN)
-    end = text.find(CAPSULE_END)
-    if start == -1 or end == -1 or end <= start:
-        return None
-    body = text[start + len(CAPSULE_BEGIN):end].strip()
-    return body or None
+def schema_errors(data):
+    """Return a list of human-readable schema problems (empty = valid)."""
+    errs = []
+    for key in REQUIRED:
+        val = data.get(key)
+        if val is None:
+            errs.append("missing required key '%s'" % key)
+        elif not isinstance(val, str) or not val.strip():
+            errs.append("key '%s' must be a non-empty string" % key)
+    for key in ("holds_and_gates", "open_followons"):
+        if key in data and not (
+            isinstance(data[key], list)
+            and all(isinstance(x, str) for x in data[key])
+        ):
+            errs.append("key '%s' must be a list of strings" % key)
+    return errs
 
 
-def extract_heading_block(text, heading_prefix):
-    """First '## <heading_prefix>...' section, up to the next '## '."""
-    pattern = re.compile(r"^##\s+" + re.escape(heading_prefix) + r".*$", re.MULTILINE)
-    match = pattern.search(text)
-    if not match:
-        return None
-    nxt = re.search(r"^##\s+", text[match.end():], re.MULTILINE)
-    end = match.end() + nxt.start() if nxt else len(text)
-    return text[match.start():end].strip()
+def render(data):
+    out = []
+    for key, heading in SECTIONS:
+        val = data.get(key)
+        if val is None:
+            continue
+        if isinstance(val, list):
+            if not val:
+                continue
+            body = "\n".join("- " + str(x) for x in val)
+        else:
+            body = str(val).strip()
+            if not body:
+                continue
+        out.append("## %s\n%s" % (heading, body))
+    return "\n\n".join(out)
 
 
-def fallback_capsule(text):
-    parts = []
-    for heading in ("ROLE", "RESUME HERE", "RESUME", "CURRENT STATE", "Current State"):
-        block = extract_heading_block(text, heading)
-        if block and block not in parts:
-            parts.append("\n".join(block.splitlines()[:80]).strip())
-        if len(parts) == 2:
-            break
-    if not parts:
-        return SELF_HEAL
-    return "\n\n".join(parts) + "\n\n" + SELF_HEAL
+def emit(context):
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "SessionStart",
+            "additionalContext": context,
+        }
+    }))
 
 
 def main():
@@ -110,25 +142,32 @@ def main():
         sys.exit(0)
 
     repo = Path(os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd())
-    handoff = repo / "handoff.md"
-    if not handoff.is_file():
+    capsule_path = Path(os.environ.get("CLAUDE_CAPSULE_FILE") or (repo / "capsule.toml"))
+    if not capsule_path.is_file():
+        sys.exit(0)  # no capsule yet -- nothing to inject
+
+    if tomllib is None:
+        emit("CAPSULE: capsule.toml present but this Python lacks tomllib "
+             "(need 3.11+). State not injected; upgrade the interpreter.")
         sys.exit(0)
-    text = handoff.read_text(encoding="utf-8")
 
-    capsule = extract_marked_capsule(text) or fallback_capsule(text)
-    body = capsule[:MAX_CHARS].rstrip()
+    raw = capsule_path.read_bytes()
+    try:
+        parsed = tomllib.loads(raw.decode("utf-8"))
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError) as exc:
+        emit(PREAMBLE + "## CAPSULE PARSE ERROR\ncapsule.toml is not valid TOML: "
+             "%s\nFix it before relying on injected state." % exc)
+        sys.exit(0)
 
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "SessionStart",
-            "additionalContext": (
-                "HANDOFF CAPSULE (auto-injected from handoff.md) -- this IS the current "
-                "state; trust it before searching for state elsewhere. Keep it true: "
-                "update the capsule IN PLACE as truth changes, append wave closeouts "
-                "below it in handoff.md.\n" + body
-            ),
-        }
-    }))
+    errs = schema_errors(parsed)
+    body = render(parsed)[:MAX_CHARS].rstrip()
+
+    context = PREAMBLE + body
+    if errs:
+        context += ("\n\n## CAPSULE SCHEMA WARNING\n"
+                    + "\n".join("- " + e for e in errs)
+                    + "\nThe capsule is incomplete; fix capsule.toml.")
+    emit(context)
     sys.exit(0)
 
 

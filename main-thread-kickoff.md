@@ -13,7 +13,7 @@ dig into.
 Anchor the sweep on the work spine -- the anchors below, read in order:
 
 - `git log` -- recent commits, what shipped lately
-- `handoff.md` -- narrative continuity + task state from the last session, if one exists
+- `capsule.toml` -- narrative continuity + task state from the last session, if one exists
 - `CLAUDE.md` -- settled decisions and per-area status (shipped / partial / proposed)
 
 Spawn Explore (or other read-only) subagents for breadth so the main context stays

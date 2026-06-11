@@ -128,7 +128,7 @@ Active workspaces live as nested clones under `WS/` in this repo (flat layout, n
 
 Multi-thread / multi-workspace coordination uses the protocol at `~/.claude/rules/coordination.md` (deployed via `templates/deploy-user-settings.py`). Vocabulary: main thread = coordinator, subthread = focused executor, bounty board = in-chat cross-thread task state, close-out report = structured subthread return.
 
-The bounty board is an in-chat artifact, reconstructed each session from `git log` + `handoff.md`, and lives only in conversation context (a persisted board goes stale once its thread closes). Start a main-thread session by pasting `templates/main-thread-kickoff.md`; spawn subthreads using the brief template at `templates/subthread-brief.md` (customize each per task before pasting). `handoff.md` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `handoff.md` and chat only — tracked source, docs, and rules use commit hashes or descriptive names instead.
+The bounty board is an in-chat artifact, reconstructed each session from `git log` + `capsule.toml`, and lives only in conversation context (a persisted board goes stale once its thread closes). Start a main-thread session by pasting `templates/main-thread-kickoff.md`; spawn subthreads using the brief template at `templates/subthread-brief.md` (customize each per task before pasting). `capsule.toml` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `capsule.toml` and chat only — tracked source, docs, and rules use commit hashes or descriptive names instead.
 
 ## Public Repo Commit Workflow
 

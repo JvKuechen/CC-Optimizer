@@ -13,12 +13,12 @@ When work spans multiple sessions, multiple parallel threads, or coordination ac
 
 You are the coordinator, not the executor.
 
-1. **Maintain shared state** — the in-chat bounty board, the `handoff.md` file, the settled-decisions list.
+1. **Maintain shared state** — the in-chat bounty board, the `capsule.toml` file, the settled-decisions list.
 2. **Spawn subthreads with self-contained briefs** — the subthread picks up cold from the brief alone. LAY OF THE LAND (read these files), STAGING DISCIPLINE, forewarned gotchas, expected close-out shape.
 3. **Integrate close-out reports** — fold what the subthread returned back into the bounty board, save surprises as memory candidates, update sequencing.
 4. **Sweep loose work** — subthreads commit only what their brief specifies. Anything else (lockfile syncs, peripheral edits, main-thread chatter that produced files) is yours to commit in logical splits after they close.
 
-To start or resume a main-thread session, paste the workspace's `main-thread-kickoff.md` — a reusable orientation prompt anchored on the work spine (git log, `handoff.md`, settled decisions), from which the main thread reconstructs the bounty board in-chat.
+To start or resume a main-thread session, paste the workspace's `main-thread-kickoff.md` — a reusable orientation prompt anchored on the work spine (git log, `capsule.toml`, settled decisions), from which the main thread reconstructs the bounty board in-chat.
 
 ## Subthread role
 
@@ -36,11 +36,11 @@ The bounty board is an **in-chat artifact, not a tracked file**. It's a structur
 
 A board only matters to the thread organizing it; once that thread closes, a persisted board is just stale drift. So it is never written to a file:
 
-- The main thread **reconstructs** the board at session start from the work spine — `git log`, `handoff.md`, and the `CLAUDE.md` settled-decisions / status.
+- The main thread **reconstructs** the board at session start from the work spine — `git log`, `capsule.toml`, and the `CLAUDE.md` settled-decisions / status.
 - When spawning a new subthread, the main thread **rewrites the whole board fresh** with current state and embeds it in the subthread brief.
 - When a subthread returns and still has context runway for related work, the main thread just hands it the next task — no rewrite, it already has the lay of the land.
 
-`handoff.md` (gitignored, per-workstation) is the only persistent local tracker. It carries durable narrative continuity; the board is live working state rebuilt from it. Persist nothing else.
+`capsule.toml` (gitignored, per-workstation) is the live-state tracker -- structured, injected at SessionStart, schema-validated on edit. The board is live working state rebuilt from it plus `git log` (the durable history). Persist nothing else.
 
 When to run a board at all: work spans 3+ parallel threads or focus areas, or multiple sessions on one workstream over weeks. Skip for solo / single-session / linear work.
 
@@ -70,7 +70,7 @@ The default fan-out model is background Agent-tool subagents the lead spawns wit
 
 Division of labor:
 
-- **In the worktree** (subagent, or the coordinator on a bounded task): write code, run dev + unit tests for the stack. A worktree is a fresh checkout, so gitignored files it needs (env files, local config, `handoff.md`) are copied in via a committed `.worktreeinclude` at the project root (gitignore-syntax; list only what a task legitimately needs, never signing keys or seed secrets).
+- **In the worktree** (subagent, or the coordinator on a bounded task): write code, run dev + unit tests for the stack. A worktree is a fresh checkout, so gitignored files it needs (env files, local config) are copied in via a committed `.worktreeinclude` at the project root (gitignore-syntax; list only what a task legitimately needs, never signing keys or seed secrets).
 - **On the lead's main checkout** (after the branch is consolidated): full builds, end-to-end runs, image bakes. These depend on shared environment state that lives on the main checkout, not in a fresh worktree. Rejected: a full build or image bake inside a worktree -- it builds against environment the worktree does not have.
 - **Close-out + consolidate**: the lead reads the close-out from artifacts -- `git diff main...worktree-<slug>` + the subagent's returned report. Adversarial-review the diff (the project's reviewer subagent), ff-merge the reviewed branch into main, then run the build / E2E there. Remove the worktree after merging (`git worktree remove --force <path>` + `git branch -d worktree-<slug>`); a worktree whose subagent made no commit auto-cleans.
 
@@ -89,7 +89,7 @@ YOU MUST NOT put these IDs in tracked content (source, docs, README, CLAUDE.md, 
 - **Descriptive name** — "the rustdoc lint strictness flip" beats "D-LINK-STRICT".
 - **Settled-decisions row reference** — for architectural decisions that live in CLAUDE.md.
 
-Exception: the in-chat bounty board and `handoff.md` aren't tracked content — IDs live there freely. Active scoping notes in `notes/` or `findings/` may carry IDs while work is in flight; they retire with the cleanup pass that closes the initiative.
+Exception: the in-chat bounty board and `capsule.toml` aren't tracked content — IDs live there freely. Active scoping notes in `notes/` or `findings/` may carry IDs while work is in flight; they retire with the cleanup pass that closes the initiative.
 
 ## Integration board (durable readiness)
 

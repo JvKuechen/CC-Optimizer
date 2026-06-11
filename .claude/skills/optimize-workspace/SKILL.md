@@ -54,7 +54,7 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
 7. **Per-project feature decisions** -- MCP, LSP, Chrome, sandboxing, fan-out.
 
 7.5. **Coordination protocol detection** -- Scan for multi-thread signals:
-   - Multiple `handoff.md` sections from different dates / threads (Read and count `## ` date-tagged sections)
+   - Multiple `capsule.toml` sections from different dates / threads (Read and count `## ` date-tagged sections)
    - Multiple active branches: `git -C "<target>" branch --no-merged main` returns 2+
    - Multiple distinct workstreams in flight (scan CLAUDE.md, README, recent commits)
    - User describes "main thread" / "subthread" / "spawn a subthread" language naturally
@@ -73,7 +73,7 @@ Glob DOES discover files in gitignored directories. Read/Edit/Write work on any 
 9. **Optimize CLAUDE.md** (Phase 3) -- Under 500 lines. Add gotchas, business context. Apply selected patterns (current-state-capsule, collaboration-posture, blocked-task-tracking, etc.). Use `@path` imports.
 
 10. **Add rules** (Phase 4) -- Always deploy:
-    - `.claude/rules/context-handoff.md` (copy from optimizer workspace)
+    - `.claude/rules/context-capsule.toml` (copy from optimizer workspace)
     - `.claude/rules/windows-shell.md` (copy from optimizer workspace, for Windows targets)
     - Project-specific path-scoped rules as needed.
 

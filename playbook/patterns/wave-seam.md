@@ -56,7 +56,11 @@ its own brief):
    Background subagents survive the compact -- completion notifications re-invoke
    the compacted lead.
 3. **Integration tail on the lean context**: reviews, fix legs, merges, until
-   single git state (main only, zero worktrees, clean status).
+   single git state (main only, zero worktrees, clean status). Parallel legs
+   sharing a build cache can poison each other's gate runs (stale artifacts
+   carrying a sibling leg's interface changes); give legs that touch shared
+   interface crates a leg-private cache, or clean the shared crates' artifacts
+   before gating.
 4. **Test on main, decide the next wave with the user, capsule seam edit** (fold
    close-outs into `current_state`, return `active_wave` to "none" or the next
    queue). One more wave in-session is fine; after that, close and re-kickoff
@@ -95,6 +99,26 @@ Scope check before arming: at a natural seam (wave closed, test step done),
 close the session instead -- the capsule + kickoff make a cold start cheap, and
 a fresh session beats a stale warm one. The heartbeat is for mid-wave waits
 where the live context is still load-bearing.
+
+### Reject routing (workers run the five-minute TTL)
+
+A review verdict lands well past a subagent's five-minute cache TTL, so a
+resumed worker re-reads its whole transcript cache-cold (~1.25x its size at the
+5m write rate). Route a Reject by shape and size (validated on the FortrOS
+wave-3 tail -- two rejects, both resolved in one revision round):
+
+- Tiny defect -> the lead fixes it on the branch itself.
+- Small/mid transcript (under ~200k) or a continuation-shaped reject ("right
+  approach, fix within it") -> resume the worker: SendMessage to the completed
+  agent id; the harness resumes it from transcript in the background. Resume
+  cost ~1.25x its transcript, and it keeps the in-head state that produces
+  structural (not patch-over) remediations.
+- Large transcript (~300k+) with a defect-shaped reject -> fresh fix leg
+  briefed from the artifacts (review verdict + close-out + branch diff). The
+  branch is the asset; the transcript dies with the worker.
+- Rejected: speculative keep-alive pings on workers during review. Most legs
+  pass (wave 2: 1 reject in 12), so the expected warming cost exceeds the one
+  saved rewrite.
 
 Session discipline at each seam:
 

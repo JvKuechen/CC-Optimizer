@@ -62,8 +62,15 @@ ends at the message). Run the adversarial-reviewer (or the Codex reviewer leg,
 backgrounded: `scripts/codex-review.sh --base main --repo <worktree> --tag <slug>
 --closeout-text "<the returned report>"`) against the diff -- the inline close-out feeds
 the claims cross-check, and the script persists it to `findings/<slug>-closeout.md` as
-the durable copy. Accept/Conditional
--> mergeable (Conditional files follow-ups); Reject -> re-spawn with the report. ff-merge
+the durable copy. Accept/Conditional -> mergeable (Conditional files follow-ups).
+Reject -> route by shape and size: a tiny defect you fix on the branch yourself; a
+small/mid leg (transcript under ~200k) or a continuation-shaped reject resumes the
+worker (SendMessage to its agent id -- the harness resumes it from transcript in the
+background; it re-reads cache-cold at ~1.25x its transcript and keeps its in-head
+state); a large transcript with a defect-shaped reject gets a fresh fix leg briefed
+from the artifacts (verdict + close-out + branch diff -- the branch is the asset).
+Rejected: keep-alive pings on a worker during its review -- most legs pass, so the
+expected warming cost exceeds the one saved rewrite. ff-merge
 the reviewed branch, then `git worktree remove --force <path>` + `git branch -d
 worktree-<slug>` (a worktree whose subagent made no commit auto-cleans). Full builds /
 E2E / image bakes run on your main checkout, never in a worktree.

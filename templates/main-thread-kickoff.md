@@ -68,6 +68,35 @@ the reviewed branch, then `git worktree remove --force <path>` + `git branch -d
 worktree-<slug>` (a worktree whose subagent made no commit auto-cleans). Full builds /
 E2E / image bakes run on your main checkout, never in a worktree.
 
+## Wave rhythm -- interview, go wide, compact at the spawn seam
+
+Each wave runs one seam loop:
+
+1. **Orient + interview.** After the lay-of-the-land report, interview the user on
+   anything the wave's briefs leave unsettled; validate each brief premise against
+   the live tree while drafting (stale anchors are the recon-decay tax).
+2. **Go wide.** Spawn every leg, then make the wave's ONE capsule edit: fold the
+   interview rulings in and write the active-wave leg table into `active_wave` --
+   one line per leg: slug | owned scope | branch | model | status. The post-compact
+   you routes close-outs and spots cross-leg collisions from this table, not from
+   the spawn briefs (each worker carries its own). Then hand the user the standing
+   compact:
+
+   ```
+   /compact Wave spawned; legs in flight per capsule.toml ACTIVE WAVE. Keep:
+   review queue state, settled rulings from the interview. Next: integration
+   tail -- reviews, fixes, merges, until single git state.
+   ```
+
+   Background subagents survive the compact -- their completion notifications
+   re-invoke you.
+3. **Integration tail** on the lean context: reviews, fix legs, merges, until single
+   git state (main only, zero worktrees, clean status).
+4. **Test on main, decide the next wave with the user, capsule seam edit** (fold
+   close-outs into `current_state`, return `active_wave` to "none" or the next
+   queue). One more wave in-session is fine; after that, close and re-kickoff fresh
+   -- one compact per wave, and a fresh session beats a second-generation compact.
+
 If you drive the session under `/goal`, state the condition transcript-demonstrable +
 bounded (the evaluator only reads the conversation) and it reprompts each turn until met.
 Prune completed tasks as you go so a stale completed-heavy list does not prime a premature

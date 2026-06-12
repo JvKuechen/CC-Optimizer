@@ -23,6 +23,43 @@ subagents -> 4. collect close-outs -> 5. review -> 6. fold + test -> 7. update t
 handoff capsule (the wave's one capsule edit; the coordinator is the only writer) ->
 8. **compact or start fresh when hydration is stale**.
 
+### The per-wave happy path (spawn-seam compact)
+
+Validated against the FortrOS wave-2 wide pass (2026-06-12): 12 legs merged in one
+evening (~4.8M subagent tokens, flat-cost), but lead usage-per-message climbed
+through the integration tail -- every small fix-leg turn re-read the orientation
+sweep, the interview, and nine spawn briefs. The fix is a deliberate compact at the
+spawn seam, the moment that content's marginal value hits zero (each worker carries
+its own brief):
+
+1. **Kickoff + interview.** Orient from capsule + git log, then interview the user
+   on anything the wave's briefs leave unsettled; validate each brief premise
+   against the live tree while drafting (stale anchors are the recon-decay tax).
+2. **Go wide.** Spawn every leg, then make the wave's ONE capsule edit: fold the
+   interview rulings in and write the active-wave leg table into `active_wave` --
+   one line per leg: slug | owned scope | branch | model | status. The post-compact
+   lead routes close-outs and spots cross-leg collisions from this table, not from
+   the discarded briefs. Then hand the user the standing compact:
+
+   ```
+   /compact Wave spawned; legs in flight per capsule.toml ACTIVE WAVE. Keep:
+   review queue state, settled rulings from the interview. Next: integration
+   tail -- reviews, fixes, merges, until single git state.
+   ```
+
+   Background subagents survive the compact -- completion notifications re-invoke
+   the compacted lead.
+3. **Integration tail on the lean context**: reviews, fix legs, merges, until
+   single git state (main only, zero worktrees, clean status).
+4. **Test on main, decide the next wave with the user, capsule seam edit** (fold
+   close-outs into `current_state`, return `active_wave` to "none" or the next
+   queue). One more wave in-session is fine; after that, close and re-kickoff
+   fresh.
+
+One compact per wave, at the spawn seam. Prefer a fresh session over a
+second-generation compact -- summary-of-summary drift compounds, and the kickoff +
+capsule make a cold start cheap.
+
 Session discipline at each seam:
 
 - **End or compact once the wave is in flight.** After the board is set and workers

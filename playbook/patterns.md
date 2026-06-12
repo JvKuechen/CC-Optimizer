@@ -28,7 +28,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 | Dependency-Graph Conformance Ratchet | [dependency-graph-ratchet.md](patterns/dependency-graph-ratchet.md) | Machine-enforcing a convention across a codebase that starts out red — conform + gate per-unit, leaves-to-roots, warn-global/deny-per-unit |
 | CI-Status Surfacing | [ci-status-surfacing.md](patterns/ci-status-surfacing.md) | Workspaces with CI gates — surface failing GitHub Actions runs at SessionStart so a red gate doesn't sit unnoticed across pushes |
 | Handoff Capsule | [handoff-capsule.md](patterns/handoff-capsule.md) | Long-lived coordinator — inject a structured, schema-validated `capsule.toml` (live state) at SessionStart + a PostToolUse validator; replaces a markdown handoff. History = git log |
-| Wave-Seam Session Policy | [wave-seam.md](patterns/wave-seam.md) | Multi-wave coordinator workstreams — end/compact at work-shape seams, terse notification deltas, one synthesis per seam; the brake on cache-read bloat now that 1M context removed forced compaction |
+| Wave-Seam Session Policy | [wave-seam.md](patterns/wave-seam.md) | Multi-wave coordinator workstreams — end/compact at work-shape seams, terse notification deltas, one synthesis per seam; per-wave happy path = interview -> go wide -> spawn-seam compact -> lean integration tail; the brake on cache-read bloat now that 1M context removed forced compaction |
 | Model Allocation by Comparative Advantage | [model-allocation.md](patterns/model-allocation.md) | Multiple models / cross-vendor CLI / a time-limited promo model — allocate coordinator/implementer/reviewer/recon by each model's edge (one-shot economics, perishable-asset rule, cross-vendor reviewer as the offset slot) |
 
 ## Architecture

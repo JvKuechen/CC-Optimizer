@@ -60,6 +60,36 @@ One compact per wave, at the spawn seam. Prefer a fresh session over a
 second-generation compact -- summary-of-summary drift compounds, and the kickoff +
 capsule make a cold start cheap.
 
+### Cache heartbeat (idle waits beyond the TTL)
+
+Doc-verified 2026-06-12 (docs/en/prompt-caching.md): a cache read resets the
+TTL ("each request that hits the cache resets the timer"), and on a Claude
+subscription Claude Code requests the one-hour TTL automatically for the main
+conversation (API-key auth defaults to five minutes; `ENABLE_PROMPT_CACHING_1H=1`
+opts in). Subagents run the five-minute TTL even on a subscription, so the
+heartbeat applies to the lead only.
+
+Economics (API list prices; subscription allowance weighting is believed to be
+the same 0.1x but is not officially documented): a heartbeat turn re-reads the
+context at 0.1x; a cold turn after expiry rewrites it at 2x (the 1h-TTL write
+rate). Break-even ~20 beats -- hourly keep-alive is cheaper than one cold start
+for any wait up to ~20 hours.
+
+Mechanism (deterministic brick, no new tooling): when entering a wait expected
+to exceed ~45 minutes with no harness-tracked completion due (a human-gated
+test, a ferry gap mid-wave), arm a background sleep -- Bash `sleep 3000` with
+`run_in_background: true`. Its exit notification re-invokes the lead; that turn
+IS the cache read that resets the one-hour timer. Respond with a one-line delta
+and re-arm; cap re-arms (~8) so an abandoned session winds down instead of
+beating all night. During an active wave, leg completions land more often than
+hourly and reset the timer themselves -- the heartbeat covers completion-free
+gaps only.
+
+Scope check before arming: at a natural seam (wave closed, test step done),
+close the session instead -- the capsule + kickoff make a cold start cheap, and
+a fresh session beats a stale warm one. The heartbeat is for mid-wave waits
+where the live context is still load-bearing.
+
 Session discipline at each seam:
 
 - **End or compact once the wave is in flight.** After the board is set and workers

@@ -97,6 +97,13 @@ Each wave runs one seam loop:
    queue). One more wave in-session is fine; after that, close and re-kickoff fresh
    -- one compact per wave, and a fresh session beats a second-generation compact.
 
+Mid-wave waits with no completion due within the hour (a human-gated test, a
+ferry gap): arm a cache heartbeat -- background Bash `sleep 3000`; its exit
+notification re-invokes you, and that turn resets the subscription cache's
+one-hour timer. Reply with a one-line delta and re-arm, capping at ~8 beats.
+Leg completions reset the timer on their own; the heartbeat covers
+completion-free gaps only. At a natural seam, close the session instead.
+
 If you drive the session under `/goal`, state the condition transcript-demonstrable +
 bounded (the evaluator only reads the conversation) and it reprompts each turn until met.
 Prune completed tasks as you go so a stale completed-heavy list does not prime a premature

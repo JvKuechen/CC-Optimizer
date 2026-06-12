@@ -40,7 +40,8 @@ The single next action to take. Concrete and resumable from a cold start.
 # --- optional ---
 
 # Between waves: "none". During a wave: the leg table the post-compact lead
-# routes by -- one line per leg: slug | owned scope | branch | model | status.
+# routes by -- one line per leg: slug | owned scope | branch | model | status
+# | merge-order note (what it must follow / what it collides with).
 # Written in the wave's one capsule edit, right after spawning and before the
 # spawn-seam compact (workers carry their own briefs; this table is what the
 # integration tail needs).

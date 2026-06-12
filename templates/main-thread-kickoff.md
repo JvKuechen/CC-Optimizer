@@ -77,10 +77,15 @@ Each wave runs one seam loop:
    the live tree while drafting (stale anchors are the recon-decay tax).
 2. **Go wide.** Spawn every leg, then make the wave's ONE capsule edit: fold the
    interview rulings in and write the active-wave leg table into `active_wave` --
-   one line per leg: slug | owned scope | branch | model | status. The post-compact
-   you routes close-outs and spots cross-leg collisions from this table, not from
-   the spawn briefs (each worker carries its own). Then hand the user the standing
-   compact:
+   one line per leg: slug | owned scope | branch | model | status | merge-order
+   note (what it must follow / what it collides with). The post-compact you routes
+   close-outs, merges in order, and spots cross-leg collisions from this table,
+   not from the spawn briefs (each worker carries its own). Whole-tree mechanical
+   sweeps (lint / format combs) collide with every feature leg -- they run alone
+   in the integration tail after features merge, not as a parallel leg. Then hand
+   the user the standing compact, with the Keep: list naming the wave's specific
+   perishables (gates awaiting a user go, adjudicated verdicts, live-hardware
+   status):
 
    ```
    /compact Wave spawned; legs in flight per capsule.toml ACTIVE WAVE. Keep:

@@ -46,11 +46,17 @@ omit test/verify reminders -- it verifies its own work, and reminders just pad t
 
 Two verified constraints shape the briefs:
 
-- **Set isolation at spawn.** A subagent cannot create its own worktree (the harness
-  blocks `EnterWorktree` from a subagent), so pass `isolation: "worktree"` on every
-  edit-task spawn. The brief has the subagent confirm it landed in a worktree and return
-  `BLOCKED: spawned without worktree isolation` if it is on `main`; re-spawn it with
-  isolation set. Read-only / research subagents need no worktree.
+- **Set isolation at spawn, and leave the edit-leg spawn un-named.** A subagent cannot
+  create its own worktree (the harness blocks `EnterWorktree` from a subagent), so pass
+  `isolation: "worktree"` on every edit-task spawn -- and spawn it as a plain background
+  Agent with no `name`. When agent-teams is enabled (env
+  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`), a `name`d background spawn routes to a
+  teammate, which starts on your shared `main` checkout and ignores `isolation` -- so it
+  lands on `main` and the brief's STEP-0 guard fires `BLOCKED: spawned without worktree
+  isolation`. Reserve `name`/SendMessage for a deliberate teammate-UI run. The brief has
+  the subagent confirm it landed in a worktree and return that BLOCKED line if it is on
+  `main`; re-spawn it un-named with isolation set. Read-only / research subagents need no
+  worktree.
 - **Subagents cannot ask the user.** `AskUserQuestion` is unavailable to a subagent;
   brief it to return `BLOCKED: <decision>, options A/B/C` rather than guess. You route it
   -- answer from context, or escalate with your own `AskUserQuestion` (which pauses an

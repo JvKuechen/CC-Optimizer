@@ -163,10 +163,11 @@ This workspace handles **Claude Code CLI** optimization only.
 
 ## Doc Pages Quick Index
 
-For optimization: best-practices, memory, settings, features-overview, model-config, output-styles, context-window, costs, env-vars
-For extensibility: skills, hooks, hooks-guide, sub-agents, plugins, plugins-reference, mcp, plugin-marketplaces, plugin-dependencies, discover-plugins, tools-reference, commands, plugin-marketplace-reference (internal)
+For optimization: best-practices, memory, settings, features-overview, model-config, output-styles, context-window, costs, env-vars, prompt-caching, large-codebases
+For extensibility: skills, hooks, hooks-guide, sub-agents, agents, plugins, plugins-reference, mcp, mcp-quickstart, managed-mcp, plugin-marketplaces, plugin-dependencies, plugin-hints, discover-plugins, tools-reference, commands, plugin-marketplace-reference (internal)
 For workflows: common-workflows, cli-reference, interactive-mode, authentication, scheduled-tasks, routines, remote-control, code-review, ultraplan, ultrareview, voice-dictation
-For permissions: permissions, permission-modes, auto-mode-config, sandboxing, server-managed-settings
+For autonomy/orchestration: goal, agent-view, advisor, workflows, worktrees, artifacts, prompt-library
+For permissions: permissions, permission-modes, auto-mode-config, sandboxing, sandbox-environments, server-managed-settings
 For UI/terminal: fullscreen, statusline, terminal-config, keybindings, deep-links, sessions
 For team features: agent-teams, channels, channels-reference, champion-kit, communications-kit
 For diagnostics: debug-your-config, troubleshoot-install, troubleshooting, errors, glossary, how-claude-code-works, claude-directory, whats-new, changelog

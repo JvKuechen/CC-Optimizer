@@ -38,6 +38,9 @@ def maybe_install_tmux_config(script_dir, home):
     src = script_dir / "tmux.conf"
     if not src.exists():
         return
+    # tmux teammate-view is Linux/WSL/macOS only; native Windows has no tmux.
+    if sys.platform == "win32":
+        return
     block = src.read_text(encoding="utf-8")
     marker = ">>> claude-code teammate-view"
     dst = home / ".tmux.conf"
@@ -52,7 +55,12 @@ def maybe_install_tmux_config(script_dir, home):
     if not sys.stdin.isatty():
         print(f"  Non-interactive -- skipping. To install later, append {src} to ~/.tmux.conf")
         return
-    if input("  Install into ~/.tmux.conf? [y/N] ").strip().lower() not in ("y", "yes"):
+    try:
+        answer = input("  Install into ~/.tmux.conf? [y/N] ").strip().lower()
+    except EOFError:
+        print("  No input available -- skipping.")
+        return
+    if answer not in ("y", "yes"):
         print("  Skipped.")
         return
     sep = "" if existing == "" or existing.endswith("\n") else "\n"

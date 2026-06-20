@@ -1,29 +1,29 @@
 {
-  "lastSync": "2026-06-10T22:03:53Z",
+  "lastSync": "2026-06-20T14:40:00Z",
   "pages": {
     "admin-setup": {
-      "lastmod": "2026-06-09T18:28:37.830Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-13T16:25:39.229Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "agent-teams": {
-      "lastmod": "2026-06-09T18:56:46.792Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:49.544Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "amazon-bedrock": {
-      "lastmod": "2026-06-05T21:14:21.913Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:49.546Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "analytics": {
       "lastmod": "2026-05-01T03:26:55.183Z",
       "fetchedAt": "2026-05-07T12:50:54Z"
     },
     "authentication": {
-      "lastmod": "2026-06-09T14:23:36.281Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-15T21:48:04.675Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "auto-mode-config": {
       "lastmod": "2026-06-09T20:02:34.197Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "best-practices": {
       "lastmod": "2026-05-28T16:54:46.454Z",
@@ -31,11 +31,11 @@
     },
     "champion-kit": {
       "lastmod": "2026-04-28T15:54:10.733Z",
-      "fetchedAt": "2026-05-07T12:50:54Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "changelog": {
-      "lastmod": "2026-06-09T22:21:48.388Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T01:27:48.384Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "channels": {
       "lastmod": "2026-06-09T14:23:36.283Z",
@@ -50,28 +50,28 @@
       "fetchedAt": "2026-05-31T16:53:46Z"
     },
     "chrome": {
-      "lastmod": "2026-06-03T19:45:17.312Z",
-      "fetchedAt": "2026-06-05T20:07:32Z"
+      "lastmod": "2026-06-19T22:06:29.464Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "claude-code-on-the-web": {
-      "lastmod": "2026-06-09T19:50:12.116Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.477Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "claude-directory": {
       "lastmod": "2026-06-09T20:02:34.216Z",
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "cli-reference": {
-      "lastmod": "2026-06-09T23:34:21.215Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:49.547Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "code-review": {
-      "lastmod": "2026-05-28T22:51:18.525Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "lastmod": "2026-06-12T00:07:56.430Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "commands": {
-      "lastmod": "2026-06-09T23:34:21.255Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.465Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "common-workflows": {
       "lastmod": "2026-05-26T22:47:27.867Z",
@@ -79,7 +79,7 @@
     },
     "communications-kit": {
       "lastmod": "2026-06-09T16:56:28.227Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "computer-use": {
       "lastmod": "2026-04-10T17:56:24.575Z",
@@ -90,8 +90,8 @@
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "costs": {
-      "lastmod": "2026-06-09T16:56:28.220Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-16T21:44:13.918Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "data-usage": {
       "lastmod": "2026-06-10T00:06:25.636Z",
@@ -99,15 +99,15 @@
     },
     "debug-your-config": {
       "lastmod": "2026-06-09T14:23:36.278Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "deep-links": {
       "lastmod": "2026-06-04T23:12:20.062Z",
-      "fetchedAt": "2026-06-05T20:07:32Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "desktop": {
-      "lastmod": "2026-06-10T00:13:38.247Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-15T22:31:07.377Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "desktop-quickstart": {
       "lastmod": "2026-06-09T16:56:28.221Z",
@@ -126,24 +126,24 @@
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "env-vars": {
-      "lastmod": "2026-06-09T23:34:21.340Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.480Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "errors": {
-      "lastmod": "2026-06-09T18:53:44.237Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-12T21:36:26.772Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "fast-mode": {
-      "lastmod": "2026-06-03T17:19:52.149Z",
-      "fetchedAt": "2026-06-05T20:07:32Z"
+      "lastmod": "2026-06-16T21:44:13.954Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "features-overview": {
-      "lastmod": "2026-06-01T21:46:03.371Z",
-      "fetchedAt": "2026-06-05T20:07:32Z"
+      "lastmod": "2026-06-18T18:02:56.590Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "fullscreen": {
-      "lastmod": "2026-06-03T19:45:17.321Z",
-      "fetchedAt": "2026-06-05T20:07:32Z"
+      "lastmod": "2026-06-18T19:23:49.537Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "github-actions": {
       "lastmod": "2026-06-09T16:56:28.254Z",
@@ -158,20 +158,20 @@
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "glossary": {
-      "lastmod": "2026-06-09T18:28:37.837Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T18:02:56.592Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "google-vertex-ai": {
       "lastmod": "2026-06-05T21:14:21.914Z",
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "headless": {
-      "lastmod": "2026-06-09T18:28:37.832Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.465Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "hooks": {
-      "lastmod": "2026-06-10T00:06:25.645Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-16T21:44:13.995Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "hooks-guide": {
       "lastmod": "2026-06-09T20:02:34.225Z",
@@ -182,64 +182,64 @@
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "interactive-mode": {
-      "lastmod": "2026-06-09T16:56:28.260Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-12T21:36:29.971Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "jetbrains": {
-      "lastmod": "2026-05-18T20:55:54.587Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "lastmod": "2026-06-13T02:22:21.667Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "keybindings": {
-      "lastmod": "2026-06-09T14:23:50.568Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.466Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "legal-and-compliance": {
-      "lastmod": "2026-05-13T17:12:30.577Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "lastmod": "2026-06-15T21:48:04.886Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "llm-gateway": {
       "lastmod": "2026-06-09T23:09:21.752Z",
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "mcp": {
-      "lastmod": "2026-06-09T23:35:14.551Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.476Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "memory": {
-      "lastmod": "2026-06-09T14:23:50.560Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T01:33:07.362Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "microsoft-foundry": {
       "lastmod": "2026-06-05T21:14:21.920Z",
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "model-config": {
-      "lastmod": "2026-06-09T23:34:21.435Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.473Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "monitoring-usage": {
-      "lastmod": "2026-06-09T19:41:31.663Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:53.861Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "network-config": {
-      "lastmod": "2026-05-05T21:29:58.999Z",
-      "fetchedAt": "2026-05-07T12:50:54Z"
+      "lastmod": "2026-06-18T18:02:56.659Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "output-styles": {
-      "lastmod": "2026-05-25T21:09:39.261Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "lastmod": "2026-06-16T21:44:14.061Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "overview": {
-      "lastmod": "2026-06-09T23:34:21.429Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-15T21:48:04.924Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "permission-modes": {
-      "lastmod": "2026-06-10T00:13:38.248Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.508Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "permissions": {
-      "lastmod": "2026-06-09T19:40:33.721Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-16T21:44:14.059Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "platforms": {
       "lastmod": "2026-06-09T23:09:21.749Z",
@@ -247,35 +247,35 @@
     },
     "plugin-dependencies": {
       "lastmod": "2026-05-28T22:51:26.181Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "plugin-marketplaces": {
-      "lastmod": "2026-06-09T14:23:50.564Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:53.864Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "plugins": {
-      "lastmod": "2026-06-10T17:21:43.622Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-10T23:19:53.217Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "plugins-reference": {
-      "lastmod": "2026-06-09T14:23:50.558Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:53.862Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "quickstart": {
-      "lastmod": "2026-06-09T23:34:21.462Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-15T21:48:04.960Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "remote-control": {
-      "lastmod": "2026-06-09T19:39:39.783Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:53.864Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "routines": {
       "lastmod": "2026-05-19T21:45:52.526Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "sandboxing": {
-      "lastmod": "2026-06-09T18:50:39.880Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:53.860Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "scheduled-tasks": {
       "lastmod": "2026-06-01T21:46:03.378Z",
@@ -290,32 +290,32 @@
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "sessions": {
-      "lastmod": "2026-06-09T14:23:50.602Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-11T23:11:23.639Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "settings": {
-      "lastmod": "2026-06-09T23:34:21.506Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-19T22:06:29.518Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "setup": {
       "lastmod": "2026-06-09T23:34:21.496Z",
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "skills": {
-      "lastmod": "2026-06-09T14:23:50.612Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T21:39:23.291Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "slack": {
       "lastmod": "2026-04-08T18:15:55.057Z",
       "fetchedAt": "2026-05-07T12:50:54Z"
     },
     "statusline": {
-      "lastmod": "2026-05-29T22:02:56.544Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "lastmod": "2026-06-18T19:23:53.862Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "sub-agents": {
-      "lastmod": "2026-06-09T17:44:18.435Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:23:53.856Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "terminal-config": {
       "lastmod": "2026-06-02T20:00:00.661Z",
@@ -326,12 +326,12 @@
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "tools-reference": {
-      "lastmod": "2026-06-09T23:34:21.527Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T18:02:56.807Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "troubleshoot-install": {
-      "lastmod": "2026-06-09T18:57:08.762Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-15T22:47:29.261Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "troubleshooting": {
       "lastmod": "2026-06-09T14:23:52.964Z",
@@ -342,88 +342,92 @@
       "fetchedAt": "2026-06-10T22:03:11Z"
     },
     "ultrareview": {
-      "lastmod": "2026-06-09T14:23:52.966Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:24:00.341Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "voice-dictation": {
       "lastmod": "2026-06-01T21:53:33.591Z",
       "fetchedAt": "2026-06-05T20:07:32Z"
     },
     "vs-code": {
-      "lastmod": "2026-06-09T14:23:52.967Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-12T21:36:37.053Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "web-quickstart": {
       "lastmod": "2026-06-10T00:13:38.249Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "whats-new": {
-      "lastmod": "2026-05-30T18:09:40.354Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "lastmod": "2026-06-15T23:20:01.616Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "zero-data-retention": {
-      "lastmod": "2026-06-09T16:56:28.258Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T18:02:56.859Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "agent-view": {
-      "lastmod": "2026-06-09T19:54:39.378Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-15T23:13:02.817Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "agents": {
       "lastmod": "2026-06-09T01:23:13.533Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "claude-platform-on-aws": {
       "lastmod": "2026-06-09T19:54:39.504Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "goal": {
       "lastmod": "2026-06-01T21:46:03.370Z",
-      "fetchedAt": "2026-06-05T20:07:32Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "large-codebases": {
       "lastmod": "2026-06-09T20:02:34.201Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "managed-mcp": {
-      "lastmod": "2026-05-25T19:31:27.585Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "lastmod": "2026-06-19T22:06:29.467Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "plugin-hints": {
-      "lastmod": "2026-06-09T14:23:50.563Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-16T21:44:14.124Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "prompt-caching": {
       "lastmod": "2026-06-09T23:34:21.475Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "prompt-library": {
       "lastmod": "2026-05-13T21:56:06.122Z",
-      "fetchedAt": "2026-05-31T16:53:46Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "sandbox-environments": {
       "lastmod": "2026-06-09T14:23:50.594Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "security-guidance": {
       "lastmod": "2026-06-01T21:46:03.373Z",
-      "fetchedAt": "2026-06-05T20:07:32Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "workflows": {
-      "lastmod": "2026-06-09T01:23:13.539Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-18T19:24:00.345Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "worktrees": {
       "lastmod": "2026-06-09T18:50:39.878Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "mcp-quickstart": {
-      "lastmod": "2026-06-02T00:41:06.482Z",
-      "fetchedAt": "2026-06-05T20:07:32Z"
+      "lastmod": "2026-06-18T19:23:53.856Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     },
     "advisor": {
-      "lastmod": "2026-06-09T23:34:21.085Z",
-      "fetchedAt": "2026-06-10T22:03:11Z"
+      "lastmod": "2026-06-16T21:44:13.702Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
+    },
+    "artifacts": {
+      "lastmod": "2026-06-18T18:30:16.756Z",
+      "fetchedAt": "2026-06-20T14:40:00Z"
     }
   },
   "deadPages": {
@@ -455,6 +459,8 @@
     "2026-w19": "2026-06-03T18:25:43.837Z",
     "2026-w20": "2026-06-03T18:25:43.841Z",
     "2026-w21": "2026-06-03T18:25:43.843Z",
-    "2026-w22": "2026-06-03T18:25:43.840Z"
+    "2026-w22": "2026-06-03T18:25:43.840Z",
+    "2026-w23": "2026-06-15T23:20:01.618Z",
+    "2026-w24": "2026-06-18T19:24:00.343Z"
   }
 }

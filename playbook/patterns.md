@@ -40,6 +40,7 @@ Referenced from Phase 1.6 of the optimization checklist.
 | Delta Polling | [delta-polling.md](patterns/delta-polling.md) | Watchers, schedulers, any periodic data processing |
 | Nested Parallel Checkout | [nested-parallel-checkout.md](patterns/nested-parallel-checkout.md) | Gitea wikis, documentation repos alongside code. Variant: track content, gitignore only .git/ |
 | Dependency Spine | [dependency-spine.md](patterns/dependency-spine.md) | Multi-system / monorepo workspaces where bring-up round-robins on cross-system dependencies |
+| Minimalism Ladder | [minimalism-ladder.md](patterns/minimalism-ladder.md) | Workspaces where agents over-build — the YAGNI decision ladder, a complexity-only review lens (distinct from the correctness reviewer), and auditable-omission discipline; exempts profiled hot paths |
 
 ## Git Infrastructure
 

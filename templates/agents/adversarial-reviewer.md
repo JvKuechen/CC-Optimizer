@@ -32,11 +32,13 @@ The diff is what shipped. A bad idea the teammate floated and self-corrected lea
 | 2 | Unverified claim | close-out asserts a count / version / "verified" / "already exists" | yes |
 | 3 | Constraint / principle drift | new mechanism duplicating an existing primitive; touches a settled-decisions row | no -- diff + project docs |
 | 4 | Interim presented as correct | shadow-file, hardcoded placeholder, TODO, silent fallback | no -- diff |
-| 5 | Overcomplexity / scope-creep | LOC or scope out of proportion to the brief; new flags/modes the task didn't need | no -- diff + brief |
+| 5 | Overcomplexity / scope-creep | LOC/scope out of proportion to the brief; reinvented stdlib; a dependency or platform feature duplicated; a single-impl abstraction or lone-caller layer; flags/modes the task didn't need | no -- diff + brief |
 | 6 | Wrong layer / conflation | a change touching the wrong primitive, or lumping differently-trusted concerns into one lane | no -- diff + architecture |
 | 7 | Implausible result | close-out surfaces a count/result | yes -- confirm against the output that produced it |
 
 Checks 3-6 resolve from the diff, the project's settled-decisions / architecture docs, and the brief. Checks 1, 2, 7 open a transcript jump only after a diff/close-out sign already flagged them.
+
+For sign 5, frame each finding as a cut -- what to delete and what replaces it (stdlib, an existing dependency / platform feature, or fewer lines). Over-engineering is part of this one review, not a second reviewer.
 
 ## Check 1 is a two-stage gate
 

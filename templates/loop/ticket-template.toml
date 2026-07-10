@@ -1,0 +1,71 @@
+# Ticket template -- one file per ticket, tracked in git under tickets/.
+# Copy to tickets/T-<nnn>.toml and fill in. Schema is enforced by
+# ticket-validate.py (PostToolUse hook); the stop gate (loop-gate.py) reads
+# the file at session stop and refuses to let a session end while the
+# in_progress ticket's gate is unmet.
+#
+# AUTHORING DISCIPLINE (the plan gate -- a human reads and approves every
+# ticket BEFORE it becomes dispatchable):
+#   - Each AC is one measurable end state, written so two agents could not
+#     disagree about whether it passes: exact commands, exact strings,
+#     numeric thresholds, exact state transitions.
+#     Rejected: adjectives as criteria ("handles errors gracefully").
+#   - `check` is the held-out oracle: authored at planning time, by a human
+#     or a planning session the human gates. Workers implement AGAINST the
+#     checks. Ticket edits land in the reviewed diff, so a check weakened
+#     mid-flight is visible to the cross-vendor reviewer.
+#   - Size every ticket to one fresh-context session. Too big to finish in
+#     one session = split it at planning time.
+
+schema_version = 1
+id = "T-001"                  # queue-local id; lives in tickets/ and chat only
+title = "Short imperative summary"
+status = "ready"              # ready | in_progress | blocked | review | done
+source = "docs/guide/example.md#section"  # spec this ticket was cut from
+size = "small"                # small | medium -- one session either way
+depends_on = []               # ticket ids that must reach done first
+
+context = """
+What a fresh session needs to know to work this ticket cold: the relevant
+guide-doc section (quote or link it), the crates/modules involved, decisions
+already settled, gotchas forewarned. Self-contained -- the worker starts
+with no other conversation history.
+"""
+
+non_goals = """
+The scope fence: adjacent work this ticket deliberately does not touch.
+"""
+
+# --- Acceptance criteria -------------------------------------------------
+# The gate runs every `check` command at session stop; exit 0 = pass.
+# Commands run from the repo root via bash.
+
+[[ac]]
+id = "AC-1"
+criterion = "Given <precondition>, when <action>, then <exact observable result>"
+check = "cargo test -p example-crate acceptance_ac1 -- --exact"
+
+[[ac]]
+id = "AC-2"
+criterion = "cargo clippy over the touched crates stays within the deny-gate budget"
+check = "cargo clippy -p example-crate -- -D warnings"
+
+# --- Gate configuration ---------------------------------------------------
+
+[gate]
+review = "codex"      # codex: require a fresh Accept from codex-review.sh
+                      # none:  AC checks alone gate the ticket
+base = "main"         # diff base the reviewer sees (BASE...HEAD)
+max_gate_rounds = 5   # circuit breaker: after this many blocked stops the
+                      # gate flips the ticket to blocked and lets go
+check_timeout = 600   # seconds per AC check command
+
+# --- Escalation -----------------------------------------------------------
+# A worker that hits a decision it cannot make fills this in, sets
+# status = "blocked", and stops (the gate allows a blocked ticket to stop).
+# The coordinator or a Remote Control push routes the question to the human.
+
+[blocked]
+question = ""
+options = ""
+recommendation = ""

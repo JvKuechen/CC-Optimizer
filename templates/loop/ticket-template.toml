@@ -30,6 +30,17 @@ What a fresh session needs to know to work this ticket cold: the relevant
 guide-doc section (quote or link it), the crates/modules involved, decisions
 already settled, gotchas forewarned. Self-contained -- the worker starts
 with no other conversation history.
+
+End every ticket's context with this closing instruction (measured lesson:
+a worker that stops to poll a backgrounded review burns a gate round per
+attempt):
+
+When done: commit, then run the cross-vendor review
+(scripts/codex-review.sh --base <base> --tag <ticket-id> --closeout-text
+"<your close-out report>") in the FOREGROUND and stay in-turn until it
+completes; the Stop gate reads findings/codex-review-<ticket-id>.md and
+requires an Accept newer than the last code commit. Rejected: attempting
+to stop as a way to poll a backgrounded review.
 """
 
 non_goals = """

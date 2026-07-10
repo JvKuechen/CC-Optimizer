@@ -134,3 +134,25 @@ Hygiene tickets run solo, not concurrent with feature legs, so whole-tree
 sweeps don't collide with in-flight worktrees. Extending a large existing
 codebase gets sharply lower expectations -- keep those tickets small and
 lean on the review gate.
+
+Measured baseline (first trial, 2026-07-10: greenfield Rust streaming
+subsystem from a settled 210-line spec, 8 tickets, all merged
+review-gated, E2E oracle green): ~$124 and ~3.5h wall total. Per ticket:
+$4-7 for mid-model legs on pure logic, $10-22 for top-model legs, worst
+leg $36 (a mid-model on a shell-heavy Wayland integration -- 10 review
+rounds). What the numbers taught:
+
+- **Route by judgment-density, not size.** The mid model matched the top
+  model at half cost on pure-logic tickets and inverted hard on the
+  shell-heavy leg. Protocol/FFI/system-integration legs go to the top
+  model.
+- **Expect gate rounds only on leg 1.** After the harness shakes out, the
+  gate goes quiet: the ticket text tells workers exactly what will be
+  checked, so they self-verify before stopping. Zero gate rounds on 7 of
+  8 legs; the gate's value shows up as shaped behavior and as the review
+  findings (a real High in wire/authz, buffer-pool and input-lifecycle
+  bugs in the compositor-adjacent legs -- all fixed pre-merge).
+- **The review is waited on, not polled.** A worker that attempts to stop
+  as a way to check on a backgrounded review burns a gate round per
+  attempt (leg 1 burned 4 this way). The ticket's closing instruction
+  must make the worker block on the review's completion.

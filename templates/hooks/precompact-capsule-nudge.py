@@ -18,8 +18,11 @@ Behavior by trigger (the manual/auto split is load-bearing):
           safe when it fired proactively; when it fires to recover from a
           context-limit error already returned by the API, a block fails
           the request outright -- and the hook input cannot distinguish the
-          two cases. The SessionStart injection still carries the last
-          capsule, so an auto-compact with a stale capsule degrades soft.
+          two cases. The heal happens on the other side: SessionStart
+          re-fires with source "compact" after compaction, and the injector
+          (handoff-capsule.py) appends a SINCE CAPSULE EDIT git-truth delta
+          when the capsule is stale, so the post-compact context knows
+          exactly what the capsule does not cover.
 
 Overrides (never wedge):
   - /compact <anything containing "capsule-ok">  -- one-shot bypass

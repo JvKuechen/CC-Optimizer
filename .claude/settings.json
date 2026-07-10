@@ -34,6 +34,16 @@
           }
         ]
       }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/templates/hooks/precompact-capsule-nudge.py\""
+          }
+        ]
+      }
     ]
   },
   "permissions": {

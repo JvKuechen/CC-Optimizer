@@ -76,16 +76,35 @@ or interactively, `/goal T-001 reaches status review` on top of the same
 instruction. The Stop gate enforces the exit either way; `/goal` just keeps
 the turns coming without per-turn prompting.
 
-**Gate (deterministic, at every stop).** In order: all AC checks exit 0 ->
-tracked working tree clean (gate what will merge) -> fresh Accept from
-`findings/codex-review-<ticket-id>.md` (newer than HEAD, no Reject, no
-PROVISIONAL). Any failure blocks the stop and feeds the exact failure back
-as next-turn guidance, including the `codex-review.sh` invocation when the
-review is what's missing. Full pass flips the ticket to `review` and
-releases the session.
+**Gate (deterministic, at every stop).** In order: tracked working tree
+clean first (cheap, and the expensive checks then exercise exactly what
+merges) -> all AC checks exit 0 -> fresh Accept from
+`findings/codex-review-<ticket-id>.md` (newer than the last code commit,
+no Reject, no PROVISIONAL). Any failure blocks the stop and feeds the
+exact failure back as next-turn guidance, including the `codex-review.sh`
+invocation when the review is what's missing. Full pass flips the ticket
+to `review`, records the gated commit, and releases the session.
+
+A ticket already in `review` re-engages the gate when its session keeps
+working past the flip -- a dirty tree, commits newer than the gated
+commit, or a status flip that never passed the gate. This applies only
+off the primary branch (default main/master, override
+`LOOP_GATE_PRIMARY_BRANCH`): on the lead's checkout, `review` tickets are
+the merge queue, and HEAD moves whenever anything else merges.
+Bookkeeping-only commits (`tickets/`, `findings/`) never stale a verdict
+or re-engage the gate.
 
 **Merge (human or lead).** `review` tickets are ready-for-merge inventory.
-Merge, then flip to `done`. The gate never merges.
+At each merge: read the verdict, confirm `git diff main...<branch> --
+tickets/` is empty (a worker weakening its own AC check is the one move
+that defeats the gate; it is visible only if looking is a habit), commit
+any uncommitted gate flip riding in the worktree, merge, flip to `done`.
+The gate never merges.
+
+**Teardown (wave close).** Remove merged worktrees, then run
+`scripts/sweep-stale-brokers.sh` (banked at `templates/codex/`) -- each
+Codex review leg leaves an idle app-server broker daemon behind, and they
+outlive worktree removal.
 
 ## Escalation
 

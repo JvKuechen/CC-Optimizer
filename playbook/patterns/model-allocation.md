@@ -54,6 +54,17 @@ vendor stronger on multi-file logic, another on security/injection), so the cros
 pair catches a wider net than either alone. Keep the in-house reviewer as a fallback /
 spot-check until an A/B confirms the cross-vendor one.
 
+The same slot extends **upstream of implementation** (field-proven in the FortrOS loop):
+
+- **Design review before implementation** -- run the blueprint through the cross-vendor
+  reviewer (`codex-review.sh --design <doc>`) while changing is cheap. Same lineage
+  diversity, applied where a caught premise saves an entire implementation leg.
+- **Plan gate over ticket drafts** -- the cross-vendor reviewer approves draft tickets
+  (`approve-tickets.py`: ACCEPT flips draft -> ready), gating the AC oracle's quality --
+  exact, non-saturable checks -- so a goal can run ticket-to-output without a human in
+  the per-ticket loop. The human keeps the seams: goal statement (with its held-out
+  oracle) and merge.
+
 **With a single / cheaper reviewer, raise the reviewer's own depth rather than
 having the coordinator re-verify it.** The instinct after dropping to one
 reviewer is to have the coordinator independently re-check every verdict, which

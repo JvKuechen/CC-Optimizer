@@ -17,7 +17,9 @@ Wire it in .claude/settings.json as a PostToolUse hook matching Write|Edit:
 
 Schema (kept in lockstep with loop-gate.py and ticket-template.toml):
   required non-empty strings: id, title, status, context
-  status enum:                ready | in_progress | blocked | review | done
+  status enum:                draft | ready | in_progress | blocked | review | done
+                              (draft = authored, awaiting plan-gate approval;
+                              only ready is dispatchable)
   ac:                         non-empty list of tables, each with non-empty
                               string id, criterion, check; ids unique
   optional strings:           source, size, non_goals
@@ -36,7 +38,7 @@ try:
 except ModuleNotFoundError:
     tomllib = None
 
-STATUSES = ("ready", "in_progress", "blocked", "review", "done")
+STATUSES = ("draft", "ready", "in_progress", "blocked", "review", "done")
 REQUIRED = ("id", "title", "status", "context")
 
 

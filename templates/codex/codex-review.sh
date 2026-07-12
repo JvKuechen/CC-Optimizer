@@ -51,11 +51,19 @@
 #     --commit <sha>     review the change a single commit introduced
 #     --base <branch>    review HEAD's delta vs a base branch (BASE...HEAD)
 #     --uncommitted      review staged + unstaged changes
+#     --design <file>    review a design doc or ticket draft BEFORE
+#                        implementation (feedback while changing is cheap).
+#                        Read-only, in place, no diff: the artifact's claims
+#                        are verified against the repo, and a ticket draft's
+#                        ACs are gated for oracle quality. An ACCEPT verdict
+#                        is what approve-tickets.py needs to flip a draft
+#                        ticket to ready.
 #   Optional:
 #     --tag <name>       label for output files (default: derived from target)
 #     --repo <dir>       repo/worktree to review in (default: this repo root)
 #     --rubric <file>    review-criteria source (default: adversarial-reviewer.md)
-#     --model <model>    override Codex model (default: Codex default)
+#     --model <model>    override Codex model (default: $CODEX_REVIEW_MODEL
+#                        if exported, else Codex default)
 #     --effort <level>   reasoning effort: minimal|low|medium|high (default:
 #                        Codex's built-in default). Spend high on security/wire
 #                        legs, low on mechanical renames.
@@ -92,8 +100,11 @@ OUTDIR="$REPO_ROOT/findings"
 
 TARGET_REPO="$REPO_ROOT"
 TAG=""
-MODEL=""
-EFFORT=""
+# Model/effort resolve flag > env > codex default. Pin the review model once
+# per workspace by exporting CODEX_REVIEW_MODEL (e.g. in the project
+# .claude/settings.json env block) instead of remembering --model per call.
+MODEL="${CODEX_REVIEW_MODEL:-}"
+EFFORT="${CODEX_REVIEW_EFFORT:-}"
 CLOSEOUT_IN=""
 CLOSEOUT_TEXT=""
 SELECTOR=""   # commit | base | uncommitted
@@ -133,6 +144,7 @@ while [ $# -gt 0 ]; do
     --commit)      SELECTOR="commit"; SELVAL="$2"; TARGET_DESC="commit $2"; [ -z "$TAG" ] && TAG="${2:0:7}"; shift 2 ;;
     --base)        SELECTOR="base";   SELVAL="$2"; TARGET_DESC="base $2";   shift 2 ;;
     --uncommitted) SELECTOR="uncommitted"; TARGET_DESC="uncommitted"; [ -z "$TAG" ] && TAG="uncommitted"; shift ;;
+    --design)      SELECTOR="design"; SELVAL="$2"; TARGET_DESC="design $2"; [ -z "$TAG" ] && TAG="design-$(basename "$2" | sed 's/\.[^.]*$//')"; shift 2 ;;
     --tag)         TAG="$2"; shift 2 ;;
     --repo)        TARGET_REPO="$2"; shift 2 ;;
     --rubric)      RUBRIC="$2"; shift 2 ;;
@@ -160,7 +172,8 @@ if ! command -v codex >/dev/null 2>&1; then
   done
 fi
 command -v codex >/dev/null 2>&1 || die "codex not found on PATH or in known install dirs. Install the CLI and run 'codex login'. If you just installed it, restart Claude Code so new shells inherit the updated PATH."
-[ -n "$SELECTOR" ] || die "no target selector. Pass one of --commit / --base / --uncommitted (see --help)."
+[ -n "$SELECTOR" ] || die "no target selector. Pass one of --commit / --base / --uncommitted / --design (see --help)."
+if [ "$SELECTOR" = "design" ] && [ ! -f "$SELVAL" ]; then die "design doc not found: $SELVAL"; fi
 [ -f "$RUBRIC" ] || die "rubric not found: $RUBRIC"
 [ -d "$TARGET_REPO" ] || die "repo dir not found: $TARGET_REPO"
 case "$EFFORT" in ""|minimal|low|medium|high) ;; *) die "invalid --effort '$EFFORT' (minimal|low|medium|high)" ;; esac
@@ -183,13 +196,17 @@ if [ -n "$CLOSEOUT_TEXT" ]; then
   printf '%s\n' "$CLOSEOUT_TEXT" > "$CLOSEOUT_IN"
 fi
 
-# Compute the diff under review deterministically (script = brick).
+# Compute the payload under review deterministically (script = brick).
+# DIFF holds the diff for the diff selectors, or the artifact text for
+# --design -- one payload variable either way.
+PAYLOAD_KIND="diff"
 case "$SELECTOR" in
   commit)      DIFF="$(git -C "$TARGET_REPO" show --no-color "$SELVAL" 2>&1)" || die "git show $SELVAL failed: $DIFF" ;;
   base)        DIFF="$(git -C "$TARGET_REPO" diff --no-color "$SELVAL"...HEAD 2>&1)" || die "git diff $SELVAL...HEAD failed: $DIFF" ;;
   uncommitted) DIFF="$(git -C "$TARGET_REPO" diff --no-color HEAD 2>&1)" || die "git diff HEAD failed: $DIFF" ;;
+  design)      PAYLOAD_KIND="design"; DIFF="$(cat "$SELVAL")" || die "cannot read design doc: $SELVAL" ;;
 esac
-[ -n "$DIFF" ] || die "empty diff for $TARGET_DESC -- nothing to review."
+[ -n "$DIFF" ] || die "empty $PAYLOAD_KIND for $TARGET_DESC -- nothing to review."
 
 # Toolchain mode (default for --commit / --base): a disposable worktree at the
 # reviewed ref + workspace-write, so Codex can run the stack's lint/test
@@ -206,7 +223,7 @@ cleanup_wt() {
   fi
   WT=""
 }
-if [ "$READ_ONLY" -eq 0 ] && [ "$SELECTOR" != "uncommitted" ]; then
+if [ "$READ_ONLY" -eq 0 ] && [ "$SELECTOR" != "uncommitted" ] && [ "$SELECTOR" != "design" ]; then
   case "$SELECTOR" in
     commit) REF="$SELVAL" ;;
     base)   REF="HEAD" ;;
@@ -227,10 +244,60 @@ RUBRIC_BODY="$(awk 'NR==1 && /^---$/{infm=1; next} infm && /^---$/{infm=0; next}
 # Adapter: bridge the rubric's Claude-team-only mechanics (teammate
 # transcript jumps) to a transcript-less external reviewer working from the
 # diff. Everything substantive -- the seven signs, staging/doctrine/
-# test-quality checks, the return format -- carries over unchanged. Two
-# variants: toolchain mode (disposable worktree, may run the toolchain) and
-# read-only mode (in-place, non-building corroboration only).
-if [ "$SANDBOX" = "workspace-write" ]; then
+# test-quality checks, the return format -- carries over unchanged. Three
+# variants: design mode (pre-implementation artifact, read-only claim
+# verification + AC-oracle gating), toolchain mode (disposable worktree, may
+# run the toolchain), and read-only diff mode (in-place, non-building
+# corroboration only).
+if [ "$SELECTOR" = "design" ]; then
+read -r -d '' ADAPTER <<'EOF' || true
+You are an external adversarial reviewer of a DESIGN ARTIFACT -- a design
+document or a ticket draft -- reviewed BEFORE implementation, while changing
+is cheap. The artifact is included verbatim at the end of this message. You
+have read-only access to the repository it targets (your cwd): verify the
+artifact's claims against it -- every "X already exists", "reuses Y", named
+module/function/path, count, or prior-art assertion gets checked by reading
+the repo, not taken on faith. Read the CLAUDE.md / AGENTS.md settled
+decisions and grep for prior art exactly as the criteria call for.
+
+Apply the criteria below with this mapping: there is no diff and no teammate
+transcript -- the artifact's stated premises and claims stand in for both.
+Press hardest on:
+- Premise not pressure-tested: is the core assumption validated against the
+  repo and its settled decisions, or elaborated from an unchecked guess?
+- Constraint/doctrine drift: does the design duplicate an existing primitive
+  or cross a settled-decisions row?
+- Overcomplexity: frame each finding as a cut -- what to delete and what
+  existing machinery replaces it.
+- Wrong layer / conflation.
+- Missing constraints: failure modes, concurrency, rollback, migration,
+  platform quirks the design is silent on.
+
+When the artifact is a TICKET DRAFT (TOML with [[ac]] blocks), also gate the
+acceptance criteria themselves -- once approved they run as a machine oracle
+no human re-reads, so:
+- each criterion is one measurable end state two agents could not disagree
+  about: exact commands, exact strings, numeric thresholds;
+- each check command actually tests its criterion -- flag saturable checks a
+  worker could pass without delivering the spec;
+- the ticket is sized to one fresh-context session; non_goals fence the real
+  adjacencies.
+
+A claim you cannot verify read-only (needs a build, a test run, a network
+call): mark that finding PROVISIONAL ("needs a toolchain run") rather than
+letting it decide the verdict alone.
+
+Use the exact return format below. VERDICT: ACCEPT means build it as
+designed; CONDITIONAL means build it with the named adjustments; REJECT
+means rework the design before any implementation. End the report with that
+single terminal VERDICT: line -- a deterministic gate parses it (an ACCEPT
+is what flips a ticket draft to ready).
+
+The criteria follow, then the design artifact.
+
+----- REVIEW CRITERIA (adversarial-reviewer rubric) -----
+EOF
+elif [ "$SANDBOX" = "workspace-write" ]; then
 read -r -d '' ADAPTER <<'EOF' || true
 You are an external adversarial reviewer working inside a disposable git
 worktree checked out at the exact code under review (your cwd). The diff under
@@ -300,6 +367,15 @@ $(cat "$CLOSEOUT_IN")
 "
 fi
 
+if [ "$PAYLOAD_KIND" = "design" ]; then
+# No code fence: the artifact is markdown/TOML that may hold fences itself.
+PROMPT="$ADAPTER
+$RUBRIC_BODY
+$CLOSEOUT_BLOCK
+----- DESIGN ARTIFACT UNDER REVIEW ($TARGET_DESC, tag=$TAG) -----
+$DIFF
+----- END DESIGN ARTIFACT -----"
+else
 PROMPT="$ADAPTER
 $RUBRIC_BODY
 $CLOSEOUT_BLOCK
@@ -307,6 +383,7 @@ $CLOSEOUT_BLOCK
 \`\`\`diff
 $DIFF
 \`\`\`"
+fi
 
 declare -a EXTRA_FLAGS=()
 [ -n "$MODEL" ] && EXTRA_FLAGS+=(--model "$MODEL")
@@ -317,7 +394,7 @@ if [ "$SANDBOX" = "workspace-write" ] && [ -n "${CARGO_TARGET_DIR:-}" ]; then
   EXTRA_FLAGS+=(-c "sandbox_workspace_write.writable_roots=[\"$CARGO_TARGET_DIR\"]")
 fi
 
-echo "codex-review: reviewing $TARGET_DESC in $REVIEW_DIR (tag=$TAG, sandbox=$SANDBOX, $(printf '%s' "$DIFF" | wc -l) diff lines${EFFORT:+, effort=$EFFORT}${CLOSEOUT_IN:+, +closeout})" >&2
+echo "codex-review: reviewing $TARGET_DESC in $REVIEW_DIR (tag=$TAG, sandbox=$SANDBOX, $(printf '%s' "$DIFF" | wc -l) $PAYLOAD_KIND lines${EFFORT:+, effort=$EFFORT}${CLOSEOUT_IN:+, +closeout})" >&2
 
 # Prompt via stdin ('-') to dodge ARG_MAX on large diffs. Verbose run -> log;
 # clean report -> closeout via -o. The sandbox bounds what Codex can touch:

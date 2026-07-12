@@ -20,7 +20,11 @@
 schema_version = 1
 id = "T-001"                  # queue-local id; lives in tickets/ and chat only
 title = "Short imperative summary"
-status = "ready"              # ready | in_progress | blocked | review | done
+status = "draft"              # draft | ready | in_progress | blocked | review | done
+                              # Born draft. The plan gate flips draft -> ready
+                              # (human sign-off, or approve-tickets.py running
+                              # the cross-vendor reviewer over the draft);
+                              # only ready is dispatchable.
 source = "docs/guide/example.md#section"  # spec this ticket was cut from
 size = "small"                # small | medium -- one session either way
 depends_on = []               # ticket ids that must reach done first

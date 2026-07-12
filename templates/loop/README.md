@@ -20,6 +20,7 @@ loop here is a dispatch detail; the product is the gate.
 | `ticket-template.toml` | Ticket schema: context, numbered machine-checkable ACs, gate config, escalation fields |
 | `hooks/ticket-validate.py` | PostToolUse guard: a malformed ticket edit fails loud at edit time |
 | `hooks/loop-gate.py` | Stop hook: the session cannot end while the in_progress ticket's gate is unmet |
+| `approve-tickets.py` | Plan-gate driver: cross-vendor design review over each draft ticket, ACCEPT flips draft -> ready |
 
 Companion (deployed separately): `templates/codex/codex-review.sh` +
 `templates/agents/adversarial-reviewer.md` -- the cross-vendor review leg the
@@ -31,7 +32,11 @@ gate requires when `gate.review = "codex"`.
 2. `mkdir tickets/` at the repo root (tracked in git). Ensure `findings/`
    exists and is gitignored.
 3. Deploy the Codex review leg (`scripts/codex-review.sh` +
-   `.claude/agents/adversarial-reviewer.md`) per `templates/codex/`.
+   `.claude/agents/adversarial-reviewer.md`) per `templates/codex/`, and
+   copy `approve-tickets.py` to `scripts/`. Pin the review model once by
+   exporting `CODEX_REVIEW_MODEL` (and optionally `CODEX_REVIEW_EFFORT`) in
+   the project's `.claude/settings.json` env block -- every review and
+   plan-gate leg then uses it without per-call flags.
 4. Wire both hooks in `.claude/settings.json`. The Stop-hook `timeout` must
    cover the slowest AC check plus the git calls -- a 10-minute test suite
    needs more than 600:
@@ -55,13 +60,28 @@ gate requires when `gate.review = "codex"`.
 
 ## The loop
 
-**Plan gate (human).** Cut the guide docs into tickets with a planning
-session; the human reads and approves every ticket before it becomes
-dispatchable. The ACs are the contract: one measurable end state each, an
-exact `check` command, written so two agents could not disagree about
-passing. The checks are the held-out oracle -- authored at planning time,
-not by the worker. Ticket edits land in the reviewed diff, so a check
-weakened mid-flight is visible to the reviewer.
+**Plan gate (human or cross-vendor).** Cut the guide docs into tickets with
+a planning session. Tickets are born `status = "draft"`; only `ready` is
+dispatchable, and the plan gate is what flips draft -> ready:
+
+- **Human form:** read and approve each draft by hand. The strongest
+  held-out property; keep it for judgment-dense or novel work.
+- **Cross-vendor form (automated):** `python scripts/approve-tickets.py`
+  runs the Codex design review over each draft (`codex-review.sh --design`)
+  and flips it to ready on a terminal `VERDICT: ACCEPT`. The design adapter
+  gates the AC oracle itself -- exact, non-saturable checks two agents could
+  not disagree about -- because with the human out of the per-ticket loop,
+  cross-vendor scrutiny of the checks is what remains of the held-out
+  property. Anything but ACCEPT stays draft, report path printed.
+
+Either way the ACs are the contract: one measurable end state each, an
+exact `check` command. Ticket edits land in the reviewed diff, so a check
+weakened mid-flight is visible to the reviewer -- and at merge,
+`git diff main...<branch> -- tickets/` empty stays the habit.
+
+Design docs get the same pre-implementation review: `codex-review.sh
+--design docs/design/foo.md --tag foo-design` -- cross-vendor feedback
+while changing is cheap, before any implementation leg is spawned.
 
 **Dispatch (one ticket per fresh session).** Fresh context per ticket is
 what keeps drift and token burn bounded. Either form works:
@@ -108,6 +128,33 @@ The gate never merges.
 `scripts/sweep-stale-brokers.sh` (banked at `templates/codex/`) -- each
 Codex review leg leaves an idle app-server broker daemon behind, and they
 outlive worktree removal.
+
+## Goal mode -- state a goal, run to output
+
+The full-auto chain composes the pieces so one stated goal runs to shipped
+output with the human only at the seams:
+
+1. **Plan.** A planning session cuts the goal into draft tickets
+   (`/goal every ticket for <goal> exists in tickets/ as draft, sized to
+   one session each`).
+2. **Plan gate.** `python scripts/approve-tickets.py` -- cross-vendor
+   approval flips drafts to ready; anything else comes back with a report
+   for the planner (or you) to address.
+3. **Dispatch.** Fresh session per ready ticket -- interactive (`/goal all
+   tickets in tickets/ reach status review or blocked, or stop after N
+   turns`) or headless (`claude -p` per ticket). The Stop gate holds every
+   exit; the review leg runs inside each session in the foreground.
+4. **Merge.** The lead (or you) merges `review` tickets: read the verdict,
+   confirm `git diff main...<branch> -- tickets/` is empty, merge, flip to
+   done.
+5. Repeat until the goal's own oracle -- the E2E check or the guide's
+   held-out test named when the goal was stated -- is green.
+
+A `blocked` ticket with a filled question pierces the loop at any point:
+its leg stops cleanly, and with Remote Control the question reaches your
+phone. State the goal WITH its oracle up front ("done when `cargo test
+--test e2e_persistence` passes on main"); a goal without a held-out check
+inherits every saturation risk the per-ticket gates were built to avoid.
 
 ## Escalation
 

@@ -59,6 +59,7 @@ suite that needs 10 minutes needs a timeout above 600):
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -69,6 +70,12 @@ except ModuleNotFoundError:
     tomllib = None
 
 TAIL_CHARS = 2000  # per failing check, kept small so the feedback stays readable
+
+# Resolve bash by PATH semantics (shutil.which), not bare "bash": on Windows,
+# CreateProcess searches System32 BEFORE PATH, so a bare "bash" silently runs
+# WSL's bash -- wrong filesystem view, wrong toolchain. LOOP_GATE_BASH
+# overrides for exotic setups.
+BASH = os.environ.get("LOOP_GATE_BASH") or shutil.which("bash") or "bash"
 
 
 def block(reason):
@@ -97,7 +104,7 @@ def load_tickets(tickets_dir):
 def run_check(cmd, cwd, timeout):
     try:
         proc = subprocess.run(
-            ["bash", "-lc", cmd],
+            [BASH, "-lc", cmd],
             cwd=str(cwd),
             capture_output=True,
             text=True,

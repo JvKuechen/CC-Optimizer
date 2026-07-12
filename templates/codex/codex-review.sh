@@ -64,7 +64,7 @@
 #     --rubric <file>    review-criteria source (default: adversarial-reviewer.md)
 #     --model <model>    override Codex model (default: $CODEX_REVIEW_MODEL
 #                        if exported, else Codex default)
-#     --effort <level>   reasoning effort: minimal|low|medium|high (default:
+#     --effort <level>   reasoning effort: minimal|low|medium|high|xhigh (default:
 #                        Codex's built-in default). Spend high on security/wire
 #                        legs, low on mechanical renames.
 #     --closeout-text <string>  the worker's close-out report, passed inline
@@ -176,7 +176,7 @@ command -v codex >/dev/null 2>&1 || die "codex not found on PATH or in known ins
 if [ "$SELECTOR" = "design" ] && [ ! -f "$SELVAL" ]; then die "design doc not found: $SELVAL"; fi
 [ -f "$RUBRIC" ] || die "rubric not found: $RUBRIC"
 [ -d "$TARGET_REPO" ] || die "repo dir not found: $TARGET_REPO"
-case "$EFFORT" in ""|minimal|low|medium|high) ;; *) die "invalid --effort '$EFFORT' (minimal|low|medium|high)" ;; esac
+case "$EFFORT" in ""|minimal|low|medium|high|xhigh) ;; *) die "invalid --effort '$EFFORT' (minimal|low|medium|high|xhigh)" ;; esac
 if [ -z "$CLOSEOUT_TEXT" ] && [ -n "$CLOSEOUT_IN" ] && [ ! -f "$CLOSEOUT_IN" ]; then
   echo "codex-review: WARNING closeout file not found ($CLOSEOUT_IN); proceeding without the claims cross-check" >&2
   CLOSEOUT_IN=""

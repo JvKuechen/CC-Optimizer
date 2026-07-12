@@ -2,7 +2,7 @@
 
 ## Summary
 
-A git repository inside another git repository, gitignored by the parent, with its own `.git` directory and remote. NOT a submodule -- it's a parallel, independent checkout that happens to live inside the parent's directory tree.
+A git repository inside another git repository, gitignored by the parent, with its own `.git` directory and remote. Not a submodule -- it's a parallel, independent checkout that happens to live inside the parent's directory tree.
 
 ## When to Use
 
@@ -32,8 +32,8 @@ parent-repo/
 
 ## Gotchas
 
-- `git status` in parent will NOT show nested repo changes (it's gitignored)
-- `git add -A` in parent will NOT capture nested repo content
+- `git status` in parent will not show nested repo changes (it's gitignored)
+- `git add -A` in parent will not capture nested repo content
 - Claude Code may not realize the nested directory is a separate repo unless told in CLAUDE.md
 - **GitHub wikis require the `master` branch** -- keep the wiki branch as `master`. GitHub's wiki tab only reads from `master`. Gitea wikis also default to `master`. If your pre-push hook pushes the wiki, detect the branch dynamically rather than hardcoding `main`
 - On Windows, avoid symlinks -- just use a real nested directory

@@ -8,7 +8,7 @@ Any workspace with gitignored directories that contain content Claude needs to s
 
 ## Problem
 
-Claude Code's Grep tool uses ripgrep, which respects `.gitignore` by default. Gitignored directories are silently skipped. Claude Code also passes `--no-config` to rg, so `RIPGREP_CONFIG_PATH` cannot override this. Explicit `path` targeting into the gitignored dir DOES work -- the problem is Claude doesn't know to do it.
+Claude Code's Grep tool uses ripgrep, which respects `.gitignore` by default. Gitignored directories are silently skipped. Claude Code also passes `--no-config` to rg, so `RIPGREP_CONFIG_PATH` cannot override this. Explicit `path` targeting into the gitignored dir does work -- the problem is Claude doesn't know to do it.
 
 ## How
 
@@ -99,8 +99,8 @@ if __name__ == "__main__":
 ## Rules
 
 - Only fires when Grep searches from the repo root (no path or path == root)
-- Does NOT fire when searching inside a gitignored dir (already covered)
-- Does NOT fire when searching a specific tracked dir (intentionally scoped)
+- Does not fire when searching inside a gitignored dir (already covered)
+- Does not fire when searching a specific tracked dir (intentionally scoped)
 - Customize `GITIGNORED_SEARCH_DIRS` per project
 - Zero token cost -- command hook, no LLM invocation
 - Nudges Claude to re-search rather than duplicating the search itself

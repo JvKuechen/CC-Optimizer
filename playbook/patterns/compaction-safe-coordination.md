@@ -45,7 +45,7 @@ exactly what a compaction erases.
    the exact gate-bypass that happens when a worktree auto-cleans after a no-op run and a
    resume lands the subagent on main.
 6. **Merge discipline.** Merge-base-check *every* branch before merging (a held branch gets
-   inherited as a sibling's base; `rebase --onto` to decouple). Do NOT merge a branch while a
+   inherited as a sibling's base; `rebase --onto` to decouple). Do not merge a branch while a
    review of it is still in flight (when two reviews overlap, the more skeptical one was
    right). Re-dispatch *fresh* -- never resume -- a no-op/BLOCKED worktree subagent.
 

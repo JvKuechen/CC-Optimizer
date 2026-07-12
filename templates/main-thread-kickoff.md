@@ -88,7 +88,7 @@ Each wave runs one seam loop:
 1. **Orient + interview.** After the lay-of-the-land report, interview the user on
    anything the wave's briefs leave unsettled; validate each brief premise against
    the live tree while drafting (stale anchors are the recon-decay tax).
-2. **Go wide.** Spawn every leg, then make the wave's ONE capsule edit: fold the
+2. **Go wide.** Spawn every leg, then make the wave's **one** capsule edit: fold the
    interview rulings in and write the active-wave leg table into `active_wave` --
    one line per leg: slug | owned scope | branch | model | status | merge-order
    note (what it must follow / what it collides with). The post-compact you routes

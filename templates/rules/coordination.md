@@ -14,7 +14,7 @@ When work spans multiple sessions, multiple parallel threads, or coordination ac
 You are the coordinator, not the executor.
 
 1. **Maintain shared state** — the in-chat bounty board, the `capsule.toml` file, the settled-decisions list.
-2. **Spawn subthreads with self-contained briefs** — the subthread picks up cold from the brief alone. LAY OF THE LAND (read these files), STAGING DISCIPLINE, forewarned gotchas, expected close-out shape.
+2. **Spawn subthreads with self-contained briefs** — the subthread picks up cold from the brief alone. Lay of the Land (read these files), Staging Discipline, forewarned gotchas, expected close-out shape.
 3. **Integrate close-out reports** — fold what the subthread returned back into the bounty board, save surprises as memory candidates, update sequencing.
 4. **Sweep loose work** — subthreads commit only what their brief specifies. Anything else (lockfile syncs, peripheral edits, main-thread chatter that produced files) is yours to commit in logical splits after they close.
 
@@ -24,7 +24,7 @@ To start or resume a main-thread session, paste the workspace's `main-thread-kic
 
 You are scope-disciplined.
 
-1. **Read the brief and orient first** — the LAY OF THE LAND names files and sections to read before deciding scope. Don't skip it.
+1. **Read the brief and orient first** — the Lay of the Land names the files and sections to read before deciding scope -- read them first.
 2. **Stay in scope** — fix what the brief asks; surface other findings in the close-out report rather than fixing inline.
 3. **Stage what your task produced** -- in an isolated per-task worktree, `git status` then `git add -A` is fine (the checkout holds only your work); on a shared main checkout, `git status` then `git add <specific paths>`. Rejected: `git add -A` on a shared main tree.
 4. **Close with a structured report** — see "Close-out report shape" below.
@@ -46,14 +46,14 @@ When to run a board at all: work spans 3+ parallel threads or focus areas, or mu
 
 ## Staging discipline
 
-IMPORTANT: At commit time only. The rule depends on whether you are in an isolated worktree or a shared main checkout.
+**At commit time only.** The rule depends on whether you are in an isolated worktree or a shared main checkout.
 
 **Isolated per-task worktree** (a `claude --worktree` session, an `isolation: worktree` subagent, or an agent-team teammate that has called `EnterWorktree` -- see Worktree workflow below): the checkout holds only your task's work. `git status` to confirm the dirty set is all yours, then `git add -A` is fine.
 
 **Shared main checkout** (solo-mode subthreads sharing one tree, or the lead's own checkout):
 
 1. `git status` -- see all dirty paths.
-2. Add ONLY the paths your commit needs, by filename or explicit directory.
+2. Add only the paths your commit needs, by filename or explicit directory.
 3. Rejected: `git add -A`, `git add .`, or `git add --all` on a shared main tree.
 
 Why the shared-tree rule is strict (hazards that vanish in an isolated worktree):
@@ -65,7 +65,7 @@ Why the shared-tree rule is strict (hazards that vanish in an isolated worktree)
 
 The default fan-out model is background Agent-tool subagents the lead spawns with `isolation: "worktree"` (+ `run_in_background: true`). Each gets its own checkout at `.claude/worktrees/<slug>` on branch `worktree-<slug>` from local `HEAD`, runs without moving the lead's checkout, and fires a completion notification that re-invokes the lead (survives compaction). No tmux. Two verified constraints shape the briefs:
 
-- **Isolation is set at spawn, not self-served.** A subagent cannot create its own worktree (the harness blocks `EnterWorktree` from a subagent: "spawn an Agent with `cwd` set to it"). So the lead passes `isolation: "worktree"` on every edit-task spawn, and the brief has the subagent CONFIRM it (`git rev-parse --show-toplevel` + `git branch --show-current`): isolated = toplevel under `.claude/worktrees/` and branch `worktree-<slug>`. If it is on `main` instead, the subagent returns `BLOCKED: spawned without worktree isolation` and the lead re-spawns it with isolation set. Read-only / research subagents need no worktree.
+- **Isolation is set at spawn, not self-served.** A subagent cannot create its own worktree (the harness blocks `EnterWorktree` from a subagent: "spawn an Agent with `cwd` set to it"). So the lead passes `isolation: "worktree"` on every edit-task spawn, and the brief has the subagent confirm it (`git rev-parse --show-toplevel` + `git branch --show-current`): isolated = toplevel under `.claude/worktrees/` and branch `worktree-<slug>`. If it is on `main` instead, the subagent returns `BLOCKED: spawned without worktree isolation` and the lead re-spawns it with isolation set. Read-only / research subagents need no worktree.
 - **Subagents cannot ask the user.** `AskUserQuestion` is unavailable to a subagent, and a background one auto-denies any prompting call and continues. So brief a subagent to return `BLOCKED: <decision>, options A/B/C, recommendation` when a decision is genuinely open, rather than guess. The lead routes it -- answering from context, or escalating to the user with its own `AskUserQuestion` (which pauses an active `/goal` loop, since it blocks mid-turn before the goal evaluator fires at turn end).
 
 Division of labor:
@@ -74,7 +74,7 @@ Division of labor:
 - **On the lead's main checkout** (after the branch is consolidated): full builds, end-to-end runs, image bakes. These depend on shared environment state that lives on the main checkout, not in a fresh worktree. Rejected: a full build or image bake inside a worktree -- it builds against environment the worktree does not have.
 - **Close-out + consolidate**: the lead reads the close-out from artifacts -- `git diff main...worktree-<slug>` + the subagent's returned report. Adversarial-review the diff (the project's reviewer subagent), ff-merge the reviewed branch into main, then run the build / E2E there. Remove the worktree after merging (`git worktree remove --force <path>` + `git branch -d worktree-<slug>`); a worktree whose subagent made no commit auto-cleans.
 
-**Optional -- agent-team mode** (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`): the multi-teammate team UI is a separate model most workflows do not need. Teammates do NOT auto-isolate -- they start in the lead's shared checkout, so run the lead in tmux mode (`teammateMode: "tmux"`) so a teammate's `EnterWorktree` isolates only that teammate (in-process mode drags the lead), drive `EnterWorktree` from the brief, and read close-outs via `SendMessage` (a teammate's plain final message does not reach the lead). A `TeammateIdle` hook (`templates/hooks/teammate-digest.py`) can auto-capture close-outs; `TeamDelete` leaves teammate worktrees on disk. Prefer background subagents above unless you specifically need the team UI.
+**Optional -- agent-team mode** (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`): the multi-teammate team UI is a separate model most workflows do not need. Teammates do not auto-isolate -- they start in the lead's shared checkout, so run the lead in tmux mode (`teammateMode: "tmux"`) so a teammate's `EnterWorktree` isolates only that teammate (in-process mode drags the lead), drive `EnterWorktree` from the brief, and read close-outs via `SendMessage` (a teammate's plain final message does not reach the lead). A `TeammateIdle` hook (`templates/hooks/teammate-digest.py`) can auto-capture close-outs; `TeamDelete` leaves teammate worktrees on disk. Prefer background subagents above unless you specifically need the team UI.
 
 ### Worktree base ref
 
@@ -84,7 +84,7 @@ New worktrees must branch from local `HEAD`, not a remote ref. Set `worktree.bas
 
 Task IDs that exist only in chat or scratchpads (`T\d+`, `D-*`, `#\d+` referring to in-thread numbering) don't survive thread close-out. They stop being meaningful once the thread closes.
 
-YOU MUST NOT put these IDs in tracked content (source, docs, README, CLAUDE.md, rules files). Use instead:
+**Keep these IDs out of tracked content** (source, docs, README, CLAUDE.md, rules files); use instead:
 - **Commit hash** — persistent, greppable.
 - **Descriptive name** — "the rustdoc lint strictness flip" beats "D-LINK-STRICT".
 - **Settled-decisions row reference** — for architectural decisions that live in CLAUDE.md.

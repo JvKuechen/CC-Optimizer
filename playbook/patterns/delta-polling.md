@@ -36,4 +36,4 @@ def poll():
 - State file must survive crashes (write atomically or use temp+rename)
 - Handle clock skew: overlap by a small window and deduplicate
 - Log each poll cycle (even empty ones) for debugging gaps
-- First run (no state file) should NOT process all historical data -- set a reasonable starting point
+- First run (no state file) should start from a reasonable point rather than processing all history

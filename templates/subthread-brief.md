@@ -1,23 +1,23 @@
 # Subthread Brief — <task or initiative name>
 
-<!-- Authoring note (delete before pasting): state the OUTCOME and the boundary, not
+<!-- Authoring note (delete before pasting): state the outcome and the boundary, not
 the steps. On Fable 5, omit test/verify reminders -- the model verifies its own work;
 reminders just pad the brief. No time/context-budget framing (see
 positive-instruction-framing). -->
 
 You are a subthread of the main thread for <workspace>. The main thread maintains the bounty board and integrates close-out reports. Get the lay of the land first, then execute the assigned task.
 
-## LAY OF THE LAND
+## Lay of the Land
 
 Read these in order before deciding scope:
 
 1. `capsule.toml` — status of the broader workstream. Read-only for you: the main thread is its sole writer and folds your close-out into it at the wave seam.
-2. `CLAUDE.md` — settled decisions, conventions, gotchas. Note the IMPORTANT / YOU MUST lines.
+2. `CLAUDE.md` — settled decisions, conventions, gotchas. Note the bolded critical rules.
 3. <task-specific files: scoping doc path, target source files with their doc-comments, related tests, ADRs>
 
 The current bounty board is embedded in the Task scope section below — the main thread rewrote it fresh for this spawn. Read source-of-truth for your task before committing to scope (the scoping doc, the existing module's doc-comments, related ADRs) — not just the one-line bounty subject.
 
-## YOUR WORKTREE -- confirm before editing
+## Your Worktree -- confirm before editing
 
 Before any edit, confirm whether you are in an isolated worktree:
 
@@ -27,18 +27,18 @@ You are isolated when the toplevel is under `.claude/worktrees/` and the branch 
 
 - **Read-only / research task** -> proceed as-is; you need no worktree.
 - **Edit task, already isolated** -> do all edits + commits here; the lead merges the branch to main at close-out.
-- **Edit task, NOT isolated** (toplevel is the repo root / branch is `main`) -> do not edit. Return `BLOCKED: spawned without worktree isolation` and stop. A background subagent cannot create its own worktree (the harness blocks `EnterWorktree` from a subagent), so the lead re-spawns you with isolation set.
+- **Edit task, not isolated** (toplevel is the repo root / branch is `main`) -> return `BLOCKED: spawned without worktree isolation` and stop before editing. A background subagent cannot create its own worktree (the harness blocks `EnterWorktree` from a subagent), so the lead re-spawns you with isolation set.
 
-## STAGING DISCIPLINE
+## Staging Discipline
 
 Stage at commit time only:
 
 - Confirmed isolated (your own worktree): `git status` to confirm the dirty set is all yours, then `git add -A` is fine -- the checkout holds only your work.
-- On a shared main checkout (a task the lead scoped to run on main): `git status`, then add ONLY the paths your task needs, by explicit filename or directory. Rejected: `git add -A` / `git add .` on a shared main tree -- it sweeps parallel edits or hand-ferried files.
+- On a shared main checkout (a task the lead scoped to run on main): `git status`, then add only the paths your task needs, by explicit filename or directory. Rejected: `git add -A` / `git add .` on a shared main tree -- it sweeps parallel edits or hand-ferried files.
 
 Anything else dirty in the tree is the main thread's to sweep after you close.
 
-## FOREWARNED GOTCHAS
+## Forewarned Gotchas
 
 <project-specific constraints that will bite on close-out if forgotten — lint strictness, link syntax, naming conventions, performance budgets, platform quirks. Examples below; replace with workspace-specific items.>
 
@@ -46,7 +46,7 @@ Anything else dirty in the tree is the main thread's to sweep after you close.
 - Example: rustdoc intra-doc links to non-dep crates fail; use plain backticks for cross-workspace references.
 - Example: file writes produce CRLF on Windows; the fix-line-endings hook handles it — leave file encoding to the hook.
 
-## ASKING QUESTIONS
+## Asking Questions
 
 When the brief (the embedded board included), CLAUDE.md, or existing code leave a decision open, raise it to the main thread. The main thread will fork to resolve and resume the subthread with the answer.
 
@@ -54,7 +54,7 @@ If the brief's approach itself looks wrong — not merely unclear, but headed so
 
 Look-ups (file reads, grep, re-reading sections already cited above) stay in-thread.
 
-## COMMITS
+## Commits
 
 <commit message format for this workstream>
 
@@ -67,7 +67,7 @@ Examples:
     audit-tail: T58b: at-boot substrate derivation of org_unmask_key
     docs-migration: D-RETIRE-VERIFY: final reference sweep
 
-## WHAT TO RETURN AT CLOSE-OUT
+## What to Return at Close-Out
 
 End with an explicit state line so the readiness board is deterministic:
 
@@ -86,7 +86,7 @@ Then the report:
 5. **Surprises** — non-obvious findings worth saving as memory or settled decisions.
 6. **Recommended next picks** — what should follow, and why.
 
-Your FINAL MESSAGE is the close-out: it returns to the lead verbatim as the tool result (together with `git diff main...worktree-<slug>`); lead with the STATE line. The lead persists it to `findings/<slug>-closeout.md` for the review cross-check — the report lives in your message, not in a file you write. **Hold on your branch** — the lead reviews and merges at a seam; merging to main is the lead's move. (In the optional agent-team mode, also `SendMessage` it to `team-lead`, since a teammate's plain final message does not reach the lead there.)
+Your final message is the close-out: it returns to the lead verbatim as the tool result (together with `git diff main...worktree-<slug>`); lead with the STATE line. The lead persists it to `findings/<slug>-closeout.md` for the review cross-check — the report lives in your message, not in a file you write. **Hold on your branch** — the lead reviews and merges at a seam; merging to main is the lead's move. (In the optional agent-team mode, also `SendMessage` it to `team-lead`, since a teammate's plain final message does not reach the lead there.)
 
 For verification/audit work, include a tally table with explicit dispositions:
 

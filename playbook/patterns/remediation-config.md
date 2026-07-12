@@ -49,6 +49,6 @@ def should_run(action_name, config):
 ## Rules
 
 - `dry_run: true` is the default. Require explicit opt-in for destructive actions
-- Kill switch stops ALL actions immediately (for "oh no" moments)
+- Kill switch stops all actions immediately (for "oh no" moments)
 - Cooldowns prevent cascading restarts
 - Log every action (attempted, skipped, succeeded, failed) with timestamps

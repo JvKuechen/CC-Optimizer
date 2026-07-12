@@ -31,6 +31,7 @@ Forms that work:
 ## Rules
 
 - The acute footgun is *imperative* negations that name a model failure ("don't", "never", "do not", "cannot" + a behavior). Reframe those first.
+- Emphasize with markup, not capitals. An ALL-CAPS word mid-prose ("NOT", "ONE", "DISJOINT") reads as shouting, and on a negation it sharpens the very priming this pattern fights. Use **bold** for a load-bearing term, or a `Rejected:` label for an anti-pattern. This includes the old caps markers: write a critical rule as a bold positive directive, not "IMPORTANT" or "YOU MUST". Keep caps only for literal tokens -- acronyms (API, GPU, PNG), code identifiers, a git `HEAD`, an env var, a `BLOCKED:` return value.
 - Mild descriptive negations ("has no", "is not") are a weak priming surface -- reframe them opportunistically when a file is touched anyway, rather than as a dedicated sweep.
 - Verify by re-reading for meaning, not just by grepping the tokens away. A reframe that softens a warning into a bland description has lost ground truth -- the `Rejected:` line keeps the warning's edge.
 - Apply this to memory files too: a clean brief is undone if the anti-pattern resurfaces in an always-loaded memory.

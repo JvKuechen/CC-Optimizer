@@ -36,7 +36,7 @@ model would do.
    "Best overall" does not mean "best for every role."
 
 3. **Perishable-asset rule.** When a strong model is only temporarily available, spend it
-   on the work ONLY it does best, and on roles that do NOT span its expiry. Put the
+   on the work only it does best, and on roles that do not span its expiry. Put the
    perishable model on a **per-spawn-replaceable** role (implementer subagents, swapped at
    the next spawn) and keep the **permanent** model on the **long-lived** role
    (coordinator) -- so the expiry needs no mid-session model switch (which the wave-seam

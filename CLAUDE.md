@@ -20,7 +20,7 @@ Optimization is judgment work. Push back when an audit finding, a pattern choice
 
 ## Post-Clone Setup
 
-IMPORTANT: Run `python scripts/setup.py` after cloning. This creates workspace directories, pins Claude Code to the stable release channel, installs git hooks, and (on Linux/WSL) ensures a bare `python` resolves via `python-is-python3` and the GitHub CLI (`gh`) is installed (auth is interactive: `gh auth login`). Wiki sync to GitHub/Gitea wikis is handled by CI workflows (no local setup needed). The script is idempotent.
+**Run `python scripts/setup.py` after cloning.** This creates workspace directories, pins Claude Code to the stable release channel, installs git hooks, and (on Linux/WSL) ensures a bare `python` resolves via `python-is-python3` and the GitHub CLI (`gh`) is installed (auth is interactive: `gh auth login`). Wiki sync to GitHub/Gitea wikis is handled by CI workflows (no local setup needed). The script is idempotent.
 
 ## Workflow
 
@@ -105,7 +105,7 @@ When writing CLAUDE.md for other workspaces:
 - Use `@path` imports for existing docs (README, package.json) — reference, single-source
 - Move detailed reference to `.claude/skills/` (loaded on-demand, not every request)
 - Use `.claude/rules/` with `paths:` frontmatter for file-pattern-scoped conventions
-- Use IMPORTANT / YOU MUST for critical rules Claude tends to ignore
+- Make a critical rule unmissable with **bold** and a positive directive; reserve ALL-CAPS for literal tokens (acronyms, code, env vars), not emphasis
 - Phrase rules as positive targets; when an anti-pattern must be shown, label it `Rejected:` followed by the anti-pattern rather than writing a `never`/`don't` instruction
 - Rejected from CLAUDE.md: file-by-file descriptions, generic practices, tutorials, frequently-changing info
 
@@ -132,7 +132,7 @@ The bounty board is an in-chat artifact, reconstructed each session from `git lo
 
 ## Public Repo Commit Workflow
 
-This repo has a `.public-repo` marker. The pre-commit hook blocks direct `git commit`. YOU MUST follow this workflow:
+This repo has a `.public-repo` marker. The pre-commit hook blocks direct `git commit`. **Follow this workflow:**
 
 1. Review staged diff: `git diff --cached`
 2. Verify no hostnames, credentials, usernames, IPs, or environment-specific details
@@ -142,7 +142,7 @@ Environment-specific content goes in gitignored files (e.g., `*-environments.md`
 
 ## Public Repo Push Workflow
 
-On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) intercepts `git push` commands. The hook swaps the push command with `scripts/push-review.py`, which outputs a consolidated diff review as Bash output. IMPORTANT: The Bash output is truncated in the UI. YOU MUST re-present the COMPLETE Bash output as markdown -- every section, every line of the diff, nothing omitted. Use ` ```diff ` fencing for syntax coloring. Do NOT run git push again -- the user will execute the push via the `!` command shown at the end of the review.
+On repos with a `.public-repo` marker, a PreToolUse hook (`push-review.py`) intercepts `git push` commands. The hook swaps the push command with `scripts/push-review.py`, which outputs a consolidated diff review as Bash output. **The Bash output is truncated in the UI; re-present the complete Bash output as markdown** -- every section, every line of the diff, nothing omitted. Use ` ```diff ` fencing for syntax coloring. Leave the actual push to the user -- they execute it via the `!` command shown at the end of the review.
 
 ## Gotchas
 

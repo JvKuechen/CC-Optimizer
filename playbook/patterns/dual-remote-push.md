@@ -36,7 +36,7 @@ Every project gets a local Gitea remote. Some also get GitHub.
 
 ## How It Works
 
-- **Push**: Git sends to ALL push URLs configured on a remote. One command, both updated.
+- **Push**: Git sends to all push URLs configured on a remote. One command, both updated.
 - **Fetch**: Git only fetches from the single fetch URL. One remote = one fetch source.
 - **Secondary remote**: Keep standalone named remotes around for direct fetch if you need to pull from the other source.
 

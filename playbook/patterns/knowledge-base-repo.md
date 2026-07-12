@@ -46,7 +46,7 @@ project/
     setup.py            # Post-clone: clone wiki, install pre-push hook
   playbook/
     roadmap.md          # Phased project plan
-  Import/               # LOCAL ONLY (gitignored). Raw materials: installers, PDFs, manuals
+  Import/               # local only (gitignored). Raw materials: installers, PDFs, manuals
   .gitignore            # Import/, wiki/, .venv/, .env, settings.local.json
   .gitattributes        # * text=auto eol=lf
 ```

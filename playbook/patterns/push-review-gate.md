@@ -90,7 +90,7 @@ Standalone script that outputs a markdown-formatted review:
 
 ### `CLAUDE.md` (behavioral instruction)
 
-Tells Claude: the hook swaps the push command with the review script. Present the Bash output as markdown. Do NOT run git push again.
+Tells Claude: the hook swaps the push command with the review script. Present the Bash output as markdown, and leave the actual push to the user.
 
 ## hookSpecificOutput Format
 

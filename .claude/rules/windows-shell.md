@@ -11,13 +11,13 @@ paths:
 
 # Windows Shell Rules
 
-These rules apply when authoring shell or hook code targeted at native Windows (Git Bash, CMD, PowerShell). They apply on Windows only -- WSL is exempt. YOU MUST follow them when editing files matched by the `paths:` above.
+These rules apply when authoring shell or hook code targeted at native Windows (Git Bash, CMD, PowerShell). They apply on Windows only -- WSL is exempt. **Follow them when editing files matched by the `paths:` above.**
 
 On a machine set up with `deploy-user-settings.py`, the `shell-rewrite.py` and `ascii-normalize.py` user hooks auto-correct the most common violations (`nul` redirects, `python3`, non-ASCII typography) before they take effect. Treat the hooks as a safety net -- these rules still describe the code to write.
 
 ## Path Separators
 
-- ALWAYS use forward slashes (`/`) in paths passed to Bash, even on Windows. Git Bash, Python, Node, and most CLI tools handle them correctly.
+- Always use forward slashes (`/`) in paths passed to Bash, even on Windows. Git Bash, Python, Node, and most CLI tools handle them correctly.
 - Keep backslashes out of unquoted Bash commands. Rejected: `.venv\scripts\activate` -- Bash reads each `\` as an escape character and silently swallows it, leaving `.venvscriptsactivate`.
 - If a backslash is genuinely required (rare), double it: `.venv\\scripts\\activate`.
 - Build paths in Python/Node scripts with `pathlib.Path` or `path.join()` -- the safe construction. Rejected: string concatenation with a literal `\`.
@@ -42,7 +42,7 @@ Prefer the portable form on the right; the construct on the left misbehaves on W
 
 ## ASCII Only in Code
 
-IMPORTANT: write all generated code -- Python, shell, JavaScript, config files -- in plain ASCII. The Windows console often runs a non-UTF-8 codepage, where non-ASCII characters trigger `UnicodeEncodeError` or `SyntaxError`. Markdown documentation is exempt.
+**Write all generated code -- Python, shell, JavaScript, config files -- in plain ASCII.** The Windows console often runs a non-UTF-8 codepage, where non-ASCII characters trigger `UnicodeEncodeError` or `SyntaxError`. Markdown documentation is exempt.
 
 Use the ASCII form; the Rejected column lists what to keep out of code:
 
@@ -62,5 +62,5 @@ Use the ASCII form; the Rejected column lists what to keep out of code:
 
 ## Quoting
 
-- ALWAYS double-quote paths that may contain spaces: `"C:/Users/My Name/project"`.
+- Always double-quote paths that may contain spaces: `"C:/Users/My Name/project"`.
 - Prefer double quotes over single quotes in Bash on Windows (single quotes misbehave in some contexts).

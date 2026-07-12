@@ -24,7 +24,7 @@ scripts/
   run_remediation.py       # Orchestrator: fixes identified issues
 ```
 
-Key principle: health checks are ALWAYS safe to run (read-only). Remediation scripts ALWAYS have safety controls (see remediation-config pattern).
+Key principle: health checks are always safe to run (read-only). Remediation scripts always have safety controls (see remediation-config pattern).
 
 ## Rules
 

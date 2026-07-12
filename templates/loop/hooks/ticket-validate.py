@@ -21,7 +21,12 @@ Schema (kept in lockstep with loop-gate.py and ticket-template.toml):
                               (draft = authored, awaiting plan-gate approval;
                               only ready is dispatchable)
   ac:                         non-empty list of tables, each with non-empty
-                              string id, criterion, check; ids unique
+                              string id, criterion, check; ids unique.
+                              OPTIONAL while status is draft or blocked -- the
+                              AC oracle is authored at the plan gate, so a
+                              backlog stub may not carry it yet; every other
+                              status requires it (and approve-tickets.py
+                              refuses to flip an AC-less draft to ready)
   optional strings:           source, size, non_goals
   optional list of strings:   depends_on
   optional [gate] table:      review in {codex, none}; base string;
@@ -61,7 +66,13 @@ def schema_errors(data):
 
     acs = data.get("ac")
     if not isinstance(acs, list) or not acs:
-        errs.append("at least one [[ac]] table is required")
+        # Pre-plan-gate stubs (draft, or blocked at planning time) may not
+        # carry the AC oracle yet; every dispatchable-or-beyond status must.
+        if status not in ("draft", "blocked"):
+            errs.append(
+                "at least one [[ac]] table is required once status leaves "
+                "draft/blocked (the AC oracle is what the gate runs)"
+            )
     else:
         seen = set()
         for i, ac in enumerate(acs):

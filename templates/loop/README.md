@@ -72,12 +72,22 @@ dispatchable, and the plan gate is what flips draft -> ready:
   gates the AC oracle itself -- exact, non-saturable checks two agents could
   not disagree about -- because with the human out of the per-ticket loop,
   cross-vendor scrutiny of the checks is what remains of the held-out
-  property. Anything but ACCEPT stays draft, report path printed.
+  property. Anything but ACCEPT stays draft, report path printed. On
+  ACCEPT, a deterministic falsification pass then runs each check against
+  the pre-implementation tree: an oracle must be able to fail, and a check
+  that already exits 0 is a vacuous filter (cargo exits 0 on a zero-match
+  test name) or an already-satisfied state -- lone passes surface as
+  invariant-guard notes, an all-pass oracle holds the draft.
 
 Either way the ACs are the contract: one measurable end state each, an
-exact `check` command. Ticket edits land in the reviewed diff, so a check
-weakened mid-flight is visible to the reviewer -- and at merge,
-`git diff main...<branch> -- tickets/` empty stays the habit.
+exact `check` command. A backlog stub may sit in `draft` (or `blocked`)
+without ACs -- the oracle is authored at the plan gate -- but nothing
+AC-less ever leaves draft: the validator requires ACs from `ready` onward,
+approve-tickets refuses to flip an AC-less draft even on ACCEPT, and the
+Stop gate blocks a ticket with no checks. Ticket edits land in the
+reviewed diff, so a check weakened mid-flight is visible to the reviewer
+-- and at merge, `git diff main...<branch> -- tickets/` empty stays the
+habit.
 
 Design docs get the same pre-implementation review: `codex-review.sh
 --design docs/design/foo.md --tag foo-design` -- cross-vendor feedback

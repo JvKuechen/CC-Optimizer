@@ -14,6 +14,13 @@
 #     or a planning session the human gates. Workers implement AGAINST the
 #     checks. Ticket edits land in the reviewed diff, so a check weakened
 #     mid-flight is visible to the cross-vendor reviewer.
+#   - Prove each check CAN fail: run it against the pre-implementation tree
+#     and expect non-zero (approve-tickets.py does this automatically on
+#     ACCEPT). A check that passes before any work is vacuous or already
+#     satisfied -- it gates nothing. Field-caught trap: cargo exits 0 when a
+#     test filter matches zero tests, so a mistyped/unqualified name passes
+#     forever. Rejected: `cargo test foo -- --exact` where no test named foo
+#     exists (runs 0 tests, exits 0).
 #   - Size every ticket to one fresh-context session. Too big to finish in
 #     one session = split it at planning time.
 

@@ -304,7 +304,17 @@ def main():
             % (ticket_id, dirty[:TAIL_CHARS])
         )
 
-    # 2. AC checks -- the held-out mechanical oracle.
+    # 2. AC checks -- the held-out mechanical oracle. A ticket with no ACs
+    # has no oracle: clean-tree + review alone must never release a session
+    # (an AC-less draft that slipped past the plan gate would otherwise
+    # sail through).
+    if not (ticket.get("ac") or []):
+        block_round(
+            "loop-gate: %s has no [[ac]] acceptance criteria -- nothing to "
+            "gate against. Author the AC oracle (plan gate) before working "
+            "the ticket; an AC-less ticket is a draft, not dispatchable."
+            % ticket_id
+        )
     failures = []
     for ac in ticket.get("ac") or []:
         code, tail = run_check(ac.get("check", "false"), root, check_timeout)

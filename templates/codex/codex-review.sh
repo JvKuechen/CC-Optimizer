@@ -281,7 +281,10 @@ no human re-reads, so:
 - each check command actually tests its criterion -- flag saturable checks a
   worker could pass without delivering the spec;
 - the ticket is sized to one fresh-context session; non_goals fence the real
-  adjacencies.
+  adjacencies;
+- a ticket draft with no [[ac]] blocks has no oracle: never ACCEPT it --
+  return REJECT or CONDITIONAL and propose the exact ACs (criterion + check
+  command) it needs.
 
 A claim you cannot verify read-only (needs a build, a test run, a network
 call): mark that finding PROVISIONAL ("needs a toolchain run") rather than

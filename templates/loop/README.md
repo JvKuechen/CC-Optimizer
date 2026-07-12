@@ -36,7 +36,11 @@ gate requires when `gate.review = "codex"`.
    copy `approve-tickets.py` to `scripts/`. Pin the review model once by
    exporting `CODEX_REVIEW_MODEL` (and optionally `CODEX_REVIEW_EFFORT`) in
    the project's `.claude/settings.json` env block -- every review and
-   plan-gate leg then uses it without per-call flags.
+   plan-gate leg then uses it without per-call flags. Pins are perishable
+   (a review model can be withdrawn server-side mid-wave), so also set
+   `CODEX_REVIEW_MODEL_FALLBACK`: the script resolves the pin against
+   codex's local model cache, falls back automatically when the preferred
+   model is withdrawn, and restores it when the cache lists it again.
 4. Wire both hooks in `.claude/settings.json`. The Stop-hook `timeout` must
    cover the slowest AC check plus the git calls -- a 10-minute test suite
    needs more than 600:

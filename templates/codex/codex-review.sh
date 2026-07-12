@@ -63,7 +63,11 @@
 #     --repo <dir>       repo/worktree to review in (default: this repo root)
 #     --rubric <file>    review-criteria source (default: adversarial-reviewer.md)
 #     --model <model>    override Codex model (default: $CODEX_REVIEW_MODEL
-#                        if exported, else Codex default)
+#                        if exported, else Codex default). With
+#                        $CODEX_REVIEW_MODEL_FALLBACK also set, the pin is
+#                        resolved against codex's local model cache: a
+#                        withdrawn preferred model falls back automatically
+#                        and returns when the cache lists it again.
 #     --effort <level>   reasoning effort: minimal|low|medium|high|xhigh (default:
 #                        Codex's built-in default). Spend high on security/wire
 #                        legs, low on mechanical renames.
@@ -157,6 +161,27 @@ while [ $# -gt 0 ]; do
     *)             die "unknown argument: $1 (see --help)" ;;
   esac
 done
+
+# Perishable-pin resilience (upstreamed from the field): a pinned review
+# model can be withdrawn server-side mid-wave. When CODEX_REVIEW_MODEL_FALLBACK
+# is set, resolve the pin against codex's own local model cache: a preferred
+# model absent from the cache resolves to the fallback, and when the preferred
+# model returns, the refreshed cache restores it automatically -- no manual
+# pin change either direction. A present model never swaps; no cache file =
+# no swap (fail toward the explicit pin; the 400 surfacing + provenance
+# warning downstream stay the net).
+FALLBACK_MODEL="${CODEX_REVIEW_MODEL_FALLBACK:-}"
+if [ -n "$MODEL" ] && [ -n "$FALLBACK_MODEL" ] && [ "$MODEL" != "$FALLBACK_MODEL" ]; then
+  MODELS_CACHE="${CODEX_HOME:-$HOME/.codex}/models_cache.json"
+  if [ -f "$MODELS_CACHE" ] && ! grep -q "\"$MODEL\"" "$MODELS_CACHE"; then
+    if grep -q "\"$FALLBACK_MODEL\"" "$MODELS_CACHE"; then
+      echo "codex-review: model pin '$MODEL' absent from the codex model cache; using fallback '$FALLBACK_MODEL'" >&2
+      MODEL="$FALLBACK_MODEL"
+    else
+      echo "codex-review: WARNING -- neither pin '$MODEL' nor fallback '$FALLBACK_MODEL' appears in $MODELS_CACHE; keeping the pin" >&2
+    fi
+  fi
+fi
 
 # Resolve the Codex CLI. A fresh shell inherits it from the system PATH, but a
 # shell started BEFORE the CLI was installed (codex installed mid-session) keeps

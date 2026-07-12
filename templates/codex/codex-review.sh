@@ -410,8 +410,18 @@ printf '%s' "$PROMPT" | codex exec \
     - >"$LOG" 2>&1 || {
   status=$?
   echo "codex-review: FAILED (exit $status). See $LOG" >&2
+  # Surface the cause inline -- a failed gate should not need a manual log
+  # tail to distinguish "unsupported model" from quota from a crash.
+  grep -iE "error" "$LOG" | tail -3 >&2 || true
   exit $status
 }
+
+# Model-pin provenance: codex warns (and may silently fall back) when the
+# pinned id is missing from the account's model cache. A verdict from an
+# unknown model quietly breaks the cross-vendor allocation -- make it loud.
+if [ -n "$MODEL" ] && grep -qiE "model metadata.*not found|defaulting to fallback" "$LOG"; then
+  echo "codex-review: WARNING -- model pin '$MODEL' may not have been honored (metadata-fallback warning in $LOG). Verify the id against the account's model list; the verdict's provenance is uncertain until the pin resolves cleanly." >&2
+fi
 
 # The stop gate parses the report's terminal VERDICT: line alone (so
 # Rejected:-style labels inside findings stay unambiguous). A report without

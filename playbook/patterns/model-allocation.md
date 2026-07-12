@@ -42,6 +42,11 @@ model would do.
    (coordinator) -- so the expiry needs no mid-session model switch (which the wave-seam
    rule forbids anyway). The window expiry is also a good moment to re-check the table,
    since work TYPE often shifts at the same boundary (e.g. refactor/gates -> feature push).
+   The reviewer pin is perishable too (field-observed: a pinned review model withdrawn
+   server-side mid-wave, 400ing the gate the same day the promo implementer model
+   expired): keep the pin in ONE place (an env var like CODEX_REVIEW_MODEL, not scattered
+   flags) and pre-name the conservative fallback -- a specific model id, decided while
+   calm, never autopick.
 
 ## Cross-vendor reviewer = the offset slot
 

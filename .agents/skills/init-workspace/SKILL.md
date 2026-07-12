@@ -1,0 +1,144 @@
+---
+name: init-workspace
+description: Bootstrap a new Codex workspace or import an existing one
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+argument-hint: "[project-name or path-to-workspace]"
+---
+
+Bootstrap a new Codex workspace, or import an existing project into the nested workspace structure.
+
+## Resolve Target Path
+
+Determine where the workspace will live based on `$ARGUMENTS`:
+
+- **Absolute or relative path provided** (contains `/` or `\`): Use that path directly (existing external-path behavior).
+- **Project name only** (no path separators): Set target to `WS/{project-name}/` inside the CC-Optimizer repo.
+- **No arguments**: Ask for project name and org folder (from config), then set target as above.
+
+## Importing an Existing Project
+
+When the user wants to move an existing project into `WS/`:
+
+### 1. Check for name mismatch
+
+Before copying, compare the local folder name against the repo name(s) on its remotes:
+```bash
+git -C "<source>" remote -v
+```
+Extract the repo name from each remote URL (strip `.git` suffix, take the last path component). If any remote name differs from the local folder name, present options:
+
+> Local folder is "Apps" but remote says "search.tcl.local". What should the workspace be named?
+> 1. search.tcl.local (from origin)
+> 2. Apps (keep current name)
+
+If multiple remotes have different repo names, list all unique names as options. Use the chosen name as the target directory name under `WS/`.
+
+### 2. Copy local
+
+**Copy local** (default) -- `cp -r <source> <target>`. This preserves gitignored files, local configs, build artifacts, `deps/`, `.Codex/settings.local.json`, and untracked reference material. Preferred over cloning from remote. After copying, re-hide the `.git` directory (`cp -r` strips the Windows hidden attribute):
+```bash
+attrib +H "<target>/.git"
+```
+
+**Clone from remote** -- Only if the user explicitly requests a clean clone, or if no local copy exists.
+
+Before copying, check and report the source repo's state:
+```bash
+git -C "<source>" status --short
+```
+Inform the user of any dirty state (modified files, untracked files, uncommitted changes). This is informational -- proceed with the copy regardless, since preserving local state is the point.
+
+### 3. Migrate session history
+
+After copying into `WS/`, migrate session history so `/resume` works at the new path:
+```bash
+python scripts/migrate-sessions.py "<old-path>" "<new-path>"
+```
+
+If the script reports no existing sessions, that's fine -- skip silently.
+
+## New Workspace Setup
+
+For new workspaces (no existing project to import):
+1. If a git remote URL is provided, clone it: `git clone <url> <target-path>`
+2. If no remote, create the directory and `git init` inside it
+3. Add `deps/` to the project's `.gitignore` (for pinned external reference material)
+
+## Steps
+
+1. **Detect workspace type** -- Check if the target path has existing files.
+   - **Empty directory**: New project. Ask the user what they're building.
+   - **Existing project**: Scan for language files, package manifests, build configs to auto-detect the stack. Confirm findings with the user.
+
+2. **Git init** -- If not already a git repo (skip for copied/cloned repos):
+   - Empty dir: `git init`
+   - Existing project: `git init && git add -A && git commit -m "Initial commit"` (snapshot before changes)
+
+3. **Gather project info** -- Use AskUserQuestion for anything not auto-detected:
+   - What does this project do? (one sentence)
+   - Tech stack (language, framework, build tool, test runner)
+   - Commands to build/test/run
+   - Work or personal project? (pre-filled if org folder was chosen)
+
+4. **Create AGENTS.md** -- Keep under 500 lines. Include:
+   - Purpose (one paragraph)
+   - Platform (Windows 11, reference shell rules)
+   - Tech stack
+   - Commands (build, test, run)
+   - Architecture notes (if applicable)
+   - Collaboration posture stanza (see `playbook/patterns/collaboration-posture.md`) -- explicit permission to push back; skip for rote/CI-only workspaces
+
+5. **Create .Codex/settings.json** -- Stack-appropriate permissions:
+   - Add `"$schema": "https://json.schemastore.org/Codex-settings.json"` for editor autocomplete
+   - Always: git read/write subcommands (explicit, not `Bash(git *)`)
+   - Stack-specific: build tool, test runner, linter, package manager
+   - Always deny: destructive git, sensitive files
+   - Use `//path` for absolute paths (not `/path` which is relative to settings file)
+
+6. **Deploy standard rules** -- Copy from this optimizer workspace:
+   - `.Codex/rules/context-capsule.toml`
+   - `.Codex/rules/windows-shell.md`
+
+7. **Create .gitignore** -- If none exists, create one appropriate for the stack. Always include `.Codex/settings.local.json`. For nested workspaces, ensure `deps/` is included.
+
+8. **Commit** -- `git add -A && git commit -m "Codex workspace setup"`.
+
+9. **Public repo lock** -- Check if any remote points to a public host:
+   ```bash
+   git -C "<target>" remote -v
+   ```
+   - Remotes on `github.com`, `gitlab.com`, or other public hosting = potentially public.
+   - Remotes on private IPs, `.local` domains, or LAN-only hosts (e.g., internal Gitea) = private.
+   - If any public remote found, ask the user: "Is this repo public? Should I add the public repo commit lock?"
+   - If yes: create `.public-repo` marker, install the pre-commit hook from CC-Optimizer's `scripts/setup.py` (the `PRE_COMMIT_HOOK` content), and install the commit-msg hook. Add `scripts/verified-commit.sh` if the project has a `scripts/` directory, otherwise note the `PUBLIC_REPO_VERIFIED=1` bypass in the report.
+   - If no: skip.
+
+10. **Report** -- Tell the user what was created and what they should customize.
+
+## Optional: Coordination Protocol
+
+After step 10, ask the user: "Will this workspace have multi-thread / multi-session / coordination-heavy work?"
+
+If yes, plant the coordination protocol:
+- Copy `templates/subthread-brief.md` from CC-Optimizer to `<target>/subthread-brief.md` (subthread brief template).
+- Copy `templates/main-thread-kickoff.md` from CC-Optimizer to `<target>/main-thread-kickoff.md` (main-thread session kickoff prompt).
+- Append this section to the workspace AGENTS.md:
+
+  ```markdown
+  ## Coordination
+
+  Multi-thread work uses the coordination protocol — see `~/.Codex/rules/coordination.md` for vocabulary (main thread, subthread, bounty board, close-out report) and discipline (staging, thread-local IDs).
+
+  The bounty board is an in-chat tracker, rebuilt each session from `git log` + `capsule.toml` — not a file. Start a main-thread session with `main-thread-kickoff.md`; spawn subthreads with `subthread-brief.md`. `capsule.toml` (gitignored) is the only persistent local tracker. Thread-local IDs (`T<n>`, `D-*`, `#<n>`) live in `capsule.toml` and chat only — tracked source and docs use commit hashes or descriptive names instead.
+  ```
+
+If no, skip silently. The global rule remains available either way (deployed via `templates/deploy-user-settings.py`).
+
+## What This Does NOT Do
+
+- No skills, subagents, hooks, or MCP setup (use `/optimize-workspace` for that)
+- No audit or findings (this is for new projects, not existing ones)
+- No playbook phases beyond basic infrastructure
+
+This is the quick-start. `/optimize-workspace` is the full treatment.

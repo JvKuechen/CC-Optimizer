@@ -48,7 +48,10 @@ Design verdicts (settled in the optimizer thread, 2026-06-10):
 """
 import json
 import os
+import subprocess
 import sys
+import time
+from datetime import datetime
 from pathlib import Path
 
 try:
@@ -125,6 +128,62 @@ def render(data):
     return "\n\n".join(out)
 
 
+MAX_LOG_LINES = 15
+MAX_DIRTY_LINES = 10
+
+
+def staleness_delta(repo, capsule_path):
+    """Git-truth delta since the capsule's last write, or "" when current.
+
+    This is what makes a stale capsule safe to inject: the post-compact (or
+    next-morning) context receives the capsule PLUS exactly what it does not
+    cover, so the pending seam edit can be folded from git truth instead of
+    rediscovery. Auto-compact cannot be blocked on staleness (a blocked
+    recovery compact fails the in-flight request), so the heal happens here,
+    on the injection side.
+    """
+    try:
+        mtime = capsule_path.stat().st_mtime
+    except OSError:
+        return ""
+    since = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+
+    def run(*args):
+        try:
+            proc = subprocess.run(
+                ["git", *args], cwd=str(repo),
+                capture_output=True, text=True, timeout=10,
+            )
+            return proc.stdout.strip() if proc.returncode == 0 else ""
+        except (OSError, subprocess.TimeoutExpired):
+            return ""
+
+    def capped(text, cap):
+        lines = text.splitlines()
+        body = "\n".join("- " + ln for ln in lines[:cap])
+        if len(lines) > cap:
+            body += "\n- ...and %d more" % (len(lines) - cap)
+        return body
+
+    log = run("log", "--oneline", "--no-decorate", "--since", since)
+    dirty = run("status", "--porcelain", "--untracked-files=no")
+    if not log and not dirty:
+        return ""
+
+    age_h = (time.time() - mtime) / 3600.0
+    parts = [
+        "## SINCE CAPSULE EDIT",
+        "The capsule was last written %s (%.1fh ago). Git state has moved "
+        "since then; a seam edit folding the items below into the capsule "
+        "has not yet landed." % (since, age_h),
+    ]
+    if log:
+        parts.append("Commits newer than the capsule:\n" + capped(log, MAX_LOG_LINES))
+    if dirty:
+        parts.append("Uncommitted tracked changes:\n" + capped(dirty, MAX_DIRTY_LINES))
+    return "\n\n".join(parts)
+
+
 def emit(context):
     print(json.dumps({
         "hookSpecificOutput": {
@@ -165,6 +224,9 @@ def main():
     body = render(parsed)[:MAX_CHARS].rstrip()
 
     context = PREAMBLE + body
+    delta = staleness_delta(repo, capsule_path)
+    if delta:
+        context += "\n\n" + delta
     if errs:
         context += ("\n\n## CAPSULE SCHEMA WARNING\n"
                     + "\n".join("- " + e for e in errs)

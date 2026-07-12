@@ -21,6 +21,27 @@ transliterate its own mapping keys.
 import json
 import os
 import sys
+import unicodedata
+
+
+def _codepoint_label(cp):
+    """Describe a codepoint using ONLY ASCII -- never the literal character.
+
+    Echoing the offending character back (e.g. "U+DC9D '<char>'") is unsafe: a
+    lone surrogate or other malformed codepoint embedded in this deny message
+    gets persisted into the session transcript, and every later API request then
+    re-serializes it into an invalid JSON body (HTTP 400, session wedged). The
+    codepoint number plus its Unicode name is enough to identify it and stays
+    pure ASCII.
+    """
+    try:
+        name = unicodedata.name(chr(cp))
+    except (ValueError, OverflowError):
+        if 0xD800 <= cp <= 0xDFFF:
+            name = "lone surrogate"
+        else:
+            name = "unnamed"
+    return "U+%04X (%s)" % (cp, name)
 
 # Only source code is normalized. Docs/data files may carry intentional Unicode.
 SOURCE_EXTENSIONS = frozenset([
@@ -108,7 +129,7 @@ def main():
     new_text, unmapped = normalize(text)
 
     if unmapped:
-        sample = ", ".join("U+%04X '%s'" % (cp, ch) for ch, cp in unmapped[:8])
+        sample = ", ".join(_codepoint_label(cp) for ch, cp in unmapped[:8])
         more = "" if len(unmapped) <= 8 else " (and %d more)" % (len(unmapped) - 8)
         reason = (
             "Blocked: non-ASCII characters with no ASCII equivalent in source "

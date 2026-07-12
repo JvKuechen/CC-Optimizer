@@ -62,7 +62,14 @@ RECOMMENDATION:
 - Accept: no findings; mark complete
 - Conditional: minor findings; mark complete + file follow-ups for the lead
 - Reject: structural findings; send back to the teammate with this report
+
+VERDICT: <ACCEPT | CONDITIONAL | REJECT>
 ```
+
+Close the report with the `VERDICT:` line -- exactly one, as the last line,
+carrying one of the three tokens. Deterministic gates parse that line alone
+(so `Rejected:` labels inside findings stay unambiguous); the prose
+RECOMMENDATION above it is for the lead.
 
 Every finding carries both pointers -- the `file:line` that shipped and the transcript location of the reasoning -- so the lead can investigate either without re-deriving your work.
 

@@ -245,6 +245,8 @@ the criteria say to confirm a finding via a teammate's transcript, reason
 instead from the diff plus what you can read and run in the repo. Apply every
 one of the seven signs, the staging/doctrine/test-quality checks, and the
 exact return format below. Be blunt; every finding carries a file:line.
+End the report with its terminal line -- VERDICT: followed by exactly one of
+ACCEPT | CONDITIONAL | REJECT -- a deterministic gate parses that line alone.
 
 Verify before you assert: check any claim about lint reachability ("this lint
 fires"), test-only exemptions, dependency closures, build graphs, counts, or
@@ -269,6 +271,8 @@ teammate's transcript, reason instead from the diff plus what you can read in
 the repo. Apply every one of the seven signs, the staging/doctrine/
 test-quality checks, and the exact return format below. Be blunt; every
 finding carries a file:line.
+End the report with its terminal line -- VERDICT: followed by exactly one of
+ACCEPT | CONDITIONAL | REJECT -- a deterministic gate parses that line alone.
 
 Verify before you assert: you run read-only, without compiling or running
 lints or tests. Check any claim about dependency closures, build graphs,
@@ -328,5 +332,13 @@ printf '%s' "$PROMPT" | codex exec \
   echo "codex-review: FAILED (exit $status). See $LOG" >&2
   exit $status
 }
+
+# The stop gate parses the report's terminal VERDICT: line alone (so
+# Rejected:-style labels inside findings stay unambiguous). A report without
+# one still lands -- gates fall back to a whole-text verdict scan -- but flag
+# it loudly so the drift is visible at the source.
+if ! grep -qiE '^[# *>_-]*VERDICT[: *-]+(ACCEPT|CONDITIONAL|REJECT)\b' "$CLOSEOUT"; then
+  echo "codex-review: WARNING -- no terminal 'VERDICT: ACCEPT|CONDITIONAL|REJECT' line in $CLOSEOUT; deterministic gates fall back to a whole-text verdict scan." >&2
+fi
 
 echo "codex-review: complete -> $CLOSEOUT  (full run: $LOG)"

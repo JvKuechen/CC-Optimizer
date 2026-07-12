@@ -76,11 +76,14 @@ or interactively, `/goal T-001 reaches status review` on top of the same
 instruction. The Stop gate enforces the exit either way; `/goal` just keeps
 the turns coming without per-turn prompting.
 
-**Gate (deterministic, at every stop).** In order: tracked working tree
-clean first (cheap, and the expensive checks then exercise exactly what
-merges) -> all AC checks exit 0 -> fresh Accept from
+**Gate (deterministic, at every stop).** In order: working tree clean
+first, untracked files included (cheap; a never-`git add`ed source file is
+the classic works-locally-broken-on-merge, and the expensive checks then
+exercise exactly what merges) -> all AC checks exit 0 -> fresh verdict in
 `findings/codex-review-<ticket-id>.md` (newer than the last code commit,
-no Reject, no PROVISIONAL). Any failure blocks the stop and feeds the
+terminal `VERDICT: ACCEPT` or `CONDITIONAL` line -- the gate parses that
+line alone, so `Rejected:` labels inside findings stay unambiguous -- and
+no PROVISIONAL findings). Any failure blocks the stop and feeds the
 exact failure back as next-turn guidance, including the `codex-review.sh`
 invocation when the review is what's missing. Full pass flips the ticket
 to `review`, records the gated commit, and releases the session.

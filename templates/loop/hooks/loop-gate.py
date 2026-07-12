@@ -8,13 +8,19 @@ next turn's guidance. Sessions with no in_progress ticket stop normally, so
 the gate costs nothing outside loop work.
 
 The gate, in order (fail fast, cheap first):
-  1. Every [[ac]] check command exits 0 (run from the repo root via bash).
-  2. The working tree is clean (tracked files) -- gate what will merge,
-     not a moving target.
+  1. The working tree is clean, untracked files included -- gate what will
+     merge, not a moving target. A new source file that was never `git add`ed
+     is the classic works-locally-broken-on-merge, so untracked blocks too
+     (scratch belongs in .gitignore; findings/ is excluded either way).
+  2. Every [[ac]] check command exits 0 (run from the repo root via bash).
   3. When gate.review = "codex": findings/codex-review-<ticket-id>.md exists,
-     is newer than HEAD's commit time, and contains an Accept verdict with no
-     Reject and no PROVISIONAL. A missing/stale report blocks with the exact
-     codex-review.sh invocation to run.
+     is newer than HEAD's commit time, and its terminal "VERDICT:" line reads
+     ACCEPT or CONDITIONAL (the rubric's machine-parseable last line; parsing
+     that line alone keeps `Rejected:`-style labels inside findings from
+     reading as the verdict). PROVISIONAL findings block regardless. A report
+     without a VERDICT line falls back to the legacy whole-text scan. A
+     missing/stale report blocks with the exact codex-review.sh invocation
+     to run.
 On full pass the hook flips the ticket to status = "review" (ready for
 merge; a human or the outer loop flips it to done) and allows the stop.
 
@@ -220,7 +226,7 @@ def main():
             sys.exit(0)
         code_head, _ = last_code_commit(root)
         _, dirty_now = git(
-            root, "status", "--porcelain", "--untracked-files=no",
+            root, "status", "--porcelain", "--untracked-files=normal",
             "--", ".", ":(exclude)findings",
         )
         stale = [
@@ -274,16 +280,20 @@ def main():
 
     # 1. Clean tree first (cheap): the gated state must be the committed
     # state, and the expensive AC runs then exercise exactly what merges.
-    # findings/ is excluded: the gate's own state file and the review report
-    # live there and must not wedge the gate when findings/ isn't gitignored.
+    # Untracked files count -- a new source file that was never `git add`ed
+    # passes local AC runs but is absent from the reviewed diff and the
+    # merge (scratch belongs in .gitignore). findings/ is excluded: the
+    # gate's own state file and the review report live there and must not
+    # wedge the gate when findings/ isn't gitignored.
     code, dirty = git(
-        root, "status", "--porcelain", "--untracked-files=no",
+        root, "status", "--porcelain", "--untracked-files=normal",
         "--", ".", ":(exclude)findings",
     )
     if code == 0 and dirty:
         block_round(
-            "loop-gate: the working tree has uncommitted tracked changes on "
-            "%s:\n%s\nCommit the ticket's work, then stop again."
+            "loop-gate: the working tree has uncommitted or untracked "
+            "changes on %s:\n%s\nCommit the ticket's work (git add new "
+            "source files; gitignore scratch), then stop again."
             % (ticket_id, dirty[:TAIL_CHARS])
         )
 
@@ -322,7 +332,21 @@ def main():
                 % (report.name, invocation)
             )
         text = report.read_text(encoding="utf-8", errors="replace")
-        if re.search(r"\bREJECT(?:ED)?\b", text, re.IGNORECASE):
+        # Authoritative verdict: the rubric's terminal "VERDICT: <token>"
+        # line. Parsing this line alone keeps `Rejected:`-style labels inside
+        # findings (the reviewer's licensed house style) from reading as the
+        # verdict. Last matching line wins; a report without one (written
+        # against the pre-VERDICT rubric) falls back to the whole-text scan.
+        verdict = None
+        for m in re.finditer(
+            r"^[\s#*>_-]*VERDICT\b[\s:*-]*(ACCEPT|CONDITIONAL|REJECT)\b",
+            text, re.IGNORECASE | re.MULTILINE,
+        ):
+            verdict = m.group(1).upper()
+        legacy_reject = verdict is None and re.search(
+            r"\bREJECT(?:ED)?\b", text, re.IGNORECASE
+        )
+        if verdict == "REJECT" or legacy_reject:
             block_round(
                 "loop-gate: Codex review verdict on %s is Reject. Address the "
                 "findings in %s, commit, re-run the review, then stop again."
@@ -335,10 +359,17 @@ def main():
                 "reviewer could not, or fix), re-run the review, then stop again."
                 % ticket_id
             )
-        if not re.search(r"\bACCEPT(?:ED)?\b", text, re.IGNORECASE):
+        if verdict is None and not re.search(r"\bACCEPT(?:ED)?\b", text, re.IGNORECASE):
             block_round(
-                "loop-gate: no verdict found in %s. Re-run the review:\n  %s"
+                "loop-gate: no verdict found in %s. Re-run the review (the "
+                "current rubric emits a terminal VERDICT: line):\n  %s"
                 % (report.name, invocation)
+            )
+        if verdict == "CONDITIONAL":
+            print(
+                "loop-gate: %s verdict is CONDITIONAL -- follow-ups ride in "
+                "%s for the merge step" % (ticket_id, report.as_posix()),
+                file=sys.stderr,
             )
 
     # Gate met: hand the ticket to the merge step and let the session end.

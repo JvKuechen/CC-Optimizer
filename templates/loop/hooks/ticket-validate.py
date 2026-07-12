@@ -89,6 +89,9 @@ def schema_errors(data):
             review = gate.get("review")
             if review is not None and review not in ("codex", "none"):
                 errs.append("gate.review must be 'codex' or 'none'")
+            base = gate.get("base")
+            if base is not None and not (isinstance(base, str) and base.strip()):
+                errs.append("gate.base must be a non-empty string")
             for key in ("max_gate_rounds", "check_timeout"):
                 val = gate.get(key)
                 if val is not None and not (isinstance(val, int) and val > 0):

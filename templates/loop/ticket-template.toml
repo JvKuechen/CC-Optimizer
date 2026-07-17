@@ -20,7 +20,11 @@
 #     satisfied -- it gates nothing. Field-caught trap: cargo exits 0 when a
 #     test filter matches zero tests, so a mistyped/unqualified name passes
 #     forever. Rejected: `cargo test foo -- --exact` where no test named foo
-#     exists (runs 0 tests, exits 0).
+#     exists (runs 0 tests, exits 0). An integration target that exists but
+#     is empty or misnamed ALSO runs 0 tests and exits 0 -- so checks that
+#     run tests go through scripts/test-oracle.sh (banked alongside this
+#     template), which enforces a passed-test floor (--min N, default 1)
+#     on top of cargo's exit code.
 #   - Size every ticket to one fresh-context session. Too big to finish in
 #     one session = split it at planning time.
 
@@ -65,7 +69,7 @@ The scope fence: adjacent work this ticket deliberately does not touch.
 [[ac]]
 id = "AC-1"
 criterion = "Given <precondition>, when <action>, then <exact observable result>"
-check = "cargo test -p example-crate acceptance_ac1 -- --exact"
+check = "bash scripts/test-oracle.sh -p example-crate --test acceptance module::acceptance_ac1 -- --exact"
 
 [[ac]]
 id = "AC-2"

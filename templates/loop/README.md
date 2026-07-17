@@ -33,7 +33,11 @@ gate requires when `gate.review = "codex"`.
    exists and is gitignored.
 3. Deploy the Codex review leg (`scripts/codex-review.sh` +
    `.claude/agents/adversarial-reviewer.md`) per `templates/codex/`, and
-   copy `approve-tickets.py` to `scripts/`. Pin the review model once by
+   copy `approve-tickets.py` and `test-oracle.sh` to `scripts/`
+   (test-oracle wraps every test-running AC check with a passed-test
+   floor -- field-caught: an integration target that exists but is empty
+   or misnamed runs 0 tests and exits 0, defeating a bare-cargo oracle).
+   Pin the review model once by
    exporting `CODEX_REVIEW_MODEL` (and optionally `CODEX_REVIEW_EFFORT`) in
    the project's `.claude/settings.json` env block -- every review and
    plan-gate leg then uses it without per-call flags. Pins are perishable

@@ -24,11 +24,12 @@ if [ "${1:-}" = "--min" ]; then
     MIN="${2:-}"
     shift 2 2>/dev/null || { echo "test-oracle: --min needs a value" >&2; exit 2; }
 fi
-# The floor IS the invariant: a zero, negative, or garbage floor would
-# reopen the vacuous-run hole this script exists to close. Positive
-# integers only, validated before cargo spends any time.
-if ! [[ "$MIN" =~ ^[1-9][0-9]*$ ]]; then
-    echo "test-oracle: --min must be a positive integer, got '${MIN}'" >&2
+# The floor IS the invariant: a zero, negative, garbage, or overflow floor
+# would reopen the vacuous-run hole this script exists to close. Positive
+# integers only, capped at 9 digits so the later arithmetic can never
+# overflow bash's integer comparison (which error-OPENS inside an if).
+if ! [[ "$MIN" =~ ^[1-9][0-9]{0,8}$ ]]; then
+    echo "test-oracle: --min must be a positive integer (max 9 digits), got '${MIN}'" >&2
     exit 2
 fi
 
@@ -46,7 +47,9 @@ while read -r n; do
     total=$((total + n))
 done < <(printf '%s\n' "$out" | sed -n 's/^test result: ok\. \([0-9][0-9]*\) passed.*/\1/p')
 
-if [ "$total" -lt "$MIN" ]; then
+# Inverted comparison so a comparison ERROR fails closed: if `[` cannot
+# prove total >= MIN (including by erroring), the check fails.
+if ! [ "$total" -ge "$MIN" ]; then
     echo "test-oracle: vacuous run -- $total test(s) passed, $MIN required" >&2
     exit 1
 fi

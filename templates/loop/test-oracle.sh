@@ -21,8 +21,15 @@ set -euo pipefail
 
 MIN=1
 if [ "${1:-}" = "--min" ]; then
-    MIN="${2:?test-oracle: --min needs a number}"
-    shift 2
+    MIN="${2:-}"
+    shift 2 2>/dev/null || { echo "test-oracle: --min needs a value" >&2; exit 2; }
+fi
+# The floor IS the invariant: a zero, negative, or garbage floor would
+# reopen the vacuous-run hole this script exists to close. Positive
+# integers only, validated before cargo spends any time.
+if ! [[ "$MIN" =~ ^[1-9][0-9]*$ ]]; then
+    echo "test-oracle: --min must be a positive integer, got '${MIN}'" >&2
+    exit 2
 fi
 
 out="$(cargo test "$@" 2>&1)" || {
